@@ -44,8 +44,10 @@ In particular, franky provides the following new features/improvements:
 * A larger part of the libfranka API is exposed to python (e.g.,`setCollisionBehavior`, `setJoinImpedance`, and `setCartesianImpedance`).
 * Cartesian motion generation handles boundaries in Euler angles properly.
 * [There is a new joint motion type that supports waypoints.](#motion-types)
-* [The signature of `Affine` changed.](#geometry) `Affine` does not handle elbow positions anymore. Instead, a new class `RobotPose` stores both the end-effector pose and optionally the elbow position.
-* The `MotionData` class does not exist anymore. Instead, reactions and other settings moved to `Motion`.
+* [The signature of `Affine` changed.](#geometry) `Affine` does not handle elbow positions anymore.
+Instead, a new class `RobotPose` stores both the end-effector pose and optionally the elbow position.
+* The `MotionData` class does not exist anymore.
+Instead, reactions and other settings moved to `Motion`.
 * [The `Measure` class allows for arithmetic operations.](#real-time-reactions)
 * Exceptions caused by libfranka are raised properly instead of being printed to stdout.
 * [We provide wheels for both Franka Research 3 and the older Franka Panda](#installation)
@@ -58,7 +60,7 @@ To install franky, you have to follow three steps:
 
 ### Installing a real-time kernel
 
-In order for franky to function properly, it requires the underlying OS to use a realtime kernel. 
+In order for franky to function properly, it requires the underlying OS to use a realtime kernel.
 Otherwise, you might see `communication_constrains_violation` errors.
 
 To check whether your system is currently using a real-time kernel, type `uname -a`.
@@ -69,7 +71,8 @@ Linux [PCNAME] 5.15.0-1056-realtime #63-Ubuntu SMP PREEMPT_RT ...
 ```
 If it does not say PREEMPT_RT, you are not currently running a real-time kernel.
 
-There are multiple ways of installing a real-time kernel. You can [build it from source](https://frankaemika.github.io/docs/installation_linux.html#setting-up-the-real-time-kernel) or, if you are using Ubuntu, it can be [enabled through Ubuntu Pro](https://ubuntu.com/real-time).
+There are multiple ways of installing a real-time kernel.
+You can [build it from source](https://frankaemika.github.io/docs/installation_linux.html#setting-up-the-real-time-kernel) or, if you are using Ubuntu, it can be [enabled through Ubuntu Pro](https://ubuntu.com/real-time).
 
 ### Allowing the executing user to run real-time applications
 
@@ -98,11 +101,11 @@ $ groups
 If realtime is not listed in your groups, try rebooting.
 
 ### Installing franky
-To start using franky with Python and libfranka *0.13.3*, just install it via
+To start using franky with Python and libfranka *0.15.0*, just install it via
 ```bash
 pip install franky-panda
 ```
-We also provide wheels for libfranka versions *0.7.1*, *0.8.0*, *0.9.2*, *0.10.0*, *0.11.0*, *0.12.1*, *0.13.3*. 
+We also provide wheels for libfranka versions *0.7.1*, *0.8.0*, *0.9.2*, *0.10.0*, *0.11.0*, *0.12.1*, *0.13.3*, *0.14.2*, *0.15.0*.
 They can be installed via
 ```bash
 VERSION=0-9-2
@@ -126,7 +129,7 @@ make
 make install
 ```
 
-To use franky, you can also include it as a subproject in your parent CMake via `add_subdirectory(franky)` and then `target_link_libraries(<target> franky)`. 
+To use franky, you can also include it as a subproject in your parent CMake via `add_subdirectory(franky)` and then `target_link_libraries(<target> franky)`.
 
 If you need only the Python module, you can install franky via
 ```bash
@@ -145,7 +148,7 @@ cd franky/
 docker compose build franky-run
 ```
 
-To use another version of libfranka than the default (v0.13.3) add a build argument:
+To use another version of libfranka than the default (0.15.0) add a build argument:
 ```bash
 docker compose build franky-run --build-arg LIBFRANKA_VERSION=0.9.2
 ```
@@ -170,7 +173,11 @@ docker compose run --rm franky-build build-wheels  # To build wheels for all sup
 
 ## Tutorial
 
-Franky comes with both a C++ and Python API that differ only regarding real-time capability. We will introduce both languages next to each other. In your C++ project, just include `include <franky.hpp>` and link the library. For Python, just `import franky`. As a first example, only four lines of code are needed for simple robotic motions.
+Franky comes with both a C++ and Python API that differ only regarding real-time capability.
+We will introduce both languages next to each other.
+In your C++ project, just include `include <franky.hpp>` and link the library.
+For Python, just `import franky`.
+As a first example, only four lines of code are needed for simple robotic motions.
 
 ```c++
 #include <franky.hpp>
@@ -205,8 +212,8 @@ Furthermore, we will introduce methods for geometric calculations, for moving th
 
 ### Geometry
 
-`franky.Affine` is a python wrapper for [Eigen::Affine3d](https://eigen.tuxfamily.org/dox/group__TutorialGeometry.html). 
-It is used for Cartesian poses, frames and transformation. 
+`franky.Affine` is a python wrapper for [Eigen::Affine3d](https://eigen.tuxfamily.org/dox/group__TutorialGeometry.html).
+It is used for Cartesian poses, frames and transformation.
 franky adds its own constructor, which takes a position and a quaternion as inputs:
 ```python
 import math
@@ -225,8 +232,8 @@ In all cases, distances are in [m] and rotations in [rad].
 
 ### Robot
 
-We wrapped most of the libfanka API (including the RobotState or ErrorMessage) for Python. 
-Moreover, we added methods to adapt the dynamics of the robot for all motions. 
+We wrapped most of the libfanka API (including the RobotState or ErrorMessage) for Python.
+Moreover, we added methods to adapt the dynamics of the robot for all motions.
 The `rel` name denotes that this a factor of the maximum constraints of the robot.
 ```python
 from franky import Robot
@@ -283,7 +290,7 @@ joint_vel = joint_state.velocity
 
 ### Motion Types
 
-Franky defines a number of different motion types. 
+Franky defines a number of different motion types.
 In python, you can use them as follows:
 ```python
 import math
@@ -360,9 +367,9 @@ robot.move(m2)
 
 ### Real-Time Reactions
 
-By adding reactions to the motion data, the robot can react to unforeseen events. 
-In the Python API, you can define conditions by using a comparison between a robot's value and a given threshold. 
-If the threshold is exceeded, the reaction fires. 
+By adding reactions to the motion data, the robot can react to unforeseen events.
+In the Python API, you can define conditions by using a comparison between a robot's value and a given threshold.
+If the threshold is exceeded, the reaction fires.
 ```python
 from franky import CartesianMotion, Affine, ReferenceType, Measure, Reaction
 
@@ -452,7 +459,7 @@ robot.move(motion)
 ### Real-Time Motion
 
 By setting the `asynchronous` parameter of `Robot.move` to `True`, the function does not block until the motion finishes.
-Instead, it returns immediately and, thus, allows the main thread to set new motions asynchronously. 
+Instead, it returns immediately and, thus, allows the main thread to set new motions asynchronously.
 ```python
 import time
 from franky import Affine, CartesianMotion, Robot, ReferenceType
@@ -481,7 +488,7 @@ Hence, after an asynchronous motion has finished, make sure to call `Robot.join_
 
 ### Gripper
 
-In the `franky::Gripper` class, the default gripper force and gripper speed can be set. 
+In the `franky::Gripper` class, the default gripper force and gripper speed can be set.
 Then, additionally to the libfranka commands, the following helper methods can be used:
 
 ```c++
@@ -556,15 +563,17 @@ else:
 
 ## Development
 
-Franky is written in C++17 and Python3.7. It is currently tested against following versions
+Franky is written in C++17 and Python3.7.
+It is currently tested against following versions
 
-- Libfranka v0.7.1, v0.8.0, v0.9.2, v0.10.0, v0.11.0, v0.12.1, v0.13.3
+- Libfranka v0.7.1, v0.8.0, v0.9.2, v0.10.0, v0.11.0, v0.12.1, v0.13.3, v0.14.2, v.0.15.0
 - Eigen v3.4.0
 - Pybind11 v2.13.6
+- Pinocchio v3.4.0
 - Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
 - Catch2 v2.13.8 (for testing only)
 
 ## License
 
-For non-commercial applications, this software is licensed under the LGPL v3.0. 
+For non-commercial applications, this software is licensed under the LGPL v3.0.
 If you want to use franky within commercial applications or under a different license, please contact us for individual agreements.

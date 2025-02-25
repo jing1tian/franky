@@ -1,7 +1,25 @@
 #!/bin/bash
 set -e
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 LIBFRANKA_VERSION="${LIBFRANKA_VERSION:-${LIBFRANKA_DEFAULT_VERSION}}"
+
+# Function to compare versions using sort -V
+version_ge() {
+    local version1="$1"
+    local version2="$2"
+
+    if [[ "$(printf "%s\n%s" "$version2" "$version1" | sort -V | head -n1)" == "$version2" ]]; then
+        return 0  # version1 is greater than or equal to version2
+    else
+        return 1  # version1 is less than version2
+    fi
+}
+
+if version_ge "$LIBFRANKA_VERSION" "0.14.0"; then
+  "${SCRIPT_DIR}/install-pinocchio"
+fi
+
 echo "Installing libfranka version ${LIBFRANKA_VERSION}..."
 TMP_DIR="$(mktemp -d /var/tmp/tmp.XXXXXXXXXX)"
 git clone --recursive https://github.com/frankaemika/libfranka.git "${TMP_DIR}"
@@ -17,7 +35,7 @@ git submodule update
 
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF ..
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF -DCMAKE_POLICY_DEFAULT_CMP0167=NEW ..
 make -j "$(nproc)"
 sudo make install || make install
 
