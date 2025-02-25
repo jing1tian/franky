@@ -9,6 +9,7 @@ git checkout "${EIGEN_VERSION}"
 mkdir build
 cd build
 cmake ..
+make -j "$(nproc)"
 sudo make install || make install
 cd /
 rm -rf "${TMP_DIR}"
