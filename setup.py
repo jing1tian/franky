@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import re
 import subprocess
@@ -51,7 +52,9 @@ class CMakeBuild(build_ext):
         Path(self.build_temp).mkdir(exist_ok=True, parents=True)
 
         subprocess.check_call(["cmake", str(Path(".").resolve())] + cmake_args, cwd=self.build_temp)
-        subprocess.check_call(["cmake", "--build", ".", "--target", "_franky"] + build_args, cwd=self.build_temp)
+        subprocess.check_call(
+            ["cmake", "--build", ".", "--target", "_franky"] + build_args +
+            ["--", "-j", str(multiprocessing.cpu_count())], cwd=self.build_temp)
 
 with (Path(__file__).resolve().parent / "VERSION").open() as f:
     version = f.read()
