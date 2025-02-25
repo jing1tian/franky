@@ -39,5 +39,5 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
-          path: output
+          name: libfranka_${{ inputs.libfranka-version }}_wheels
+          path: output/libfranka_*_wheels.zip

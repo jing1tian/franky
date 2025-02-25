@@ -21,13 +21,13 @@ jobs:
     steps:
       - name: Prepare
         run: |
-          mkdir -p wheels
+          mkdir -p artifacts
 
       - name: Get wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: wheels
-          path: wheels/
+          path: artifacts/
+          merge-multiple: true
 
       - name: Create release
         uses: "marvinpinto/action-automatic-releases@latest"
@@ -37,11 +37,11 @@ jobs:
           draft: false
           files: |
             LICENSE
-            wheels/*.zip
+            artifacts/libfranka_*_wheels.zip
 
       - name: Unpack wheels
         run: |
-          unzip wheels/libfranka_0-13-3_wheels.zip
+          unzip artifacts/libfranka_0-15-0_wheels.zip
 
       - name: Publish python package
         uses: pypa/gh-action-pypi-publish@release/v1
