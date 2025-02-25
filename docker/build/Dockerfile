@@ -10,7 +10,7 @@ ADD docker/common/ /tmp/common/
 ARG LIBFRANKA_VERSION
 RUN /tmp/common/install-dependencies
 
-ARG PYBIN_SUPPORTED_VERSIONS="cp3(7m|8|9|10|11|12)"
+ARG PYBIN_SUPPORTED_VERSIONS="cp3(7m|8|9|10|11|12|13)"
 RUN /tmp/common/manylinux-setup-pip
 
 # Set working directory

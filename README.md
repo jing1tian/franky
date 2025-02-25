@@ -570,7 +570,7 @@ It is currently tested against following versions
 - Eigen v3.4.0
 - Pybind11 v2.13.6
 - Pinocchio v3.4.0
-- Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
+- Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
 - Catch2 v2.13.8 (for testing only)
 
 ## License
