@@ -36,7 +36,6 @@ jobs:
           prerelease: false
           draft: false
           files: |
-            LICENSE
             artifacts/libfranka_*_wheels.zip
 
       - name: Unpack wheels
