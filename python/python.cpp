@@ -912,8 +912,7 @@ PYBIND11_MODULE(_franky, m) {
       .def_static("forward", &Kinematics::forward, "q"_a)
       .def_static("forward_elbow", &Kinematics::forwardElbow, "q"_a)
       .def_static("forward_euler", &Kinematics::forwardEuler, "q"_a)
-      .def_static("jacobian", &Kinematics::jacobian, "q"_a)
-      .def_static("inverse", &Kinematics::inverse, "target"_a, "q0"_a, "null_space"_a = std::nullopt);
+      .def_static("jacobian", &Kinematics::jacobian, "q"_a);
 
   py::class_<Robot>(m, "RobotInternal")
       .def(py::init<>([](
@@ -1028,8 +1027,8 @@ PYBIND11_MODULE(_franky, m) {
       .def_property_readonly_static("max_joint_jerk", [](py::object) {
         return Vector7d::Map(Robot::max_joint_jerk.data());
       }, "[rad/s^3]")
-      .def_static("forward_kinematics", &Robot::forwardKinematics, "q"_a)
-      .def_static("inverseKinematics", &Robot::inverseKinematics, "target"_a, "q0"_a);
+      .def_static("forward_kinematics", &Robot::forwardKinematics, "q"_a);
+      // .def_static("inverse_kinematics", &Robot::inverseKinematics, "target"_a, "q0"_a);
 
   py::class_<std::future<bool>>(m, "BoolFuture")
       .def("wait", [](const std::future<bool> &future, std::optional<double> timeout) {

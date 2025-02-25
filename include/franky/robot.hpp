@@ -397,7 +397,7 @@ class Robot : public franka::Robot {
    * @param q0 The initial guess for the joint positions.
    * @return A vector containing the joint positions.
    */
-  [[nodiscard]] static Vector7d inverseKinematics(const Affine &target, const Vector7d &q0);
+  // [[nodiscard]] static Vector7d inverseKinematics(const Affine &target, const Vector7d &q0);
 
   /**
    * @brief Calculate the forward kinematics for the given joint positions.

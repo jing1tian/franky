@@ -41,30 +41,6 @@ Affine Robot::forwardKinematics(const Vector7d &q) {
   return Kinematics::forward(q);
 }
 
-Vector7d Robot::inverseKinematics(const Affine &target, const Vector7d &q0) {
-  Vector7d result;
-
-  Eigen::Vector3d angles = Euler(target.rotation()).angles();
-  Eigen::Vector3d angles_norm;
-  angles_norm << angles[0] - M_PI, M_PI - angles[1], angles[2] - M_PI;
-
-  if (angles_norm[1] > M_PI) {
-    angles_norm[1] -= 2 * M_PI;
-  }
-  if (angles_norm[2] < -M_PI) {
-    angles_norm[2] += 2 * M_PI;
-  }
-
-  if (angles.norm() < angles_norm.norm()) {
-    angles_norm = angles;
-  }
-
-  Eigen::Matrix<double, 6, 1> x_target;
-  x_target << target.translation(), angles;
-
-  return Kinematics::inverse(x_target, q0);
-}
-
 franka::RobotState Robot::state() {
   std::lock_guard<std::mutex> state_lock(state_mutex_);
   {
