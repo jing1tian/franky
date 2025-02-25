@@ -2,7 +2,7 @@
 set -e
 
 echo "Installing pybind11 version ${PYBIND11_VERSION}..."
-TMP_DIR="$(mktemp -d)"
+TMP_DIR="$(mktemp -d /var/tmp/tmp.XXXXXXXXXX)"
 git clone https://github.com/pybind/pybind11.git "${TMP_DIR}"
 cd "${TMP_DIR}"
 git checkout "v${PYBIND11_VERSION}"

@@ -3,7 +3,7 @@ set -e
 
 LIBFRANKA_VERSION="${LIBFRANKA_VERSION:-${LIBFRANKA_DEFAULT_VERSION}}"
 echo "Installing libfranka version ${LIBFRANKA_VERSION}..."
-TMP_DIR="$(mktemp -d)"
+TMP_DIR="$(mktemp -d /var/tmp/tmp.XXXXXXXXXX)"
 git clone --recursive https://github.com/frankaemika/libfranka.git "${TMP_DIR}"
 cd "${TMP_DIR}"
 
