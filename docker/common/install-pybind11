@@ -8,7 +8,7 @@ cd "${TMP_DIR}"
 git checkout "v${PYBIND11_VERSION}"
 mkdir build
 cd build
-cmake -DPYBIND11_TEST=OFF ..
+cmake .. -DPYBIND11_TEST=OFF -DCMAKE_BUILD_TYPE=Release
 make -j "$(nproc)"
 sudo make install || make install
 cd /
