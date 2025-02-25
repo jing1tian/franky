@@ -37,7 +37,7 @@ jobs:
           LIBFRANKA_VERSION=${{ inputs.libfranka-version }} ./docker/common/manylinux-build-wheels
 
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: output
