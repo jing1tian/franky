@@ -887,21 +887,23 @@ PYBIND11_MODULE(_franky, m) {
            "speed"_a,
            "force"_a,
            "epsilon_inner"_a = 0.005,
-           "epsilon_outer"_a = 0.005)
+           "epsilon_outer"_a = 0.005,
+           py::call_guard<py::gil_scoped_release>())
       .def("grasp_async", &Gripper::graspAsync,
            "width"_a,
            "speed"_a,
            "force"_a,
            "epsilon_inner"_a = 0.005,
-           "epsilon_outer"_a = 0.005)
-      .def("move", &Gripper::move, "width"_a, "speed"_a)
-      .def("move_async", &Gripper::moveAsync, "width"_a, "speed"_a)
-      .def("open", &Gripper::open, "speed"_a)
-      .def("open_async", &Gripper::openAsync, "speed"_a)
-      .def("homing", &Gripper::homing)
-      .def("homing_async", &Gripper::homingAsync)
-      .def("stop", &Gripper::stop)
-      .def("stop_async", &Gripper::stopAsync)
+           "epsilon_outer"_a = 0.005,
+           py::call_guard<py::gil_scoped_release>())
+      .def("move", &Gripper::move, "width"_a, "speed"_a, py::call_guard<py::gil_scoped_release>())
+      .def("move_async", &Gripper::moveAsync, "width"_a, "speed"_a, py::call_guard<py::gil_scoped_release>())
+      .def("open", &Gripper::open, "speed"_a, py::call_guard<py::gil_scoped_release>())
+      .def("open_async", &Gripper::openAsync, "speed"_a, py::call_guard<py::gil_scoped_release>())
+      .def("homing", &Gripper::homing, py::call_guard<py::gil_scoped_release>())
+      .def("homing_async", &Gripper::homingAsync, py::call_guard<py::gil_scoped_release>())
+      .def("stop", &Gripper::stop, py::call_guard<py::gil_scoped_release>())
+      .def("stop_async", &Gripper::stopAsync, py::call_guard<py::gil_scoped_release>())
       .def_property_readonly("state", &Gripper::state)
       .def_property_readonly("server_version", (uint16_t (Gripper::*)()) &Gripper::serverVersion)
       .def_property_readonly("width", &Gripper::width)
