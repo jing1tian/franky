@@ -36,8 +36,8 @@ class Gripper : public franka::Gripper {
    * @return Future that becomes ready when the grasp is finished. Contains true if an object has been grasped, false
    * otherwise.
    */
-  std::future<bool> graspAsync(
-      double width, double speed, double force, double epsilon_inner = 0.005, double epsilon_outer = 0.005) const;
+  std::shared_future<bool> graspAsync(
+      double width, double speed, double force, double epsilon_inner = 0.005, double epsilon_outer = 0.005);
 
   /**
    * @brief Asynchronous variant of the franka::Gripper::move function.
@@ -45,7 +45,7 @@ class Gripper : public franka::Gripper {
    * @param speed Speed of the movement in [m/s].
    * @return Future that becomes ready when the movement is finished. Contains true if the movement was successful,
    */
-  std::future<bool> moveAsync(double width, double speed) const;
+  std::shared_future<bool> moveAsync(double width, double speed);
 
   /**
    * @brief Opens the gripper fully.
@@ -60,19 +60,19 @@ class Gripper : public franka::Gripper {
    * @return Future that becomes ready when the gripper is fully opened. Contains true if the gripper was opened
    * successfully.
    */
-  std::future<bool> openAsync(double speed);
+  std::shared_future<bool> openAsync(double speed);
 
   /**
    * @brief Asynchronous variant of the franka::Gripper::homing function.
    * @return A future that becomes ready when the homing is finished. Contains true if the homing was successful.
    */
-  std::future<bool> homingAsync();
+  std::shared_future<bool> homingAsync();
 
   /**
     * @brief Asynchronous variant of the franka::Gripper::stop function.
     * @return A future that becomes ready when the stop is finished. Contains true if the stop was successful.
     */
-  std::future<bool> stopAsync();
+  std::shared_future<bool> stopAsync();
 
   /**
    * @brief Current opening width of the gripper [m]
@@ -102,6 +102,10 @@ class Gripper : public franka::Gripper {
     return readOnce();
   }
 
+private:
+  std::shared_future<bool> current_future_;
+
+  std::shared_future<bool> setCurrentFuture(std::future<bool> future);
 };
 
 } // namespace franky
