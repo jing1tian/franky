@@ -1038,8 +1038,8 @@ PYBIND11_MODULE(_franky, m) {
           return future.wait_for(std::chrono::duration<double>(timeout.value())) == std::future_status::ready;
         future.wait();
         return true;
-      }, "timeout"_a = std::nullopt)
-      .def("get", &std::shared_future<bool>::get);
+      }, "timeout"_a = std::nullopt, py::call_guard<py::gil_scoped_release>())
+      .def("get", &std::shared_future<bool>::get, py::call_guard<py::gil_scoped_release>());
 
   py::register_exception<franka::Exception>(m, "Exception");
   py::register_exception<franka::CommandException>(m, "CommandException");
