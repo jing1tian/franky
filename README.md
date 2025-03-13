@@ -1,7 +1,7 @@
 <div align="center">
   <img width="340" src="https://raw.githubusercontent.com/timschneider42/franky/master/doc/logo.svg?sanitize=true">
   <h3 align="center">
-    High-Level Motion Library for Franka Robots with Python and C++ Support
+    High-Level Control Library for Franka Robots with Python and C++ Support
   </h3>
 </div>
 <p align="center">
