@@ -1,7 +1,7 @@
 <div align="center">
   <img width="340" src="https://raw.githubusercontent.com/timschneider42/franky/master/doc/logo.svg?sanitize=true">
   <h3 align="center">
-    High-Level Motion Library for the Franka Emika Robot
+    High-Level Motion Library for Franka Robots with Python and C++ Support
   </h3>
 </div>
 <p align="center">
@@ -26,10 +26,13 @@
   </a>
 </p>
 
+Franky is a high-level motion library for Franka robots offering Python and C++ support. 
+By wrapping [libfranka](https://frankaemika.github.io/docs/libfranka.html) in a Python interface, Franky eliminates the need for strict real-time programming at 1 kHz. 
+Instead, you can define higher-level motion targets in Python, and Franky will use [Ruckig](https://github.com/pantor/ruckig) to plan time-optimal trajectories in real time.
 
-Franky is a high-level motion library (both C++ and Python) for Franka robots.
-It adds a Python wrapper around [libfranka](https://frankaemika.github.io/docs/libfranka.html), while replacing necessary real-time programming with higher-level motion commands.
-As franky focuses on making real-time trajectory generation easy, it allows the robot to react to unforeseen events.
+Although Python does not provide real-time guarantees, Franky strives to maintain as much real-time control as possible.
+Motions can be preempted at any moment, prompting Franky to replan trajectories on the fly. 
+To handle unforeseen situations—such as unexpected contact with the environment—Franky includes a reaction system that allows to dynamically update motion commands.
 
 Check out the [tutorial](#tutorial) and the [examples](https://github.com/TimSchneider42/franky/tree/master/examples) for an introduction.
 The full documentation can be found at [https://timschneider42.github.io/franky/](https://timschneider42.github.io/franky/).
