@@ -108,7 +108,7 @@ To start using franky with Python and libfranka *0.15.0*, just install it via
 ```bash
 pip install franky-panda
 ```
-We also provide wheels for libfranka versions *0.7.1*, *0.8.0*, *0.9.2*, *0.10.0*, *0.11.0*, *0.12.1*, *0.13.3*, *0.14.2*, *0.15.0*.
+We also provide wheels for libfranka versions *0.5.0*, *0.7.1*, *0.8.0*, *0.9.2*, *0.10.0*, *0.11.0*, *0.12.1*, *0.13.3*, *0.14.2*, and *0.15.0*.
 They can be installed via
 ```bash
 VERSION=0-9-2
@@ -569,12 +569,12 @@ else:
 Franky is written in C++17 and Python3.7.
 It is currently tested against following versions
 
-- Libfranka v0.7.1, v0.8.0, v0.9.2, v0.10.0, v0.11.0, v0.12.1, v0.13.3, v0.14.2, v.0.15.0
-- Eigen v3.4.0
-- Pybind11 v2.13.6
-- Pinocchio v3.4.0
+- Libfranka 0.5.0, 0.7.1, 0.8.0, 0.9.2, 0.10.0, 0.11.0, 0.12.1, 0.13.3, 0.14.2, 0.15.0
+- Eigen 3.4.0
+- Pybind11 2.13.6
+- Pinocchio 3.4.0
 - Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
-- Catch2 v2.13.8 (for testing only)
+- Catch2 2.13.8 (for testing only)
 
 ## License
 

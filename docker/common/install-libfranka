@@ -30,7 +30,13 @@ git checkout "${LIBFRANKA_VERSION}"
 # Cherry-pick missing imports commit
 git config user.email "john.doe@example.com"
 git config user.name "John Doe"
-if ! git merge-base --is-ancestor f1f46fb HEAD; then git cherry-pick -m 1 f1f46fb; fi
+if ! git merge-base --is-ancestor f1f46fb HEAD; then
+  if git merge-base --is-ancestor 775160c HEAD; then
+    git cherry-pick -m 1 f1f46fb;
+  else
+    sed -i '1i#include <stdexcept>' src/control_types.cpp
+  fi
+fi
 git submodule update
 
 mkdir build
