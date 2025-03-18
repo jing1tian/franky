@@ -6,7 +6,8 @@ dist
 *.egg-info
 __pycache__
 geckodriver.log
-doc/html
+/doc/html/*
+!/doc/html/google*.html
 tmp
 *.pyc
 /cmake-build-*
