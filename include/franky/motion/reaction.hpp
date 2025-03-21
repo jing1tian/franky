@@ -23,7 +23,8 @@ class Motion;
  */
 template<typename ControlSignalType>
 class Reaction {
-  using MotionFunc = std::function<std::shared_ptr<Motion<ControlSignalType>>(const franka::RobotState &, double, double)>;
+  using MotionFunc = std::function<std::shared_ptr<Motion<ControlSignalType>>(
+      const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)>;
 
  public:
   /**
@@ -46,7 +47,9 @@ class Reaction {
    * robot started moving, and is only reset if a motion expires without being replaced by a new motion.
    * @return The new motion if the condition is met, or nullptr otherwise.
    */
-  std::shared_ptr<Motion<ControlSignalType>> operator()(const franka::RobotState &robot_state, double rel_time, double abs_time);
+  std::shared_ptr<Motion<ControlSignalType>> operator()(const franka::RobotState &robot_state,
+                                                        std::chrono::duration<double> rel_time,
+                                                        std::chrono::duration<double> abs_time);
 
   /**
    * @brief Check if the condition is met.
@@ -56,7 +59,9 @@ class Reaction {
    * robot started moving, and is only reset if a motion expires without being replaced by a new motion.
    * @return True if the condition is met, false otherwise.
    */
-  [[nodiscard]] inline bool condition(const franka::RobotState &robot_state, double rel_time, double abs_time) const {
+  [[nodiscard]] inline bool condition(const franka::RobotState &robot_state,
+                                      std::chrono::duration<double> rel_time,
+                                      std::chrono::duration<double> abs_time) const {
     return condition_(robot_state, rel_time, abs_time);
   }
 
@@ -65,13 +70,20 @@ class Reaction {
    * @param callback The callback to register. Callbacks are called with the robot state, the relative time [s] and the
    * absolute time [s].
    */
-  void registerCallback(std::function<void(const franka::RobotState &, double, double)> callback);
+  void registerCallback(
+      std::function<void(
+          const franka::RobotState &,
+          std::chrono::duration<double>,
+          std::chrono::duration<double>)> callback);
 
  private:
   MotionFunc motion_func_;
   Condition condition_;
   std::mutex callback_mutex_;
-  std::vector<std::function<void(const franka::RobotState &, double, double)>> callbacks_{};
+  std::vector<std::function<void(
+      const franka::RobotState &,
+      std::chrono::duration<double>,
+      std::chrono::duration<double>)>> callbacks_{};
 };
 
 }  // namespace franky

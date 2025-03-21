@@ -17,7 +17,8 @@ namespace franky {
  */
 class Condition {
  public:
-  using CheckFunc = std::function<bool(const franka::RobotState &, double, double)>;
+  using CheckFunc = std::function<bool(
+      const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)>;
 
   /**
    * @param check_func A function that returns true if the condition is met.
@@ -40,13 +41,16 @@ class Condition {
    * robot started moving, and is only reset if a motion expires without being replaced by a new motion.
    * @return True if the condition is met.
    */
-  inline bool operator()(const franka::RobotState &robot_state, double rel_time, double abs_time) const {
+  inline bool operator()(
+      const franka::RobotState &robot_state,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time) const {
     return check_func_(robot_state, rel_time, abs_time);
   }
 
-    /**
-     * @brief The string representation of the condition.
-     */
+  /**
+   * @brief The string representation of the condition.
+   */
   [[nodiscard]] inline std::string repr() const {
     return repr_;
   }

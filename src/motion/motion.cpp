@@ -7,11 +7,16 @@
 
 namespace franky {
 
-template class Motion<franka::Torques>;
-template class Motion<franka::JointVelocities>;
-template class Motion<franka::CartesianVelocities>;
-template class Motion<franka::JointPositions>;
-template class Motion<franka::CartesianPose>;
+template
+class Motion<franka::Torques>;
+template
+class Motion<franka::JointVelocities>;
+template
+class Motion<franka::CartesianVelocities>;
+template
+class Motion<franka::JointPositions>;
+template
+class Motion<franka::CartesianPose>;
 
 template<typename ControlSignalType>
 Motion<ControlSignalType>::Motion() : robot_(nullptr) {}
@@ -52,8 +57,8 @@ ControlSignalType
 Motion<ControlSignalType>::nextCommand(
     const franka::RobotState &robot_state,
     franka::Duration time_step,
-    double rel_time,
-    double abs_time,
+    std::chrono::duration<double> rel_time,
+    std::chrono::duration<double> abs_time,
     const std::optional<ControlSignalType> &previous_command) {
   auto next_command = nextCommandImpl(robot_state, time_step, rel_time, abs_time, previous_command);
   const std::lock_guard<std::mutex> lock(callback_mutex_);
@@ -64,7 +69,9 @@ Motion<ControlSignalType>::nextCommand(
 
 template<typename ControlSignalType>
 std::shared_ptr<Motion<ControlSignalType>> Motion<ControlSignalType>::checkAndCallReactions(
-    const franka::RobotState &robot_state, double rel_time, double abs_time) {
+    const franka::RobotState &robot_state,
+    std::chrono::duration<double> rel_time,
+    std::chrono::duration<double> abs_time) {
   for (auto &reaction : reactions_) {
     if (reaction->condition(robot_state, rel_time, abs_time)) {
       auto new_motion = (*reaction)(robot_state, rel_time, abs_time);

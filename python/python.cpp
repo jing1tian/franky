@@ -94,8 +94,8 @@ void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal
         motion.registerCallback([callback](
             const franka::RobotState &robot_state,
             franka::Duration time_step,
-            double rel_time,
-            double abs_time,
+            std::chrono::duration<double> rel_time,
+            std::chrono::duration<double> abs_time,
             const ControlSignalType &control_signal) {
           callback_executor.add([callback, robot_state, time_step, rel_time, abs_time, control_signal]() {
             try {
@@ -114,10 +114,13 @@ void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal
            "condition"_a, "motion"_a = nullptr)
       .def("register_callback", [](
           Reaction<ControlSignalType> &reaction,
-          const std::function<void(const franka::RobotState &, double, double)> &callback
+          const std::function<void(
+              const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)> &callback
       ) {
         reaction.registerCallback([callback](
-            const franka::RobotState &robot_state, double rel_time, double abs_time) {
+            const franka::RobotState &robot_state,
+            std::chrono::duration<double> rel_time,
+            std::chrono::duration<double> abs_time) {
           callback_executor.add([callback, robot_state, rel_time, abs_time]() {
             try {
               callback(robot_state, rel_time, abs_time);
@@ -734,11 +737,11 @@ PYBIND11_MODULE(_franky, m) {
            "force_constraints"_a = std::nullopt,
            "exponential_decay"_a = 0.005);
 
-  py::class_<CartesianImpedanceMotion, ImpedanceMotion, std::shared_ptr<CartesianImpedanceMotion>>(m,
-                                                                                                   "CartesianImpedanceMotion")
+  py::class_<CartesianImpedanceMotion, ImpedanceMotion, std::shared_ptr<CartesianImpedanceMotion>>(
+      m, "CartesianImpedanceMotion")
       .def(py::init<>([](
                const Affine &target,
-               double duration,
+               std::chrono::duration<double> duration,
                ReferenceType target_type,
                double translational_stiffness,
                double rotational_stiffness,
@@ -1030,7 +1033,7 @@ PYBIND11_MODULE(_franky, m) {
         return Vector7d::Map(Robot::max_joint_jerk.data());
       }, "[rad/s^3]")
       .def_static("forward_kinematics", &Robot::forwardKinematics, "q"_a);
-      // .def_static("inverse_kinematics", &Robot::inverseKinematics, "target"_a, "q0"_a);
+  // .def_static("inverse_kinematics", &Robot::inverseKinematics, "target"_a, "q0"_a);
 
   py::class_<std::shared_future<bool>>(m, "BoolFuture")
       .def("wait", [](const std::shared_future<bool> &future, std::optional<double> timeout) {

@@ -54,8 +54,8 @@ class ImpedanceMotion : public Motion<franka::Torques> {
   nextCommandImpl(
       const franka::RobotState &robot_state,
       franka::Duration time_step,
-      double rel_time,
-      double abs_time,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time,
       const std::optional<franka::Torques> &previous_command) override;
 
   [[nodiscard]] inline Affine intermediate_target() const {
@@ -67,7 +67,7 @@ class ImpedanceMotion : public Motion<franka::Torques> {
   }
 
   virtual std::tuple<Affine, bool>
-  update(const franka::RobotState &robot_state, franka::Duration time_step, double time) = 0;
+  update(const franka::RobotState &robot_state, franka::Duration time_step, std::chrono::duration<double> time) = 0;
 
  private:
   Affine absolute_target_;

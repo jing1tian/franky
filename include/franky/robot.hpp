@@ -475,7 +475,9 @@ class Robot : public franka::Robot {
         motion_generator_.emplace<MotionGenerator<ControlSignalType>>(this, motion);
         auto motion_generator = &std::get<MotionGenerator<ControlSignalType>>(motion_generator_);
         motion_generator->registerUpdateCallback(
-            [this](const franka::RobotState &robot_state, franka::Duration duration, double time) {
+            [this](const franka::RobotState &robot_state,
+                   franka::Duration duration,
+                   std::chrono::duration<double> time) {
               std::lock_guard<std::mutex> lock(this->state_mutex_);
               current_state_ = robot_state;
             });

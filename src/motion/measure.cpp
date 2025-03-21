@@ -8,7 +8,7 @@
 Condition operator OP(const Measure &m1, const Measure &m2) { \
   std::stringstream ss;     \
   ss << m1.repr() << " " << #OP << " " << m2.repr(); \
-  return Condition([m1, m2](const franka::RobotState &robot_state, double rel_time, double abs_time) { \
+  return Condition([m1, m2](const franka::RobotState &robot_state, std::chrono::duration<double> rel_time, std::chrono::duration<double> abs_time) { \
     return m1(robot_state, rel_time, abs_time) OP m2(robot_state, rel_time, abs_time); \
   }, ss.str()); \
 }
@@ -17,7 +17,7 @@ Condition operator OP(const Measure &m1, const Measure &m2) { \
 Measure operator OP(const Measure &m1, const Measure &m2) { \
   std::stringstream ss;     \
   ss << "(" << m1.repr() << ") " << #OP << " (" << m2.repr() << ")"; \
-  return Measure([m1, m2](const franka::RobotState &robot_state, double rel_time, double abs_time) { \
+  return Measure([m1, m2](const franka::RobotState &robot_state, std::chrono::duration<double> rel_time, std::chrono::duration<double> abs_time) { \
     return m1(robot_state, rel_time, abs_time) OP m2(robot_state, rel_time, abs_time); \
   }, ss.str()); \
 }
@@ -28,37 +28,51 @@ Measure::Measure(Measure::MeasureFunc measure_func, std::string repr)
     : measure_func_(std::move(measure_func)), repr_(std::move(repr)) {}
 
 Measure::Measure(double constant)
-    : measure_func_([constant](const franka::RobotState &robot_state, double rel_time, double abs_time) {
+    : measure_func_([constant](const franka::RobotState &robot_state,
+                               std::chrono::duration<double> rel_time,
+                               std::chrono::duration<double> abs_time) {
   return constant;
 }), repr_(std::to_string(constant)) {}
 
 Measure Measure::ForceX() {
-  return Measure([](const franka::RobotState &robot_state, double rel_time, double abs_time) {
+  return Measure([](const franka::RobotState &robot_state,
+                    std::chrono::duration<double> rel_time,
+                    std::chrono::duration<double> abs_time) {
     return robot_state.O_F_ext_hat_K[0];
   }, "F_x");
 }
 
 Measure Measure::ForceY() {
-  return Measure([](const franka::RobotState &robot_state, double rel_time, double abs_time) {
+  return Measure([](const franka::RobotState &robot_state,
+                    std::chrono::duration<double> rel_time,
+                    std::chrono::duration<double> abs_time) {
     return robot_state.O_F_ext_hat_K[1];
   }, "F_y");
 }
 
 Measure Measure::ForceZ() {
-  return Measure([](const franka::RobotState &robot_state, double rel_time, double abs_time) {
+  return Measure([](const franka::RobotState &robot_state,
+                    std::chrono::duration<double> rel_time,
+                    std::chrono::duration<double> abs_time) {
     return robot_state.O_F_ext_hat_K[2];
   }, "F_z");
 }
 
 Measure Measure::RelTime() {
-  return Measure([](const franka::RobotState &robot_state, double rel_time, double abs_time) {
-    return rel_time;
+  return Measure([](
+      const franka::RobotState &robot_state,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time) {
+    return rel_time.count();
   }, "t");
 }
 
 Measure Measure::AbsTime() {
-  return Measure([](const franka::RobotState &robot_state, double rel_time, double abs_time) {
-    return abs_time;
+  return Measure([](
+      const franka::RobotState &robot_state,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time) {
+    return abs_time.count();
   }, "t");
 }
 
@@ -77,7 +91,10 @@ MEASURE_OP_DEF(/)
 Measure measure_pow(const Measure &base, const Measure &exponent) {
   std::stringstream ss;
   ss << "(" << base.repr() << ")^(" << exponent.repr() << ")";
-  return Measure([base, exponent](const franka::RobotState &robot_state, double rel_time, double abs_time) {
+  return Measure([base, exponent](
+      const franka::RobotState &robot_state,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time) {
     return std::pow(base(robot_state, rel_time, abs_time), exponent(robot_state, rel_time, abs_time));
   }, ss.str());
 }
@@ -85,7 +102,10 @@ Measure measure_pow(const Measure &base, const Measure &exponent) {
 Measure operator-(const Measure &m) {
   std::stringstream ss;
   ss << "-(" << m.repr() << ") ";
-  return Measure([m](const franka::RobotState &robot_state, double rel_time, double abs_time) {
+  return Measure([m](
+      const franka::RobotState &robot_state,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time) {
     return -m(robot_state, rel_time, abs_time);
   }, ss.str());
 }

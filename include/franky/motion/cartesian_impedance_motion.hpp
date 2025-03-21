@@ -38,24 +38,24 @@ class CartesianImpedanceMotion : public ImpedanceMotion {
    * @param target The target pose.
    * @param duration The duration of the motion in [s].
    */
-  explicit CartesianImpedanceMotion(const Affine &target, double duration);
+  explicit CartesianImpedanceMotion(const Affine &target, std::chrono::duration<double> duration);
 
   /**
    * @param target The target pose.
    * @param duration The duration of the motion in [s].
    * @param params Parameters for the motion.
    */
-  explicit CartesianImpedanceMotion(const Affine &target, double duration, const Params &params);
+  explicit CartesianImpedanceMotion(const Affine &target, std::chrono::duration<double> duration, const Params &params);
 
  protected:
   void initImpl(const franka::RobotState &robot_state, const std::optional<franka::Torques> &previous_command) override;
 
-  std::tuple<Affine, bool>
-  update(const franka::RobotState &robot_state, franka::Duration time_step, double time) override;
+  std::tuple<Affine, bool> update(
+      const franka::RobotState &robot_state, franka::Duration time_step, std::chrono::duration<double> time) override;
 
  private:
   Affine initial_pose_;
-  double duration_;
+  std::chrono::duration<double> duration_;
   Params params_;
 };
 

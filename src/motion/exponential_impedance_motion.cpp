@@ -17,7 +17,8 @@ ExponentialImpedanceMotion::ExponentialImpedanceMotion(
     : params_(params), ImpedanceMotion(target, params) {}
 
 std::tuple<Affine, bool>
-ExponentialImpedanceMotion::update(const franka::RobotState &robot_state, franka::Duration time_step, double time) {
+ExponentialImpedanceMotion::update(
+    const franka::RobotState &robot_state, franka::Duration time_step, std::chrono::duration<double> time) {
   auto trans = params_.exponential_decay * target().translation() +
       (1.0 - params_.exponential_decay) * intermediate_target().translation();
   auto rot = Eigen::Quaterniond(intermediate_target().rotation()).slerp(

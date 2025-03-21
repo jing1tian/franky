@@ -22,7 +22,11 @@ template<typename ControlSignalType>
 class Motion {
  public:
   using CallbackType = std::function<
-      void(const franka::RobotState &, franka::Duration, double, double, const ControlSignalType &)>;
+      void(const franka::RobotState &,
+           franka::Duration,
+           std::chrono::duration<double>,
+           std::chrono::duration<double>,
+           const ControlSignalType &)>;
 
   /**
    * @brief Add a reaction to the motion.
@@ -32,12 +36,12 @@ class Motion {
    */
   void addReaction(std::shared_ptr<Reaction<ControlSignalType>> reaction);
 
-    /**
-     * @brief Add a reaction to the front of the reaction list.
-     *
-     * Reactions are evaluated in every step of the motion and can replace the current motion with a new motion.
-     * @param reaction The reaction to add.
-     */
+  /**
+   * @brief Add a reaction to the front of the reaction list.
+   *
+   * Reactions are evaluated in every step of the motion and can replace the current motion with a new motion.
+   * @param reaction The reaction to add.
+   */
   void addReactionFront(std::shared_ptr<Reaction<ControlSignalType>> reaction);
 
   /**
@@ -65,7 +69,7 @@ class Motion {
    * @brief Get the next command of the motion.
    * @param robot_state The current robot state.
    * @param time_step The time step [s].
-   * @param rel_time The relative time [s].
+   * @param rel_time The relative time.
    * @param abs_time The absolute time [s].
    * @param previous_command The previous command.
    * @return The next control signal for libfranka.
@@ -74,19 +78,22 @@ class Motion {
   nextCommand(
       const franka::RobotState &robot_state,
       franka::Duration time_step,
-      double rel_time,
-      double abs_time,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time,
       const std::optional<ControlSignalType> &previous_command);
 
   /**
    * @brief Check and call reactions.
    * @param robot_state The current robot state.
-   * @param rel_time The relative time [s].
+   * @param rel_time The relative time.
    * @param abs_time The absolute time [s].
    * @return The new motion if a reaction was triggered, nullptr otherwise.
    */
   std::shared_ptr<Motion<ControlSignalType>>
-  checkAndCallReactions(const franka::RobotState &robot_state, double rel_time, double abs_time);
+  checkAndCallReactions(
+      const franka::RobotState &robot_state,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time);
 
  protected:
   explicit Motion();
@@ -98,8 +105,8 @@ class Motion {
   nextCommandImpl(
       const franka::RobotState &robot_state,
       franka::Duration time_step,
-      double rel_time,
-      double abs_time,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time,
       const std::optional<ControlSignalType> &previous_command) = 0;
 
   [[nodiscard]] inline Robot *robot() const {

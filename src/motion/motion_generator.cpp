@@ -22,12 +22,12 @@ MotionGenerator<ControlSignalType>::MotionGenerator(
 template<typename ControlSignalType>
 ControlSignalType
 MotionGenerator<ControlSignalType>::operator()(const franka::RobotState &robot_state, franka::Duration period) {
-  abs_time_ += period.toSec();
+  abs_time_ += std::chrono::duration<uint64_t, std::milli>(period);
   {
-    if (abs_time_ == 0.0)
+    if (abs_time_ == std::chrono::duration<double>(0.0))
       previous_command_ = std::nullopt;
     std::unique_lock<std::mutex> lock(new_motion_mutex_);
-    if (new_motion_ != nullptr || abs_time_ == 0.0) {
+    if (new_motion_ != nullptr || abs_time_ == std::chrono::duration<double>(0.0)) {
       if (new_motion_ != nullptr) {
         current_motion_ = new_motion_;
         new_motion_ = nullptr;
@@ -77,8 +77,8 @@ bool MotionGenerator<ControlSignalType>::has_new_motion() {
 
 template<typename ControlSignalType>
 void MotionGenerator<ControlSignalType>::resetTimeUnsafe() {
-  abs_time_ = 0.0;
-  rel_time_offset_ = 0.0;
+  abs_time_ = std::chrono::duration<double>(0.0);
+  rel_time_offset_ = std::chrono::duration<double>(0.0);
 }
 
 }  // namespace franky

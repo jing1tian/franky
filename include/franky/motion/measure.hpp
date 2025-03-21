@@ -18,7 +18,8 @@ namespace franky {
  * form more complex measures.
  */
 class Measure {
-  using MeasureFunc = std::function<double(const franka::RobotState &, double, double)>;
+  using MeasureFunc = std::function<double(
+      const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)>;
 
  public:
   /**
@@ -42,7 +43,10 @@ class Measure {
    * robot started moving, and is only reset if a motion expires without being replaced by a new motion.
    * @return The value of the measure.
    */
-  inline double operator()(const franka::RobotState &robot_state, double rel_time, double abs_time) const {
+  inline double operator()(
+      const franka::RobotState &robot_state,
+      std::chrono::duration<double> rel_time,
+      std::chrono::duration<double> abs_time) const {
     return measure_func_(robot_state, rel_time, abs_time);
   }
 

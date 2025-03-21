@@ -37,8 +37,8 @@ franka::Torques
 ImpedanceMotion::nextCommandImpl(
     const franka::RobotState &robot_state,
     franka::Duration time_step,
-    double rel_time,
-    double abs_time,
+    std::chrono::duration<double> rel_time,
+    std::chrono::duration<double> abs_time,
     const std::optional<franka::Torques> &previous_command) {
   std::array<double, 7> coriolis_array = model_->coriolis(robot_state);
   std::array<double, 42> jacobian_array = model_->zeroJacobian(franka::Frame::kEndEffector, robot_state);
