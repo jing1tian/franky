@@ -16,6 +16,15 @@ CartesianVelocityWaypointMotion::CartesianVelocityWaypointMotion(
     : VelocityWaypointMotion<franka::CartesianVelocities, RobotVelocity>(waypoints, relative_dynamics_factor),
       ee_frame_(std::move(ee_frame)) {}
 
+void CartesianVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<RobotVelocity> &waypoint) const {
+  auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
+  if ((waypoint.target.vector_repr().array().abs() > vel_lim.array()).any()) {
+    std::stringstream ss;
+    ss << "Waypoint velocity " << waypoint.target.vector_repr() << " exceeds maximum velocity " << vel_lim << ".";
+    throw std::runtime_error(ss.str());
+  }
+}
+
 void CartesianVelocityWaypointMotion::initWaypointMotion(
     const franka::RobotState &robot_state,
     const std::optional<franka::CartesianVelocities> &previous_command,

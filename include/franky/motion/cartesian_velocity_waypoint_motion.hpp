@@ -36,6 +36,8 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
       Affine ee_frame = Affine::Identity());
 
  protected:
+  void checkWaypoint(const VelocityWaypoint<RobotVelocity> &waypoint) const override;
+
   void initWaypointMotion(
       const franka::RobotState &robot_state,
       const std::optional<franka::CartesianVelocities> &previous_command,
