@@ -37,14 +37,12 @@ void bind_motion_joint_vel(py::module &m) {
       m, "JointVelocityWaypointMotion")
       .def(py::init<>([](
                const std::vector<VelocityWaypoint<Vector7d>> &waypoints,
-               RelativeDynamicsFactor relative_dynamics_factor,
-               bool return_when_finished) {
+               RelativeDynamicsFactor relative_dynamics_factor) {
              return std::make_shared<JointVelocityWaypointMotion>(
-                 waypoints, relative_dynamics_factor, return_when_finished);
+                 waypoints, relative_dynamics_factor);
            }),
            "waypoints"_a,
-           "relative_dynamics_factor"_a = 1.0,
-           "return_when_finished"_a = true);
+           "relative_dynamics_factor"_a = 1.0);
 
   py::class_<JointMotion, JointVelocityWaypointMotion, std::shared_ptr<JointMotion>>(m, "JointMotion")
       .def(py::init<const Vector7d &, ReferenceType, double, bool>(),
