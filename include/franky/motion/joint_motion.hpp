@@ -25,9 +25,9 @@ class JointMotion : public JointWaypointMotion {
    */
   explicit JointMotion(
       const JointState &target,
-      ReferenceType reference_type,
-      RelativeDynamicsFactor relative_dynamics_factor,
-      bool return_when_finished);
+      ReferenceType reference_type = ReferenceType::Absolute,
+      RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+      bool return_when_finished = true);
 };
 
 }  // namespace franky
