@@ -39,3 +39,14 @@
 #define FOLD_0(f, res, x, peek, ...) FOLD_NEXT (peek, FOLD_1) (f, f(res, x), peek, __VA_ARGS__)
 #define FOLD_1(f, res, x, peek, ...) FOLD_NEXT (peek, FOLD_0) (f, f(res, x), peek, __VA_ARGS__)
 #define FOLD(f, init, ...) EVAL (FOLD_1 (f, init, __VA_ARGS__, (), 0))
+
+#define COUNT_INNER(i, unused) i + 1
+#define COUNT(...) FOLD(COUNT_INNER, 0, __VA_ARGS__)
+
+#define PACK_TUPLE_INNER(obj, unused, name) , obj.name
+#define PACK_TUPLE_1(obj, name0, ...) py::make_tuple(obj.name0 MAP_C1(PACK_TUPLE_INNER, obj, __VA_ARGS__))
+#define PACK_TUPLE(obj, ...) PACK_TUPLE_1(obj, __VA_ARGS__)
+
+#define UNPACK_TUPLE_INNER(obj_type, tuple, itr, name) , .name = tuple[itr + 1].cast<decltype(obj_type::name)>()
+#define UNPACK_TUPLE_1(obj_type, tuple, name0, ...) obj_type{.name0 = tuple[0].cast<decltype(obj_type::name0)>() MAP_C2(UNPACK_TUPLE_INNER, obj_type, tuple, __VA_ARGS__)}
+#define UNPACK_TUPLE(obj_type, tuple, ...) UNPACK_TUPLE_1(obj_type, tuple, __VA_ARGS__)
