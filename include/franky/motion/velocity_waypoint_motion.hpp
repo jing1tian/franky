@@ -70,7 +70,7 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
     }
   }
 
-  virtual std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const = 0;
+  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override = 0;
 
  private:
   RelativeDynamicsFactor relative_dynamics_factor_;

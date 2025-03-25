@@ -13,10 +13,10 @@ CartesianWaypointMotion::CartesianWaypointMotion(
     const std::vector<PositionWaypoint<CartesianState>> &waypoints,
     const RelativeDynamicsFactor &relative_dynamics_factor,
     bool return_when_finished,
-    const Affine frame)
+    Affine ee_frame)
     : PositionWaypointMotion<franka::CartesianPose, CartesianState>(
     waypoints, relative_dynamics_factor, return_when_finished),
-      ee_frame_(frame) {}
+      ee_frame_(std::move(ee_frame)) {}
 
 void CartesianWaypointMotion::initWaypointMotion(
     const franka::RobotState &robot_state,
