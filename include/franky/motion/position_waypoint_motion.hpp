@@ -41,7 +41,7 @@ class PositionWaypointMotion : public WaypointMotion<ControlSignalType, Position
    */
   explicit PositionWaypointMotion(
       std::vector<PositionWaypoint<TargetType>> waypoints,
-      const RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true
   )
       : WaypointMotion<ControlSignalType, PositionWaypoint<TargetType>, TargetType>(waypoints, return_when_finished),

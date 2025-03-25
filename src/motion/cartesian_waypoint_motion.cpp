@@ -11,7 +11,7 @@ namespace franky {
 
 CartesianWaypointMotion::CartesianWaypointMotion(
     const std::vector<PositionWaypoint<CartesianState>> &waypoints,
-    const RelativeDynamicsFactor relative_dynamics_factor,
+    const RelativeDynamicsFactor &relative_dynamics_factor,
     bool return_when_finished,
     const Affine frame)
     : PositionWaypointMotion<franka::CartesianPose, CartesianState>(

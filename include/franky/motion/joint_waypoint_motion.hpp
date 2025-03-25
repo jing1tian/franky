@@ -24,7 +24,7 @@ class JointWaypointMotion : public PositionWaypointMotion<franka::JointPositions
    */
   explicit JointWaypointMotion(
       const std::vector<PositionWaypoint<JointState>> &waypoints,
-      const RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true);
 
  protected:

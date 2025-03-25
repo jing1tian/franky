@@ -30,7 +30,7 @@ class CartesianMotion : public CartesianWaypointMotion {
   explicit CartesianMotion(
       const CartesianState &target,
       ReferenceType reference_type = ReferenceType::Absolute,
-      RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true,
       const Affine &frame = Affine::Identity());
 };

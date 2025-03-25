@@ -845,7 +845,7 @@ PYBIND11_MODULE(_franky, m) {
       .def(py::init<>([](
                const std::vector<PositionWaypoint<CartesianState>> &waypoints,
                const std::optional<Affine> &ee_frame = std::nullopt,
-               RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+               const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
                bool return_when_finished = true) {
              return std::make_shared<CartesianWaypointMotion>(
                  waypoints, relative_dynamics_factor, return_when_finished, ee_frame.value_or(Affine::Identity()));

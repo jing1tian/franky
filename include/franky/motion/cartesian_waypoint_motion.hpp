@@ -29,7 +29,7 @@ class CartesianWaypointMotion : public PositionWaypointMotion<franka::CartesianP
    */
   explicit CartesianWaypointMotion(
       const std::vector<PositionWaypoint<CartesianState>> &waypoints,
-      const RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true,
       const Affine ee_frame = Affine::Identity());
 

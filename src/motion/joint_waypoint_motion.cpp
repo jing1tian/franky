@@ -8,7 +8,7 @@ namespace franky {
 
 JointWaypointMotion::JointWaypointMotion(
     const std::vector<PositionWaypoint<JointState>> &waypoints,
-    const RelativeDynamicsFactor relative_dynamics_factor,
+    const RelativeDynamicsFactor &relative_dynamics_factor,
     bool return_when_finished)
     : PositionWaypointMotion<franka::JointPositions, JointState>(
         waypoints, relative_dynamics_factor, return_when_finished) {}

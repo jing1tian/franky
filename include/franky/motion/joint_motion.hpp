@@ -1,9 +1,5 @@
 #pragma once
 
-#include <atomic>
-#include <optional>
-#include <ruckig/ruckig.hpp>
-
 #include "franky/joint_state.hpp"
 #include "franky/motion/joint_waypoint_motion.hpp"
 #include "franky/motion/reference_type.hpp"
@@ -26,7 +22,7 @@ class JointMotion : public JointWaypointMotion {
   explicit JointMotion(
       const JointState &target,
       ReferenceType reference_type = ReferenceType::Absolute,
-      RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true);
 };
 
