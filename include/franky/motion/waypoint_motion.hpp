@@ -106,9 +106,9 @@ class WaypointMotion : public Motion<ControlSignalType> {
     for (size_t i = 0; i < steps; i++) {
       if (prev_result_ == ruckig::Result::Finished) {
         if (!target_reached_time_.has_value()) {
-          target_reached_time_ = abs_time;
+          target_reached_time_ = rel_time;
         }
-        if (abs_time - target_reached_time_.value() >= waypoint_iterator_->hold_target_duration) {
+        if (rel_time - target_reached_time_.value() >= waypoint_iterator_->hold_target_duration) {
           target_reached_time_ = std::nullopt;
           if (waypoint_iterator_ != waypoints_.end()) {
             ++waypoint_iterator_;
