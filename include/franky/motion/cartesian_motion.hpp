@@ -1,10 +1,5 @@
 #pragma once
 
-#include <atomic>
-#include <optional>
-#include <ruckig/ruckig.hpp>
-
-#include "franky/robot_pose.hpp"
 #include "franky/motion/cartesian_waypoint_motion.hpp"
 #include "franky/motion/reference_type.hpp"
 

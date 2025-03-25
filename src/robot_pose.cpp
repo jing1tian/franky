@@ -6,6 +6,7 @@
 #include <franka/control_types.h>
 
 #include "franky/types.hpp"
+#include "franky/util.hpp"
 
 namespace franky {
 
@@ -38,8 +39,7 @@ Vector7d RobotPose::vector_repr() const {
 }
 
 franka::CartesianPose RobotPose::as_franka_pose() const {
-  std::array<double, 16> array;
-  std::copy(end_effector_pose_.data(), end_effector_pose_.data() + array.size(), array.begin());
+  std::array<double, 16> array = toStd<16>(Eigen::Map<const Eigen::Vector<double, 16>>(end_effector_pose_.data()));
   if (elbow_position_.has_value()) {
     return franka::CartesianPose(array, {elbow_position_.value(), -1});
   }
