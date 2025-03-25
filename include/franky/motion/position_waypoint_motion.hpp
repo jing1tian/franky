@@ -49,7 +49,7 @@ class PositionWaypointMotion : public WaypointMotion<ControlSignalType, Position
 
  protected:
   void setInputLimits(
-      ruckig::InputParameter<7> &input_parameter, const PositionWaypoint<TargetType> &waypoint) const override {
+      const PositionWaypoint<TargetType> &waypoint, ruckig::InputParameter<7> &input_parameter) const override {
     auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
 
     auto relative_dynamics_factor =
