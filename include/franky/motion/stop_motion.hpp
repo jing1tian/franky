@@ -4,6 +4,7 @@
 #include "franky/motion/joint_motion.hpp"
 #include "franky/motion/joint_velocity_motion.hpp"
 #include "franky/motion/cartesian_motion.hpp"
+#include "franky/motion/cartesian_velocity_motion.hpp"
 
 namespace franky {
 
@@ -44,6 +45,18 @@ class StopMotion<franka::CartesianPose> : public CartesianMotion {
   explicit StopMotion() : CartesianMotion(
       RobotPose(Affine::Identity()),
       ReferenceType::Relative,
+      RelativeDynamicsFactor::MAX_DYNAMICS()
+  ) {}
+};
+
+/**
+ * @brief Stop motion for cartesian velocity control mode.
+ */
+template<>
+class StopMotion<franka::CartesianVelocities> : public CartesianVelocityMotion {
+ public:
+  explicit StopMotion() : CartesianVelocityMotion(
+      RobotVelocity(),
       RelativeDynamicsFactor::MAX_DYNAMICS()
   ) {}
 };

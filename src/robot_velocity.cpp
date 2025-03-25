@@ -6,6 +6,7 @@
 #include <franka/control_types.h>
 
 #include "franky/types.hpp"
+#include "franky/util.hpp"
 
 namespace franky {
 
@@ -13,12 +14,17 @@ RobotVelocity::RobotVelocity() = default;
 
 RobotVelocity::RobotVelocity(const RobotVelocity &) = default;
 
-RobotVelocity::RobotVelocity(const Twist &end_effector_twist, double elbow_velocity)
+RobotVelocity::RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow_velocity)
     : end_effector_twist_(end_effector_twist),
       elbow_velocity_(elbow_velocity) {}
 
-RobotVelocity::RobotVelocity(const Vector7d &vector_repr)
-    : RobotVelocity(Twist::fromVectorRepr(vector_repr.head<6>()), vector_repr[6]) {}
+RobotVelocity::RobotVelocity(const Vector7d &vector_repr, bool ignore_elbow)
+    : RobotVelocity(Twist::fromVectorRepr(vector_repr.head<6>()),
+                    ignore_elbow ? std::optional<double>(std::nullopt) : vector_repr[6]) {}
+
+RobotVelocity::RobotVelocity(const Vector6d &vector_repr, std::optional<double> elbow_velocity)
+    : elbow_velocity_(elbow_velocity),
+      end_effector_twist_(Twist::fromVectorRepr(vector_repr)) {}
 
 RobotVelocity::RobotVelocity(const franka::CartesianVelocities franka_velocity)
     : RobotVelocity(
@@ -34,10 +40,10 @@ Vector7d RobotVelocity::vector_repr() const {
 }
 
 franka::CartesianVelocities RobotVelocity::as_franka_velocity() const {
-  std::array<double, 6> array;
-  auto vec = vector_repr().head<6>();
-  std::copy(vec.data(), vec.data() + array.size(), array.begin());
-  return franka::CartesianVelocities(array, {elbow_velocity_, -1});
+  std::array<double, 6> array = toStd<6>(vector_repr().head<6>());
+  if (elbow_velocity_.has_value())
+    return franka::CartesianVelocities(array, {elbow_velocity_.value(), -1});
+  return {array};
 }
 
 }  // namespace franky

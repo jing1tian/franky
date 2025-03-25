@@ -28,13 +28,20 @@ class RobotVelocity {
    * @param end_effector_twist The twist of the end effector.
    * @param elbow_velocity The velocity of the elbow. Default is 0.0.
    */
-  RobotVelocity(const Twist &end_effector_twist, double elbow_velocity = 0.0);
+  RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow_velocity = 0.0);
 #pragma clang diagnostic pop
 
   /**
-   * @param vector_repr The vector representation of the velocity.
+   * @param vector_repr  The vector representation of the velocity.
+   * @param ignore_elbow Whether to ignore the elbow velocity. Default is false.
    */
-  explicit RobotVelocity(const Vector7d &vector_repr);
+  explicit RobotVelocity(const Vector7d &vector_repr, bool ignore_elbow = false);
+
+  /**
+ * @param vector_repr The vector representation of the velocity.
+ * @param elbow_velocity The velocity of the elbow. Optional.
+ */
+  explicit RobotVelocity(const Vector6d &vector_repr, std::optional<double> elbow_velocity = std::nullopt);
 
   /**
    * @param franka_velocity The franka velocity.
@@ -108,7 +115,7 @@ class RobotVelocity {
 
  private:
   Twist end_effector_twist_;
-  double elbow_velocity_ = 0.0;
+  std::optional<double> elbow_velocity_ = 0.0;
 };
 
 inline RobotVelocity operator*(const Affine &affine, const RobotVelocity &robot_velocity) {
