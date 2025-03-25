@@ -2,7 +2,7 @@ FROM quay.io/pypa/manylinux_2_34_x86_64:latest
 
 LABEL maintainer="Tim Schneider <tim@robot-learning.de>"
 
-RUN yum -y install poco-devel* zip boost1.78-devel urdfdom-devel fmt-devel
+RUN yum -y install poco-devel* zip boost1.78-devel urdfdom-devel fmt-devel gcc-g++
 
 RUN ln -s /usr/lib64/cmake/Boost-1.78.0/ /usr/lib64/cmake/Boost
 
