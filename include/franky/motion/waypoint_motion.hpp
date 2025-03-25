@@ -39,6 +39,11 @@ struct Waypoint {
   RelativeDynamicsFactor relative_dynamics_factor{1.0};
 
   std::optional<double> minimum_time{std::nullopt};
+
+  /**
+   * For how long to hold the target of this waypoint after it has been reached
+   */
+  std::chrono::duration<double> hold_target_duration{0.0};
 };
 
 /**
@@ -76,6 +81,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
  protected:
   void initImpl(const franka::RobotState &robot_state,
                 const std::optional<ControlSignalType> &previous_command) override {
+    target_reached_time_ = std::nullopt;
 
     initWaypointMotion(robot_state, previous_command, input_para_);
 
@@ -99,8 +105,15 @@ class WaypointMotion : public Motion<ControlSignalType> {
     const uint64_t steps = std::max<uint64_t>(time_step.toMSec(), 1);
     for (size_t i = 0; i < steps; i++) {
       if (prev_result_ == ruckig::Result::Finished) {
-        if (waypoint_iterator_ != waypoints_.end())
-          ++waypoint_iterator_;
+        if (!target_reached_time_.has_value()) {
+          target_reached_time_ = abs_time;
+        }
+        if (abs_time - target_reached_time_.value() >= waypoint_iterator_->hold_target_duration) {
+          target_reached_time_ = std::nullopt;
+          if (waypoint_iterator_ != waypoints_.end()) {
+            ++waypoint_iterator_;
+          }
+        }
         if (waypoint_iterator_ == waypoints_.end()) {
           auto output_pose = getControlSignal(input_para_);
           if (!params_.return_when_finished)
@@ -148,6 +161,8 @@ class WaypointMotion : public Motion<ControlSignalType> {
   ruckig::OutputParameter<7> output_para_;
 
   typename std::vector<Waypoint<TargetType>>::iterator waypoint_iterator_;
+
+  std::optional<std::chrono::duration<double>> target_reached_time_;
 
   void setInputLimits(const Waypoint<TargetType> &waypoint) {
     auto robot = this->robot();

@@ -777,7 +777,9 @@ PYBIND11_MODULE(_franky, m) {
                    const JointState &target,
                    ReferenceType reference_type,
                    RelativeDynamicsFactor relative_dynamics_factor,
-                   std::optional<double> minimum_time) {
+                   std::optional<double> minimum_time,
+                   std::chrono::duration<double> hold_target_duration
+               ) {
                  return Waypoint<JointState>{
                      target, reference_type, relative_dynamics_factor, minimum_time};
                }
@@ -785,11 +787,13 @@ PYBIND11_MODULE(_franky, m) {
            "target"_a,
            py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
            "relative_dynamics_factor"_a = 1.0,
-           "minimum_time"_a = std::nullopt)
+           "minimum_time"_a = std::nullopt,
+           "hold_target_duration"_a = std::chrono::duration<double>(0.0))
       .def_readonly("target", &Waypoint<JointState>::target)
       .def_readonly("reference_type", &Waypoint<JointState>::reference_type)
       .def_readonly("relative_dynamics_factor", &Waypoint<JointState>::relative_dynamics_factor)
-      .def_readonly("minimum_time", &Waypoint<JointState>::minimum_time);
+      .def_readonly("minimum_time", &Waypoint<JointState>::minimum_time)
+      .def_readonly("hold_target_duration", &Waypoint<JointState>::hold_target_duration);
 
   py::class_<JointWaypointMotion, Motion<franka::JointPositions>, std::shared_ptr<JointWaypointMotion>>(
       m, "JointWaypointMotion")
@@ -818,7 +822,9 @@ PYBIND11_MODULE(_franky, m) {
                    const CartesianState &target,
                    ReferenceType reference_type,
                    RelativeDynamicsFactor relative_dynamics_factor,
-                   std::optional<double> minimum_time) {
+                   std::optional<double> minimum_time,
+                   std::chrono::duration<double> hold_target_duration
+               ) {
                  return Waypoint<CartesianState>{
                      target, reference_type, relative_dynamics_factor, minimum_time};
                }
@@ -826,11 +832,13 @@ PYBIND11_MODULE(_franky, m) {
            "target"_a,
            py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
            "relative_dynamics_factor"_a = 1.0,
-           "minimum_time"_a = std::nullopt)
+           "minimum_time"_a = std::nullopt,
+           "hold_target_duration"_a = std::chrono::duration<double>(0.0))
       .def_readonly("target", &Waypoint<CartesianState>::target)
       .def_readonly("reference_type", &Waypoint<CartesianState>::reference_type)
       .def_readonly("relative_dynamics_factor", &Waypoint<CartesianState>::relative_dynamics_factor)
-      .def_readonly("minimum_time", &Waypoint<CartesianState>::minimum_time);
+      .def_readonly("minimum_time", &Waypoint<CartesianState>::minimum_time)
+      .def_readonly("hold_target_duration", &Waypoint<CartesianState>::hold_target_duration);
 
   py::class_<CartesianWaypointMotion, Motion<franka::CartesianPose>, std::shared_ptr<CartesianWaypointMotion>>(
       m, "CartesianWaypointMotion")
