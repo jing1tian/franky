@@ -76,7 +76,6 @@ class WaypointMotion : public Motion<ControlSignalType> {
  protected:
   void initImpl(const franka::RobotState &robot_state,
                 const std::optional<ControlSignalType> &previous_command) override {
-    current_cooldown_iteration_ = 0;
 
     initWaypointMotion(robot_state, previous_command, input_para_);
 
@@ -104,13 +103,8 @@ class WaypointMotion : public Motion<ControlSignalType> {
           ++waypoint_iterator_;
         if (waypoint_iterator_ == waypoints_.end()) {
           auto output_pose = getControlSignal(input_para_);
-          // Allow cooldown of motion, so that the low-pass filter has time to adjust to target values
-          if (!params_.return_when_finished) {
+          if (!params_.return_when_finished)
             return output_pose;
-          } else if (current_cooldown_iteration_ < cooldown_iterations_) {
-            current_cooldown_iteration_ += 1;
-            return output_pose;
-          }
           return franka::MotionFinished(output_pose);
         } else {
           setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_para_);
@@ -154,9 +148,6 @@ class WaypointMotion : public Motion<ControlSignalType> {
   ruckig::OutputParameter<7> output_para_;
 
   typename std::vector<Waypoint<TargetType>>::iterator waypoint_iterator_;
-
-  constexpr static size_t cooldown_iterations_{5};
-  size_t current_cooldown_iteration_{0};
 
   void setInputLimits(const Waypoint<TargetType> &waypoint) {
     auto robot = this->robot();
