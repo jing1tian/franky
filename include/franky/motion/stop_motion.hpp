@@ -2,6 +2,7 @@
 
 #include "franky/motion/reference_type.hpp"
 #include "franky/motion/joint_motion.hpp"
+#include "franky/motion/joint_velocity_motion.hpp"
 #include "franky/motion/cartesian_motion.hpp"
 
 namespace franky {
@@ -18,6 +19,18 @@ class StopMotion<franka::JointPositions> : public JointMotion {
   explicit StopMotion() : JointMotion(
       JointState(Vector7d::Zero()),
       ReferenceType::Relative,
+      RelativeDynamicsFactor::MAX_DYNAMICS()
+  ) {}
+};
+
+/**
+ * @brief Stop motion for joint velocity position control mode.
+ */
+template<>
+class StopMotion<franka::JointVelocities> : public JointVelocityMotion {
+ public:
+  explicit StopMotion() : JointVelocityMotion(
+      Vector7d::Zero(),
       RelativeDynamicsFactor::MAX_DYNAMICS()
   ) {}
 };

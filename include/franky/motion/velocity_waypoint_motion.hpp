@@ -10,16 +10,12 @@
 namespace franky {
 
 /**
- * @brief A position waypoint with a target and optional parameters.
+ * @brief A velocity waypoint with a target.
  *
  * @tparam TargetType The type of the target.
- *
- * @param reference_type The reference type (absolute or relative).
  */
 template<typename TargetType>
-struct PositionWaypoint : public Waypoint<TargetType> {
-  ReferenceType reference_type{ReferenceType::Absolute};
-};
+using VelocityWaypoint = Waypoint<TargetType>;
 
 /**
  * @brief A motion following multiple positional waypoints in a time-optimal way. Works with arbitrary initial
@@ -29,35 +25,41 @@ struct PositionWaypoint : public Waypoint<TargetType> {
  * @tparam TargetType The type of the target of the waypoints.
  */
 template<typename ControlSignalType, typename TargetType>
-class PositionWaypointMotion : public WaypointMotion<ControlSignalType, PositionWaypoint<TargetType>, TargetType> {
+class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, VelocityWaypoint<TargetType>, TargetType> {
  public:
   /**
    * @param waypoints                The waypoints to follow.
    * @param relative_dynamics_factor The relative dynamics factor for this motion. This factor will get multiplied with
    *                                 the robot's global dynamics factor to get the actual dynamics factor for this
    *                                 motion.
-   * @param return_when_finished     Whether to end the motion when the last waypoint is reached or keep holding the
-   *                                 last target.
    */
-  explicit PositionWaypointMotion(
-      std::vector<PositionWaypoint<TargetType>> waypoints,
-      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
-      bool return_when_finished = true
+  explicit VelocityWaypointMotion(
+      std::vector<VelocityWaypoint<TargetType>> waypoints,
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0
   )
-      : WaypointMotion<ControlSignalType, PositionWaypoint<TargetType>, TargetType>(waypoints, return_when_finished),
+      : WaypointMotion<ControlSignalType, VelocityWaypoint<TargetType>, TargetType>(waypoints, true),
         relative_dynamics_factor_(relative_dynamics_factor) {}
 
  protected:
+  void checkWaypoint(const VelocityWaypoint<TargetType> &waypoint) const override {
+    auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
+    if ((waypoint.target.array().abs() > vel_lim.array()).any()) {
+      std::stringstream ss;
+      ss << "Waypoint velocity " << waypoint.target << " exceeds maximum velocity " << vel_lim << ".";
+      throw std::runtime_error(ss.str());
+    }
+  }
+
   void setInputLimits(
-      const PositionWaypoint<TargetType> &waypoint, ruckig::InputParameter<7> &input_parameter) const override {
+      const VelocityWaypoint<TargetType> &waypoint, ruckig::InputParameter<7> &input_parameter) const override {
     auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
 
     auto relative_dynamics_factor =
         waypoint.relative_dynamics_factor * relative_dynamics_factor_ * this->robot()->relative_dynamics_factor();
 
-    input_parameter.max_velocity = toStd<7>(relative_dynamics_factor.velocity() * vel_lim);
-    input_parameter.max_acceleration = toStd<7>(relative_dynamics_factor.acceleration() * acc_lim);
-    input_parameter.max_jerk = toStd<7>(relative_dynamics_factor.jerk() * jerk_lim);
+    input_parameter.max_velocity = toStd<7>(relative_dynamics_factor.acceleration() * acc_lim);
+    input_parameter.max_acceleration = toStd<7>(relative_dynamics_factor.jerk() * jerk_lim);
+    input_parameter.max_jerk = toStd<7>(Vector7d::Constant(std::numeric_limits<double>::infinity()));
 
     if (relative_dynamics_factor.max_dynamics()) {
       input_parameter.synchronization = ruckig::Synchronization::TimeIfNecessary;

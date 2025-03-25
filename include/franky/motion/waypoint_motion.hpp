@@ -100,6 +100,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
             return output_pose;
           return franka::MotionFinished(output_pose);
         } else {
+          checkWaypoint(*waypoint_iterator_);
           setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
           setInputLimits(*waypoint_iterator_, input_parameter_);
         }
@@ -126,6 +127,8 @@ class WaypointMotion : public Motion<ControlSignalType> {
       const std::optional<ControlSignalType> &previous_command,
       const WaypointType &new_waypoint,
       ruckig::InputParameter<7> &input_parameter) = 0;
+
+  virtual void checkWaypoint(const WaypointType &waypoint) const {}
 
   [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const = 0;
 
