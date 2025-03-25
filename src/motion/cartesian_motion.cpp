@@ -8,21 +8,21 @@ namespace franky {
 CartesianMotion::CartesianMotion(
     const CartesianState &target,
     ReferenceType reference_type,
-    const Affine& frame,
+    const Affine &frame,
     RelativeDynamicsFactor relative_dynamics_factor,
     bool return_when_finished)
     : CartesianWaypointMotion(
     {
-        {
-            .target = target,
-            .reference_type = reference_type,
-            .relative_dynamics_factor = relative_dynamics_factor
+        PositionWaypoint<CartesianState>{
+            {
+                .target = target,
+            },
+            reference_type
         }
-    }, {
-        {
-            .return_when_finished = return_when_finished
-        },
-        frame
-    }) {}
+    },
+    relative_dynamics_factor,
+    return_when_finished,
+    frame
+) {}
 
 }  // namespace franky

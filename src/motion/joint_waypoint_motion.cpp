@@ -6,11 +6,12 @@
 
 namespace franky {
 
-JointWaypointMotion::JointWaypointMotion(const std::vector<Waypoint<JointState>> &waypoints)
-    : JointWaypointMotion(waypoints, Params()) {}
-
-JointWaypointMotion::JointWaypointMotion(const std::vector<Waypoint<JointState>> &waypoints, Params params)
-    : WaypointMotion<franka::JointPositions, JointState>(waypoints, params) {}
+JointWaypointMotion::JointWaypointMotion(
+    const std::vector<PositionWaypoint<JointState>> &waypoints,
+    const RelativeDynamicsFactor relative_dynamics_factor,
+    bool return_when_finished)
+    : PositionWaypointMotion<franka::JointPositions, JointState>(
+        waypoints, relative_dynamics_factor, return_when_finished) {}
 
 void JointWaypointMotion::initWaypointMotion(
     const franka::RobotState &robot_state,
@@ -32,7 +33,7 @@ franka::JointPositions JointWaypointMotion::getControlSignal(
 void JointWaypointMotion::setNewWaypoint(
     const franka::RobotState &robot_state,
     const std::optional<franka::JointPositions> &previous_command,
-    const Waypoint<JointState> &new_waypoint,
+    const PositionWaypoint<JointState> &new_waypoint,
     ruckig::InputParameter<7> &input_parameter) {
   auto new_target = new_waypoint.target;
   if (new_waypoint.reference_type == ReferenceType::Relative)

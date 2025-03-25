@@ -16,11 +16,16 @@ template<>
 class StopMotion<franka::JointPositions> : public JointWaypointMotion {
  public:
   explicit StopMotion() : JointWaypointMotion(
-      {Waypoint<JointState>{
-           .target=JointState(Vector7d::Zero()),
-           .reference_type= ReferenceType::Relative,
-           .relative_dynamics_factor = RelativeDynamicsFactor::MAX_DYNAMICS()
-       }}) {}
+      {
+          PositionWaypoint<JointState>{
+              {
+                  .target=JointState(Vector7d::Zero()),
+              },
+              ReferenceType::Relative
+          }
+      },
+      RelativeDynamicsFactor::MAX_DYNAMICS()
+  ) {}
 };
 
 /**
@@ -30,11 +35,16 @@ template<>
 class StopMotion<franka::CartesianPose> : public CartesianWaypointMotion {
  public:
   explicit StopMotion() : CartesianWaypointMotion(
-      {{
-           .target = RobotPose(Affine::Identity()),
-           .reference_type = ReferenceType::Relative,
-           .relative_dynamics_factor = RelativeDynamicsFactor::MAX_DYNAMICS()
-       }}) {}
+      {
+          PositionWaypoint<CartesianState>{
+              {
+                  .target = RobotPose(Affine::Identity()),
+              },
+              ReferenceType::Relative
+          }
+      },
+      RelativeDynamicsFactor::MAX_DYNAMICS()
+  ) {}
 };
 
 }  // namespace franky

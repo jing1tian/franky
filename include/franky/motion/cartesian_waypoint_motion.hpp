@@ -10,7 +10,7 @@
 #include "franky/robot.hpp"
 #include "franky/motion/reference_type.hpp"
 #include "franky/util.hpp"
-#include "franky/motion/waypoint_motion.hpp"
+#include "franky/motion/position_waypoint_motion.hpp"
 #include "franky/cartesian_state.hpp"
 
 namespace franky {
@@ -20,30 +20,18 @@ namespace franky {
  *
  * This motion follows multiple cartesian waypoints in a time-optimal way.
  */
-class CartesianWaypointMotion : public WaypointMotion<franka::CartesianPose, CartesianState> {
+class CartesianWaypointMotion : public PositionWaypointMotion<franka::CartesianPose, CartesianState> {
  public:
   /**
-   * @brief Parameters for the Cartesian waypoint motion.
-   * @see WaypointMotion::Params
-   */
-  struct Params : WaypointMotion<franka::CartesianPose, CartesianState>::Params {
-    /**
-     * The end-effector frame for which the target is defined. This is a transformation from the configured
-     * end-effector frame to the end-effector frame the target is defined for.
-     */
-    Affine frame{Affine::Identity()};
-  };
-
-  /**
    * @param waypoints Waypoints to follow.
+   * @param ee_frame  The end-effector frame for which the target is defined. This is a transformation from the
+   *                  configured end-effector frame to the end-effector frame the target is defined for.
    */
-  explicit CartesianWaypointMotion(const std::vector<Waypoint<CartesianState>> &waypoints);
-
-  /**
-   * @param waypoints Waypoints to follow.
-   * @param params Parameters for the motion.
-   */
-  explicit CartesianWaypointMotion(const std::vector<Waypoint<CartesianState>> &waypoints, Params params);
+  explicit CartesianWaypointMotion(
+      const std::vector<PositionWaypoint<CartesianState>> &waypoints,
+      const RelativeDynamicsFactor relative_dynamics_factor = 1.0,
+      bool return_when_finished = true,
+      const Affine ee_frame = Affine::Identity());
 
  protected:
   void initWaypointMotion(
@@ -54,7 +42,7 @@ class CartesianWaypointMotion : public WaypointMotion<franka::CartesianPose, Car
   void setNewWaypoint(
       const franka::RobotState &robot_state,
       const std::optional<franka::CartesianPose> &previous_command,
-      const Waypoint<CartesianState> &new_waypoint,
+      const PositionWaypoint<CartesianState> &new_waypoint,
       ruckig::InputParameter<7> &input_parameter) override;
 
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override;
@@ -62,10 +50,9 @@ class CartesianWaypointMotion : public WaypointMotion<franka::CartesianPose, Car
   [[nodiscard]] franka::CartesianPose getControlSignal(const ruckig::InputParameter<7> &input_parameter) const override;
 
  private:
-  Params params_;
-
   CartesianState target_state_;
   Affine ref_frame_;
+  Affine ee_frame_;
 
   static inline Vector7d vec_cart_rot_elbow(double cart, double rot, double elbow) {
     return {cart, cart, cart, rot, rot, rot, elbow};

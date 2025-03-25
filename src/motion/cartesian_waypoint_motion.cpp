@@ -9,12 +9,14 @@
 
 namespace franky {
 
-CartesianWaypointMotion::CartesianWaypointMotion(const std::vector<Waypoint<CartesianState>> &waypoints)
-    : CartesianWaypointMotion(waypoints, Params()) {}
-
-CartesianWaypointMotion::CartesianWaypointMotion(const std::vector<Waypoint<CartesianState>> &waypoints, Params params)
-    : params_(std::move(params)),
-      WaypointMotion<franka::CartesianPose, CartesianState>(waypoints, params) {}
+CartesianWaypointMotion::CartesianWaypointMotion(
+    const std::vector<PositionWaypoint<CartesianState>> &waypoints,
+    const RelativeDynamicsFactor relative_dynamics_factor,
+    bool return_when_finished,
+    const Affine frame)
+    : PositionWaypointMotion<franka::CartesianPose, CartesianState>(
+    waypoints, relative_dynamics_factor, return_when_finished),
+      ee_frame_(frame) {}
 
 void CartesianWaypointMotion::initWaypointMotion(
     const franka::RobotState &robot_state,
@@ -44,7 +46,7 @@ franka::CartesianPose CartesianWaypointMotion::getControlSignal(
 void CartesianWaypointMotion::setNewWaypoint(
     const franka::RobotState &robot_state,
     const std::optional<franka::CartesianPose> &previous_command,
-    const Waypoint<CartesianState> &new_waypoint,
+    const PositionWaypoint<CartesianState> &new_waypoint,
     ruckig::InputParameter<7> &input_parameter) {
   auto waypoint_has_elbow = input_parameter.enabled[6];
 
@@ -101,7 +103,7 @@ void CartesianWaypointMotion::setNewWaypoint(
   if (new_waypoint.reference_type == ReferenceType::Relative) {
     new_target = prev_target_robot_pose.end_effector_pose() * new_target;
   }
-  auto new_target_transformed = new_target.changeEndEffectorFrame(params_.frame.inverse());
+  auto new_target_transformed = new_target.changeEndEffectorFrame(ee_frame_.inverse());
   auto new_target_ref_frame = ref_frame_.inverse() * new_target_transformed;
 
   input_parameter.target_position = toStd<7>(new_target_ref_frame.pose().vector_repr());

@@ -15,6 +15,7 @@
 #include "franky/motion/reference_type.hpp"
 #include "franky/motion/stop_motion.hpp"
 #include "franky/motion/waypoint_motion.hpp"
+#include "franky/motion/position_waypoint_motion.hpp"
 
 #include "franky/path/aggregated_path.hpp"
 #include "franky/path/linear_path.hpp"

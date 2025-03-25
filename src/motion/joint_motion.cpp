@@ -11,15 +11,15 @@ JointMotion::JointMotion(
     bool return_when_finished)
     : JointWaypointMotion(
     {
-        {
-            .target = target,
-            .reference_type = reference_type,
-            .relative_dynamics_factor = relative_dynamics_factor
+        PositionWaypoint<JointState>{
+            {
+                .target = target,
+            },
+            reference_type,
         }
-    }, {
-        Params{
-            .return_when_finished = return_when_finished
-        }
-    }) {}
+    },
+    relative_dynamics_factor,
+    return_when_finished
+) {}
 
 }  // namespace franky

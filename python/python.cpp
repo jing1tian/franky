@@ -771,7 +771,7 @@ PYBIND11_MODULE(_franky, m) {
            "return_when_finished"_a = true,
            "finish_wait_factor"_a = 1.2);
 
-  py::class_<Waypoint<JointState>>(m, "JointWaypoint")
+  py::class_<PositionWaypoint<JointState>>(m, "JointWaypoint")
       .def(py::init<>(
                [](
                    const JointState &target,
@@ -780,8 +780,9 @@ PYBIND11_MODULE(_franky, m) {
                    std::optional<double> minimum_time,
                    std::chrono::duration<double> hold_target_duration
                ) {
-                 return Waypoint<JointState>{
-                     target, reference_type, relative_dynamics_factor, minimum_time};
+                 return PositionWaypoint<JointState>{
+                     {target, relative_dynamics_factor, minimum_time}, reference_type
+                 };
                }
            ),
            "target"_a,
@@ -789,21 +790,20 @@ PYBIND11_MODULE(_franky, m) {
            "relative_dynamics_factor"_a = 1.0,
            "minimum_time"_a = std::nullopt,
            "hold_target_duration"_a = std::chrono::duration<double>(0.0))
-      .def_readonly("target", &Waypoint<JointState>::target)
-      .def_readonly("reference_type", &Waypoint<JointState>::reference_type)
-      .def_readonly("relative_dynamics_factor", &Waypoint<JointState>::relative_dynamics_factor)
-      .def_readonly("minimum_time", &Waypoint<JointState>::minimum_time)
-      .def_readonly("hold_target_duration", &Waypoint<JointState>::hold_target_duration);
+      .def_readonly("target", &PositionWaypoint<JointState>::target)
+      .def_readonly("reference_type", &PositionWaypoint<JointState>::reference_type)
+      .def_readonly("relative_dynamics_factor", &PositionWaypoint<JointState>::relative_dynamics_factor)
+      .def_readonly("minimum_time", &PositionWaypoint<JointState>::minimum_time)
+      .def_readonly("hold_target_duration", &PositionWaypoint<JointState>::hold_target_duration);
 
   py::class_<JointWaypointMotion, Motion<franka::JointPositions>, std::shared_ptr<JointWaypointMotion>>(
       m, "JointWaypointMotion")
       .def(py::init<>([](
-               const std::vector<Waypoint<JointState>> &waypoints,
+               const std::vector<PositionWaypoint<JointState>> &waypoints,
                RelativeDynamicsFactor relative_dynamics_factor,
                bool return_when_finished) {
              return std::make_shared<JointWaypointMotion>(
-                 waypoints,
-                 JointWaypointMotion::Params{relative_dynamics_factor, return_when_finished});
+                 waypoints, relative_dynamics_factor, return_when_finished);
            }),
            "waypoints"_a,
            "relative_dynamics_factor"_a = 1.0,
@@ -816,7 +816,7 @@ PYBIND11_MODULE(_franky, m) {
            "relative_dynamics_factor"_a = 1.0,
            "return_when_finished"_a = true);
 
-  py::class_<Waypoint<CartesianState>>(m, "CartesianWaypoint")
+  py::class_<PositionWaypoint<CartesianState>>(m, "CartesianWaypoint")
       .def(py::init<>(
                [](
                    const CartesianState &target,
@@ -825,8 +825,8 @@ PYBIND11_MODULE(_franky, m) {
                    std::optional<double> minimum_time,
                    std::chrono::duration<double> hold_target_duration
                ) {
-                 return Waypoint<CartesianState>{
-                     target, reference_type, relative_dynamics_factor, minimum_time};
+                 return PositionWaypoint<CartesianState>{
+                     {target, relative_dynamics_factor, minimum_time}, reference_type};
                }
            ),
            "target"_a,
@@ -834,27 +834,24 @@ PYBIND11_MODULE(_franky, m) {
            "relative_dynamics_factor"_a = 1.0,
            "minimum_time"_a = std::nullopt,
            "hold_target_duration"_a = std::chrono::duration<double>(0.0))
-      .def_readonly("target", &Waypoint<CartesianState>::target)
-      .def_readonly("reference_type", &Waypoint<CartesianState>::reference_type)
-      .def_readonly("relative_dynamics_factor", &Waypoint<CartesianState>::relative_dynamics_factor)
-      .def_readonly("minimum_time", &Waypoint<CartesianState>::minimum_time)
-      .def_readonly("hold_target_duration", &Waypoint<CartesianState>::hold_target_duration);
+      .def_readonly("target", &PositionWaypoint<CartesianState>::target)
+      .def_readonly("reference_type", &PositionWaypoint<CartesianState>::reference_type)
+      .def_readonly("relative_dynamics_factor", &PositionWaypoint<CartesianState>::relative_dynamics_factor)
+      .def_readonly("minimum_time", &PositionWaypoint<CartesianState>::minimum_time)
+      .def_readonly("hold_target_duration", &PositionWaypoint<CartesianState>::hold_target_duration);
 
   py::class_<CartesianWaypointMotion, Motion<franka::CartesianPose>, std::shared_ptr<CartesianWaypointMotion>>(
       m, "CartesianWaypointMotion")
       .def(py::init<>([](
-               const std::vector<Waypoint<CartesianState>> &waypoints,
-               const std::optional<Affine> &frame = std::nullopt,
+               const std::vector<PositionWaypoint<CartesianState>> &waypoints,
+               const std::optional<Affine> &ee_frame = std::nullopt,
                RelativeDynamicsFactor relative_dynamics_factor = 1.0,
                bool return_when_finished = true) {
              return std::make_shared<CartesianWaypointMotion>(
-                 waypoints,
-                 CartesianWaypointMotion::Params{
-                     {relative_dynamics_factor, return_when_finished},
-                     frame.value_or(Affine::Identity())});
+                 waypoints, relative_dynamics_factor, return_when_finished, ee_frame.value_or(Affine::Identity()));
            }),
            "waypoints"_a,
-           "frame"_a = std::nullopt,
+           "ee_frame"_a = std::nullopt,
            "relative_dynamics_factor"_a = 1.0,
            "return_when_finished"_a = true);
 
@@ -862,19 +859,19 @@ PYBIND11_MODULE(_franky, m) {
       .def(py::init<>([](
                const CartesianState &target,
                ReferenceType reference_type,
-               const std::optional<Affine> &frame,
+               const std::optional<Affine> &ee_frame,
                RelativeDynamicsFactor relative_dynamics_factor,
                bool return_when_finished) {
              return std::make_shared<CartesianMotion>(
                  target,
                  reference_type,
-                 frame.value_or(Affine::Identity()),
+                 ee_frame.value_or(Affine::Identity()),
                  relative_dynamics_factor,
                  return_when_finished);
            }),
            "target"_a,
            py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
-           "frame"_a = std::nullopt,
+           "ee_frame"_a = std::nullopt,
            "relative_dynamics_factor"_a = 1.0,
            "return_when_finished"_a = true);
 
