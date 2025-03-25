@@ -117,21 +117,12 @@ void CartesianWaypointMotion::setNewWaypoint(
 
 std::tuple<Vector7d, Vector7d, Vector7d>
 CartesianWaypointMotion::getAbsoluteInputLimits() const {
-  constexpr double translation_factor{0.4};
-  constexpr double derivative_factor{0.4};
-
   Vector7d max_vel = vec_cart_rot_elbow(
-      translation_factor * Robot::max_translation_velocity,
-      Robot::max_rotation_velocity,
-      Robot::max_elbow_velocity);
-  Vector7d max_acc = derivative_factor * vec_cart_rot_elbow(
-      translation_factor * Robot::max_translation_acceleration,
-      Robot::max_rotation_acceleration,
-      Robot::max_elbow_acceleration);
-  Vector7d max_jerk = std::pow(derivative_factor, 2) * vec_cart_rot_elbow(
-      translation_factor * Robot::max_translation_jerk,
-      Robot::max_rotation_jerk,
-      Robot::max_elbow_jerk);
+      Robot::max_translation_velocity, Robot::max_rotation_velocity, Robot::max_elbow_velocity);
+  Vector7d max_acc = vec_cart_rot_elbow(
+      Robot::max_translation_acceleration, Robot::max_rotation_acceleration, Robot::max_elbow_acceleration);
+  Vector7d max_jerk = vec_cart_rot_elbow(
+      Robot::max_translation_jerk, Robot::max_rotation_jerk, Robot::max_elbow_jerk);
   return {max_vel, max_acc, max_jerk};
 }
 
