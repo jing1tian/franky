@@ -9,6 +9,15 @@ JointVelocityWaypointMotion::JointVelocityWaypointMotion(
     const RelativeDynamicsFactor &relative_dynamics_factor)
     : VelocityWaypointMotion<franka::JointVelocities, Vector7d>(waypoints, relative_dynamics_factor) {}
 
+void JointVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<Vector7d> &waypoint) const {
+  auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
+  if ((waypoint.target.array().abs() > vel_lim.array()).any()) {
+    std::stringstream ss;
+    ss << "Waypoint velocity " << waypoint.target << " exceeds maximum velocity " << vel_lim << ".";
+    throw std::runtime_error(ss.str());
+  }
+}
+
 void JointVelocityWaypointMotion::initWaypointMotion(
     const franka::RobotState &robot_state,
     const std::optional<franka::JointVelocities> &previous_command,

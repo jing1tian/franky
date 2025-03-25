@@ -27,6 +27,7 @@ class JointVelocityWaypointMotion : public VelocityWaypointMotion<franka::JointV
       const RelativeDynamicsFactor &relative_dynamics_factor = 1.0);
 
  protected:
+  void checkWaypoint(const VelocityWaypoint<Vector7d> &waypoint) const override;
 
   void initWaypointMotion(
       const franka::RobotState &robot_state,

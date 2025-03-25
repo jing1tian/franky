@@ -41,15 +41,6 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
         relative_dynamics_factor_(relative_dynamics_factor) {}
 
  protected:
-  void checkWaypoint(const VelocityWaypoint<TargetType> &waypoint) const override {
-    auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
-    if ((waypoint.target.array().abs() > vel_lim.array()).any()) {
-      std::stringstream ss;
-      ss << "Waypoint velocity " << waypoint.target << " exceeds maximum velocity " << vel_lim << ".";
-      throw std::runtime_error(ss.str());
-    }
-  }
-
   void setInputLimits(
       const VelocityWaypoint<TargetType> &waypoint, ruckig::InputParameter<7> &input_parameter) const override {
     auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
