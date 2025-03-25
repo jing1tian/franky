@@ -859,21 +859,21 @@ PYBIND11_MODULE(_franky, m) {
       .def(py::init<>([](
                const CartesianState &target,
                ReferenceType reference_type,
-               const std::optional<Affine> &ee_frame,
                RelativeDynamicsFactor relative_dynamics_factor,
-               bool return_when_finished) {
+               bool return_when_finished,
+               const std::optional<Affine> &ee_frame) {
              return std::make_shared<CartesianMotion>(
                  target,
                  reference_type,
-                 ee_frame.value_or(Affine::Identity()),
                  relative_dynamics_factor,
-                 return_when_finished);
+                 return_when_finished,
+                 ee_frame.value_or(Affine::Identity()));
            }),
            "target"_a,
            py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
-           "ee_frame"_a = std::nullopt,
            "relative_dynamics_factor"_a = 1.0,
-           "return_when_finished"_a = true);
+           "return_when_finished"_a = true,
+           "ee_frame"_a = std::nullopt);
 
   // Backwards compatibility
   m.attr("LinearMotion") = m.attr("CartesianMotion");
