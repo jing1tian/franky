@@ -42,7 +42,7 @@ class ExponentialImpedanceMotion : public ImpedanceMotion {
 
  protected:
   std::tuple<Affine, bool> update(
-      const franka::RobotState &robot_state, franka::Duration time_step, std::chrono::duration<double> time) override;
+      const franka::RobotState &robot_state, franka::Duration time_step, franka::Duration time) override;
 
  private:
   Params params_;

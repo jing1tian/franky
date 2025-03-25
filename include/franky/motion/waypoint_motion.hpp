@@ -35,7 +35,7 @@ struct Waypoint {
 
   std::optional<double> minimum_time{std::nullopt};
 
-  std::chrono::duration<double> hold_target_duration{0.0};
+  franka::Duration hold_target_duration{0};
 };
 
 /**
@@ -79,8 +79,8 @@ class WaypointMotion : public Motion<ControlSignalType> {
   nextCommandImpl(
       const franka::RobotState &robot_state,
       franka::Duration time_step,
-      std::chrono::duration<double> rel_time,
-      std::chrono::duration<double> abs_time,
+      franka::Duration rel_time,
+      franka::Duration abs_time,
       const std::optional<ControlSignalType> &previous_command) override {
     const uint64_t steps = std::max<uint64_t>(time_step.toMSec(), 1);
     for (size_t i = 0; i < steps; i++) {
@@ -147,7 +147,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
 
   typename std::vector<WaypointType>::iterator waypoint_iterator_;
 
-  std::optional<std::chrono::duration<double>> target_reached_time_;
+  std::optional<franka::Duration> target_reached_time_;
 
 };
 

@@ -57,7 +57,7 @@ class MotionGenerator {
   inline void
   registerUpdateCallback(
       const std::function<void(
-          const franka::RobotState &, franka::Duration, std::chrono::duration<double>)> &callback) {
+          const franka::RobotState &, franka::Duration, franka::Duration)> &callback) {
     update_callbacks_.push_back(callback);
   }
 
@@ -81,13 +81,13 @@ class MotionGenerator {
   std::shared_ptr<Motion<ControlSignalType>> initial_motion_;
   std::shared_ptr<Motion<ControlSignalType>> current_motion_;
   std::shared_ptr<Motion<ControlSignalType>> new_motion_;
-  std::vector<std::function<void(const franka::RobotState &, franka::Duration, std::chrono::duration<double>)>>
+  std::vector<std::function<void(const franka::RobotState &, franka::Duration, franka::Duration)>>
       update_callbacks_;
   std::mutex new_motion_mutex_;
   std::optional<ControlSignalType> previous_command_;
 
-  std::chrono::duration<double> abs_time_{0.0};
-  std::chrono::duration<double> rel_time_offset_{0.0};
+  franka::Duration abs_time_{0};
+  franka::Duration rel_time_offset_{0};
   Robot *robot_;
 };
 

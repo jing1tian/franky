@@ -18,7 +18,7 @@ namespace franky {
 class Condition {
  public:
   using CheckFunc = std::function<bool(
-      const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)>;
+      const franka::RobotState &, franka::Duration, franka::Duration)>;
 
   /**
    * @param check_func A function that returns true if the condition is met.
@@ -43,8 +43,8 @@ class Condition {
    */
   inline bool operator()(
       const franka::RobotState &robot_state,
-      std::chrono::duration<double> rel_time,
-      std::chrono::duration<double> abs_time) const {
+      franka::Duration rel_time,
+      franka::Duration abs_time) const {
     return check_func_(robot_state, rel_time, abs_time);
   }
 

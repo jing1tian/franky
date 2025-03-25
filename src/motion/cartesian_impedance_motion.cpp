@@ -9,11 +9,11 @@
 
 namespace franky {
 
-CartesianImpedanceMotion::CartesianImpedanceMotion(const Affine &target, std::chrono::duration<double> duration)
+CartesianImpedanceMotion::CartesianImpedanceMotion(const Affine &target, franka::Duration duration)
     : CartesianImpedanceMotion(target, duration, Params()) {}
 
 CartesianImpedanceMotion::CartesianImpedanceMotion(
-    const Affine &target, std::chrono::duration<double> duration, const CartesianImpedanceMotion::Params &params)
+    const Affine &target, franka::Duration duration, const CartesianImpedanceMotion::Params &params)
     : duration_(duration), params_(params), ImpedanceMotion(target, params) {}
 
 void CartesianImpedanceMotion::initImpl(
@@ -25,7 +25,7 @@ void CartesianImpedanceMotion::initImpl(
 
 std::tuple<Affine, bool>
 CartesianImpedanceMotion::update(
-    const franka::RobotState &robot_state, franka::Duration time_step, std::chrono::duration<double> time) {
+    const franka::RobotState &robot_state, franka::Duration time_step, franka::Duration time) {
   double transition_parameter = time / duration_;
   Affine intermediate_goal;
   bool done;

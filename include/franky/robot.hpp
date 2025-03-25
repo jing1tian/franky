@@ -477,7 +477,7 @@ class Robot : public franka::Robot {
         motion_generator->registerUpdateCallback(
             [this](const franka::RobotState &robot_state,
                    franka::Duration duration,
-                   std::chrono::duration<double> time) {
+                   franka::Duration time) {
               std::lock_guard<std::mutex> lock(this->state_mutex_);
               current_state_ = robot_state;
             });

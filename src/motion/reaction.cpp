@@ -24,7 +24,7 @@ template<typename ControlSignalType>
 Reaction<ControlSignalType>::Reaction(
     const Condition &condition, const std::shared_ptr<Motion<ControlSignalType>> new_motion)
     : Reaction(condition, [new_motion](
-    const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>) { return new_motion; }) {}
+    const franka::RobotState &, franka::Duration, franka::Duration) { return new_motion; }) {}
 
 template<typename ControlSignalType>
 Reaction<ControlSignalType>::Reaction(Condition condition, const Reaction::MotionFunc &motion_func)
@@ -33,8 +33,8 @@ Reaction<ControlSignalType>::Reaction(Condition condition, const Reaction::Motio
 template<typename ControlSignalType>
 std::shared_ptr<Motion<ControlSignalType>> Reaction<ControlSignalType>::operator()(
     const franka::RobotState &robot_state,
-    std::chrono::duration<double> rel_time,
-    std::chrono::duration<double> abs_time) {
+    franka::Duration rel_time,
+    franka::Duration abs_time) {
   std::lock_guard<std::mutex> lock(callback_mutex_);
   for (auto cb : callbacks_)
     cb(robot_state, rel_time, abs_time);
@@ -44,7 +44,7 @@ std::shared_ptr<Motion<ControlSignalType>> Reaction<ControlSignalType>::operator
 template<typename ControlSignalType>
 void Reaction<ControlSignalType>::registerCallback(
     std::function<void(
-        const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)> callback) {
+        const franka::RobotState &, franka::Duration, franka::Duration)> callback) {
   std::lock_guard<std::mutex> lock(callback_mutex_);
   callbacks_.push_back(callback);
 }

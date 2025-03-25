@@ -12,47 +12,47 @@ Condition::Condition(Condition::CheckFunc check_func, std::string repr)
 Condition::Condition(bool constant_value)
     : Condition(
     [constant_value](const franka::RobotState &robot_state,
-                     std::chrono::duration<double> rel_time,
-                     std::chrono::duration<double> abs_time) {
+                     franka::Duration rel_time,
+                     franka::Duration abs_time) {
       return constant_value;
     }, constant_value ? "true" : "false") {}
 
 Condition operator&&(const Condition &c1, const Condition &c2) {
   return Condition([c1, c2](const franka::RobotState &robot_state,
-                            std::chrono::duration<double> rel_time,
-                            std::chrono::duration<double> abs_time) {
+                            franka::Duration rel_time,
+                            franka::Duration abs_time) {
     return c1(robot_state, rel_time, abs_time) && c2(robot_state, rel_time, abs_time);
   }, "(" + c1.repr() + ") && (" + c2.repr() + ")");
 }
 
 Condition operator||(const Condition &c1, const Condition &c2) {
   return Condition([c1, c2](const franka::RobotState &robot_state,
-                            std::chrono::duration<double> rel_time,
-                            std::chrono::duration<double> abs_time) {
+                            franka::Duration rel_time,
+                            franka::Duration abs_time) {
     return c1(robot_state, rel_time, abs_time) || c2(robot_state, rel_time, abs_time);
   }, "(" + c1.repr() + ") || (" + c2.repr() + ")");
 }
 
 Condition operator==(const Condition &c1, const Condition &c2) {
   return Condition([c1, c2](const franka::RobotState &robot_state,
-                            std::chrono::duration<double> rel_time,
-                            std::chrono::duration<double> abs_time) {
+                            franka::Duration rel_time,
+                            franka::Duration abs_time) {
     return c1(robot_state, rel_time, abs_time) == c2(robot_state, rel_time, abs_time);
   }, c1.repr() + " == " + c2.repr());
 }
 
 Condition operator!=(const Condition &c1, const Condition &c2) {
   return Condition([c1, c2](const franka::RobotState &robot_state,
-                            std::chrono::duration<double> rel_time,
-                            std::chrono::duration<double> abs_time) {
+                            franka::Duration rel_time,
+                            franka::Duration abs_time) {
     return c1(robot_state, rel_time, abs_time) != c2(robot_state, rel_time, abs_time);
   }, c1.repr() + " != " + c2.repr());
 }
 
 Condition operator!(const Condition &c) {
   return Condition([c](const franka::RobotState &robot_state,
-                       std::chrono::duration<double> rel_time,
-                       std::chrono::duration<double> abs_time) {
+                       franka::Duration rel_time,
+                       franka::Duration abs_time) {
     return !c(robot_state, rel_time, abs_time);
   }, "!(" + c.repr() + ")");
 }

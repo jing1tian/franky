@@ -24,7 +24,7 @@ class Motion;
 template<typename ControlSignalType>
 class Reaction {
   using MotionFunc = std::function<std::shared_ptr<Motion<ControlSignalType>>(
-      const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)>;
+      const franka::RobotState &, franka::Duration, franka::Duration)>;
 
  public:
   /**
@@ -48,8 +48,8 @@ class Reaction {
    * @return The new motion if the condition is met, or nullptr otherwise.
    */
   std::shared_ptr<Motion<ControlSignalType>> operator()(const franka::RobotState &robot_state,
-                                                        std::chrono::duration<double> rel_time,
-                                                        std::chrono::duration<double> abs_time);
+                                                        franka::Duration rel_time,
+                                                        franka::Duration abs_time);
 
   /**
    * @brief Check if the condition is met.
@@ -60,8 +60,8 @@ class Reaction {
    * @return True if the condition is met, false otherwise.
    */
   [[nodiscard]] inline bool condition(const franka::RobotState &robot_state,
-                                      std::chrono::duration<double> rel_time,
-                                      std::chrono::duration<double> abs_time) const {
+                                      franka::Duration rel_time,
+                                      franka::Duration abs_time) const {
     return condition_(robot_state, rel_time, abs_time);
   }
 
@@ -73,8 +73,8 @@ class Reaction {
   void registerCallback(
       std::function<void(
           const franka::RobotState &,
-          std::chrono::duration<double>,
-          std::chrono::duration<double>)> callback);
+          franka::Duration,
+          franka::Duration)> callback);
 
  private:
   MotionFunc motion_func_;
@@ -82,8 +82,8 @@ class Reaction {
   std::mutex callback_mutex_;
   std::vector<std::function<void(
       const franka::RobotState &,
-      std::chrono::duration<double>,
-      std::chrono::duration<double>)>> callbacks_{};
+      franka::Duration,
+      franka::Duration)>> callbacks_{};
 };
 
 }  // namespace franky
