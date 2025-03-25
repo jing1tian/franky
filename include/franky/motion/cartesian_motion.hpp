@@ -35,7 +35,4 @@ class CartesianMotion : public CartesianWaypointMotion {
       const Affine &frame = Affine::Identity());
 };
 
-// Backwards compatibility
-using LinearMotion = CartesianMotion;
-
 }  // namespace franky
