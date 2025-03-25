@@ -101,7 +101,9 @@ void bind_state_repr(py::module &m) {
            [](const Twist &twist, const Affine &affine) { return twist.transformWith(affine); },
            "affine"_a)
       .def("transform_with",
-           [](const Twist &twist, const Eigen::Quaterniond &quaterion) { return twist.transformWith(quaterion); },
+           [](const Twist &twist, const Eigen::Vector4d &quaternion) {
+             return twist.transformWith(Eigen::Quaterniond(quaternion));
+           },
            "quaternion"_a)
       .def_property_readonly("linear", &Twist::linear_velocity)
       .def_property_readonly("angular", &Twist::angular_velocity)
@@ -109,7 +111,7 @@ void bind_state_repr(py::module &m) {
            [](const Twist &twist, const Affine &affine) { return affine * twist; },
            py::is_operator())
       .def("__rmul__",
-           [](const Twist &twist, const Eigen::Quaterniond &quaternion) { return quaternion * twist; },
+           [](const Twist &twist, const Eigen::Vector4d &quaternion) { return Eigen::Quaterniond(quaternion) * twist; },
            py::is_operator())
       .def("__repr__", &twistToStr)
       .def(py::pickle(
@@ -160,8 +162,8 @@ void bind_state_repr(py::module &m) {
            [](const RobotVelocity &robot_velocity, const Affine &affine) { return affine * robot_velocity; },
            py::is_operator())
       .def("__rmul__",
-           [](const RobotVelocity &robot_velocity, const Eigen::Quaterniond &quaternion) {
-             return quaternion * robot_velocity;
+           [](const RobotVelocity &robot_velocity, const Eigen::Vector4d &quaternion) {
+             return Eigen::Quaterniond(quaternion) * robot_velocity;
            },
            py::is_operator())
       .def("__repr__", robotVelocityToStr)

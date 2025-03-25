@@ -16,10 +16,10 @@ void bind_motion_joint_pos(py::module &m) {
                    ReferenceType reference_type,
                    RelativeDynamicsFactor relative_dynamics_factor,
                    std::optional<double> minimum_time,
-                   std::chrono::duration<double> hold_target_duration
+                   franka::Duration hold_target_duration
                ) {
                  return PositionWaypoint<JointState>{
-                     {target, relative_dynamics_factor, minimum_time}, reference_type
+                     {target, relative_dynamics_factor, minimum_time, hold_target_duration}, reference_type
                  };
                }
            ),
@@ -27,7 +27,7 @@ void bind_motion_joint_pos(py::module &m) {
            py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
            "relative_dynamics_factor"_a = 1.0,
            "minimum_time"_a = std::nullopt,
-           "hold_target_duration"_a = std::chrono::duration<double>(0.0))
+           "hold_target_duration"_a = franka::Duration(0))
       .def_readonly("target", &PositionWaypoint<JointState>::target)
       .def_readonly("reference_type", &PositionWaypoint<JointState>::reference_type)
       .def_readonly("relative_dynamics_factor", &PositionWaypoint<JointState>::relative_dynamics_factor)

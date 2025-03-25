@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <franka/robot_state.h>
 #include <franka/gripper_state.h>
 

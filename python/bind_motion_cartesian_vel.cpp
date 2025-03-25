@@ -8,23 +8,23 @@ namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the '_a' literal
 using namespace franky;
 
-void bind_motion_cartesian_pos(py::module &m) {
+void bind_motion_cartesian_vel(py::module &m) {
   py::class_<VelocityWaypoint<RobotVelocity>>(m, "CartesianVelocityWaypoint")
       .def(py::init<>(
                [](
                    const RobotVelocity &target,
                    RelativeDynamicsFactor relative_dynamics_factor,
                    std::optional<double> minimum_time,
-                   std::chrono::duration<double> hold_target_duration
+                   franka::Duration hold_target_duration
                ) {
                  return VelocityWaypoint<RobotVelocity>{
-                     target, relative_dynamics_factor, minimum_time};
+                     target, relative_dynamics_factor, minimum_time, hold_target_duration};
                }
            ),
            "target"_a,
            "relative_dynamics_factor"_a = 1.0,
            "minimum_time"_a = std::nullopt,
-           "hold_target_duration"_a = std::chrono::duration<double>(0.0))
+           "hold_target_duration"_a = franka::Duration(0))
       .def_readonly("target", &VelocityWaypoint<RobotVelocity>::target)
       .def_readonly("relative_dynamics_factor", &VelocityWaypoint<RobotVelocity>::relative_dynamics_factor)
       .def_readonly("minimum_time", &VelocityWaypoint<RobotVelocity>::minimum_time)
@@ -45,12 +45,13 @@ void bind_motion_cartesian_pos(py::module &m) {
            "ee_frame"_a = std::nullopt,
            "relative_dynamics_factor"_a = 1.0);
 
-  py::class_<CartesianMotion, CartesianVelocityWaypointMotion, std::shared_ptr<CartesianMotion>>(m, "CartesianMotion")
+  py::class_<CartesianVelocityMotion, CartesianVelocityWaypointMotion, std::shared_ptr<CartesianVelocityMotion>>(
+      m, "CartesianVelocityMotion")
       .def(py::init<>([](
                const RobotVelocity &target,
                RelativeDynamicsFactor relative_dynamics_factor,
                const std::optional<Affine> &ee_frame) {
-             return std::make_shared<CartesianMotion>(
+             return std::make_shared<CartesianVelocityMotion>(
                  target,
                  relative_dynamics_factor,
                  ee_frame.value_or(Affine::Identity()));

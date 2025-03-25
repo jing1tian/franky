@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 #include "franky.hpp"
 
@@ -15,7 +16,7 @@ SequentialExecutor callback_executor;
 template<typename ControlSignalType>
 void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal_name) {
   py::class_<Motion<ControlSignalType>, std::shared_ptr<Motion<ControlSignalType>>> motion_class(
-      m, (control_signal_name + "Motion").c_str());
+      m, ("Base" + control_signal_name + "Motion").c_str());
   py::class_<Reaction<ControlSignalType>, std::shared_ptr<Reaction<ControlSignalType>>> reaction_class(
       m, (control_signal_name + "Reaction").c_str());
 
@@ -29,8 +30,8 @@ void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal
         motion.registerCallback([callback](
             const franka::RobotState &robot_state,
             franka::Duration time_step,
-            std::chrono::duration<double> rel_time,
-            std::chrono::duration<double> abs_time,
+            franka::Duration rel_time,
+            franka::Duration abs_time,
             const ControlSignalType &control_signal) {
           callback_executor.add([callback, robot_state, time_step, rel_time, abs_time, control_signal]() {
             try {
@@ -50,12 +51,12 @@ void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal
       .def("register_callback", [](
           Reaction<ControlSignalType> &reaction,
           const std::function<void(
-              const franka::RobotState &, std::chrono::duration<double>, std::chrono::duration<double>)> &callback
+              const franka::RobotState &, franka::Duration, franka::Duration)> &callback
       ) {
         reaction.registerCallback([callback](
             const franka::RobotState &robot_state,
-            std::chrono::duration<double> rel_time,
-            std::chrono::duration<double> abs_time) {
+            franka::Duration rel_time,
+            franka::Duration abs_time) {
           callback_executor.add([callback, robot_state, rel_time, abs_time]() {
             try {
               callback(robot_state, rel_time, abs_time);
