@@ -67,6 +67,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
 
     waypoint_iterator_ = waypoints_.begin();
     if (waypoint_iterator_ != waypoints_.end()) {
+      checkWaypoint(*waypoint_iterator_);
       setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
       setInputLimits(*waypoint_iterator_, input_parameter_);
       prev_result_ = ruckig::Result::Working;
@@ -110,7 +111,9 @@ class WaypointMotion : public Motion<ControlSignalType> {
         if (prev_result_ == ruckig::Result::Error) {
           throw MotionPlannerException("Invalid inputs to motion planner.");
         }
-        output_parameter_.pass_to_input(input_parameter_);
+        if (prev_result_ == ruckig::Result::Working) {
+          output_parameter_.pass_to_input(input_parameter_);
+        }
       }
     }
 
