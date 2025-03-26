@@ -50,7 +50,7 @@ void CartesianVelocityWaypointMotion::initWaypointMotion(
 franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
     const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) {
   auto has_elbow = input_parameter.enabled[6];
-  RobotVelocity target_vel(toEigen<7>(input_parameter.current_position));
+  RobotVelocity target_vel(toEigenD<7>(input_parameter.current_position));
   if (has_elbow) {
     auto time_step_s = time_step.toSec();
     auto current_elbow_vel = input_parameter.current_position[6];

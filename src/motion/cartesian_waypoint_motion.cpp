@@ -40,7 +40,7 @@ void CartesianWaypointMotion::initWaypointMotion(
 franka::CartesianPose CartesianWaypointMotion::getControlSignal(
     const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) {
   auto has_elbow = input_parameter.enabled[6];
-  return (ref_frame_ * RobotPose(toEigen<7>(input_parameter.current_position), !has_elbow)).as_franka_pose();
+  return (ref_frame_ * RobotPose(toEigenD<7>(input_parameter.current_position), !has_elbow)).as_franka_pose();
 }
 
 void CartesianWaypointMotion::setNewWaypoint(
@@ -51,16 +51,16 @@ void CartesianWaypointMotion::setNewWaypoint(
   auto waypoint_has_elbow = input_parameter.enabled[6];
 
   // We first convert the current state into the frame of the current pose
-  RobotPose current_pose_old_ref_frame = RobotPose(toEigen<7>(input_parameter.current_position), !waypoint_has_elbow);
+  RobotPose current_pose_old_ref_frame = RobotPose(toEigenD<7>(input_parameter.current_position), !waypoint_has_elbow);
   Affine new_ref_to_old_ref = current_pose_old_ref_frame.end_effector_pose();
   ref_frame_ = ref_frame_ * new_ref_to_old_ref;
   auto rot = new_ref_to_old_ref.inverse().rotation();
 
-  Vector7d current_velocity = toEigen<7>(input_parameter.current_velocity);
+  Vector7d current_velocity = toEigenD<7>(input_parameter.current_velocity);
   auto linear_vel_ref_frame = rot * current_velocity.head<3>();
   auto angular_vel_ref_frame = rot * current_velocity.segment<3>(3);
 
-  Vector7d current_acc = toEigen<7>(input_parameter.current_acceleration);
+  Vector7d current_acc = toEigenD<7>(input_parameter.current_acceleration);
   auto linear_acc_ref_frame = rot * current_acc.head<3>();
   auto angular_acc_ref_frame = rot * current_acc.segment<3>(3);
 

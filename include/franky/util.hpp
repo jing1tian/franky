@@ -12,8 +12,13 @@ inline std::array<double, dims> toStd(const Eigen::Matrix<double, dims, 1> &vect
   return result;
 }
 
+template<size_t dims, typename T>
+inline Eigen::Matrix<T, dims, 1> toEigen(const std::array<T, dims> &vector) {
+  return Eigen::Matrix<T, dims, 1>::Map(vector.data());
+}
+
 template<size_t dims>
-inline Eigen::Matrix<double, dims, 1> toEigen(const std::array<double, dims> &vector) {
+inline Eigen::Matrix<double, dims, 1> toEigenD(const std::array<double, dims> &vector) {
   return Eigen::Matrix<double, dims, 1>::Map(vector.data());
 }
 
