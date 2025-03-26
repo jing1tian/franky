@@ -14,16 +14,16 @@ RobotVelocity::RobotVelocity() = default;
 
 RobotVelocity::RobotVelocity(const RobotVelocity &) = default;
 
-RobotVelocity::RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow_velocity)
+RobotVelocity::RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow)
     : end_effector_twist_(end_effector_twist),
-      elbow_velocity_(elbow_velocity) {}
+      elbow_(elbow) {}
 
 RobotVelocity::RobotVelocity(const Vector7d &vector_repr, bool ignore_elbow)
     : RobotVelocity(Twist::fromVectorRepr(vector_repr.head<6>()),
                     ignore_elbow ? std::optional<double>(std::nullopt) : vector_repr[6]) {}
 
-RobotVelocity::RobotVelocity(const Vector6d &vector_repr, std::optional<double> elbow_velocity)
-    : elbow_velocity_(elbow_velocity),
+RobotVelocity::RobotVelocity(const Vector6d &vector_repr, std::optional<double> elbow)
+    : elbow_(elbow),
       end_effector_twist_(Twist::fromVectorRepr(vector_repr)) {}
 
 RobotVelocity::RobotVelocity(const franka::CartesianVelocities franka_velocity)
@@ -35,14 +35,14 @@ RobotVelocity::RobotVelocity(const franka::CartesianVelocities franka_velocity)
 
 Vector7d RobotVelocity::vector_repr() const {
   Vector7d result;
-  result << end_effector_twist_.vector_repr(), elbow_velocity_;
+  result << end_effector_twist_.vector_repr(), elbow_;
   return result;
 }
 
 franka::CartesianVelocities RobotVelocity::as_franka_velocity() const {
   std::array<double, 6> array = toStd<6>(vector_repr().head<6>());
-  if (elbow_velocity_.has_value())
-    return franka::CartesianVelocities(array, {elbow_velocity_.value(), -1});
+  if (elbow_.has_value())
+    return franka::CartesianVelocities(array, {elbow_.value(), -1});
   return {array};
 }
 

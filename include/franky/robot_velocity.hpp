@@ -26,9 +26,9 @@ class RobotVelocity {
 #pragma clang diagnostic ignored "-Wimplicit-conversion"
   /**
    * @param end_effector_twist The twist of the end effector.
-   * @param elbow_velocity The velocity of the elbow. Default is 0.0.
+   * @param elbow The velocity of the elbow. Default is 0.0.
    */
-  RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow_velocity = 0.0);
+  RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow = 0.0);
 #pragma clang diagnostic pop
 
   /**
@@ -39,9 +39,9 @@ class RobotVelocity {
 
   /**
  * @param vector_repr The vector representation of the velocity.
- * @param elbow_velocity The velocity of the elbow. Optional.
+ * @param elbow The velocity of the elbow. Optional.
  */
-  explicit RobotVelocity(const Vector6d &vector_repr, std::optional<double> elbow_velocity = std::nullopt);
+  explicit RobotVelocity(const Vector6d &vector_repr, std::optional<double> elbow = std::nullopt);
 
   /**
    * @param franka_velocity The franka velocity.
@@ -81,7 +81,7 @@ class RobotVelocity {
    */
   template<typename RotationMatrixType>
   [[nodiscard]] inline RobotVelocity transform(const RotationMatrixType &rotation) const {
-    return {rotation * end_effector_twist_, elbow_velocity_};
+    return {rotation * end_effector_twist_, elbow_};
   }
 
   /**
@@ -92,8 +92,18 @@ class RobotVelocity {
    * @return The velocity of the new end-effector frame.
    */
   [[nodiscard]] inline RobotVelocity changeEndEffectorFrame(const Eigen::Vector3d &offset_world_frame) const {
-    return {end_effector_twist_.propagateThroughLink(offset_world_frame), elbow_velocity_};
+    return {end_effector_twist_.propagateThroughLink(offset_world_frame), elbow_};
   }
+
+  /**
+   * @brief Get the velocity with a new elbow velocity.
+   *
+   * @param elbow The new elbow velocity / position.
+   * @return The velocity with the new elbow velocity.
+   */
+    [[nodiscard]] inline RobotVelocity withElbow(const std::optional<double> elbow) const {
+      return {end_effector_twist_, elbow};
+    }
 
   /**
    * @brief Get the end effector twist.
@@ -105,17 +115,19 @@ class RobotVelocity {
   }
 
   /**
-   * @brief Get the elbow velocity.
+   * @brief Get the elbow velocity/position. If this object is retrieved by reading the franka robot state, then
+   * this field will contain the elbow velocity. If this object is created by the user for cartesian velocity control,
+   * then it must contain the elbow position.
    *
-   * @return The elbow velocity.
+   * @return The elbow velocity/position.
    */
-  [[nodiscard]] inline std::optional<double> elbow_velocity() const {
-    return elbow_velocity_;
+  [[nodiscard]] inline std::optional<double> elbow() const {
+    return elbow_;
   }
 
  private:
   Twist end_effector_twist_;
-  std::optional<double> elbow_velocity_ = 0.0;
+  std::optional<double> elbow_ = 0.0;
 };
 
 inline RobotVelocity operator*(const Affine &affine, const RobotVelocity &robot_velocity) {

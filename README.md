@@ -282,7 +282,7 @@ ee_pose = robot_pose.end_effector_pose
 elbow_pos = robot_pose.elbow_position
 robot_velocity = cartesian_state.velocity  # Contains end-effector twist and elbow velocity
 ee_twist = robot_velocity.end_effector_twist
-elbow_vel = robot_velocity.elbow_velocity
+elbow_vel = robot_velocity.elbow
 
 # Get the robot's joint state
 joint_state = robot.current_joint_state

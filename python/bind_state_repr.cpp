@@ -48,8 +48,8 @@ std::string robotPoseToStr(const RobotPose &robot_pose) {
 std::string robotVelocityToStr(const RobotVelocity &robot_velocity) {
   std::stringstream ss;
   ss << "RobotVelocity(ee_twist=" << twistToStr(robot_velocity.end_effector_twist());
-  if (robot_velocity.elbow_velocity().has_value())
-    ss << ", elbow_vel=" << robot_velocity.elbow_velocity().value();
+  if (robot_velocity.elbow().has_value())
+    ss << ", elbow_vel=" << robot_velocity.elbow().value();
   ss << ")";
   return ss.str();
 }
@@ -153,11 +153,11 @@ void bind_state_repr(py::module &m) {
   py::implicitly_convertible<Affine, RobotPose>();
 
   py::class_<RobotVelocity>(m, "RobotVelocity")
-      .def(py::init<Twist, double>(), "end_effector_twist"_a, "elbow_velocity"_a = 0.0)
+      .def(py::init<Twist, double>(), "end_effector_twist"_a, "elbow"_a = 0.0)
       .def(py::init<const RobotVelocity &>()) // Copy constructor
       .def("change_end_effector_frame", &RobotVelocity::changeEndEffectorFrame, "offset_world_frame"_a)
       .def_property_readonly("end_effector_twist", &RobotVelocity::end_effector_twist)
-      .def_property_readonly("elbow_velocity", &RobotVelocity::elbow_velocity)
+      .def_property_readonly("elbow", &RobotVelocity::elbow)
       .def("__rmul__",
            [](const RobotVelocity &robot_velocity, const Affine &affine) { return affine * robot_velocity; },
            py::is_operator())
@@ -169,7 +169,7 @@ void bind_state_repr(py::module &m) {
       .def("__repr__", robotVelocityToStr)
       .def(py::pickle(
           [](const RobotVelocity &robot_velocity) {  // __getstate__
-            return py::make_tuple(robot_velocity.end_effector_twist(), robot_velocity.elbow_velocity());
+            return py::make_tuple(robot_velocity.end_effector_twist(), robot_velocity.elbow());
           },
           [](const py::tuple &t) {  // __setstate__
             if (t.size() != 2)
