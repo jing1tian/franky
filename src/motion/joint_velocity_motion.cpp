@@ -13,6 +13,9 @@ JointVelocityMotion::JointVelocityMotion(
         VelocityWaypoint<Vector7d>{
             .target = target,
             .hold_target_duration = hold_target_duration
+        },
+        VelocityWaypoint<Vector7d>{
+            .target = Vector7d::Zero()
         }
     },
     relative_dynamics_factor

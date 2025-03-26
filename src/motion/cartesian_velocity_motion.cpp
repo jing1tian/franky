@@ -14,7 +14,10 @@ CartesianVelocityMotion::CartesianVelocityMotion(
         VelocityWaypoint<RobotVelocity>{
             .target = target,
             .hold_target_duration = hold_target_duration
-        }
+        },
+        VelocityWaypoint<RobotVelocity>{
+            .target = RobotVelocity(),
+        },
     },
     relative_dynamics_factor,
     frame
