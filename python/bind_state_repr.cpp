@@ -130,6 +130,7 @@ void bind_state_repr(py::module &m) {
            "end_effector_pose"_a,
            "elbow_position"_a = std::nullopt)
       .def(py::init<const RobotPose &>()) // Copy constructor
+      .def("change_end_effector_frame", &RobotPose::changeEndEffectorFrame, "offset_world_frame"_a)
       .def("with_elbow_position", &RobotPose::withElbowPosition, "elbow_position"_a)
       .def_property_readonly("end_effector_pose", &RobotPose::end_effector_pose)
       .def_property_readonly("elbow_position", &RobotPose::elbow_position)
@@ -156,6 +157,7 @@ void bind_state_repr(py::module &m) {
       .def(py::init<Twist, double>(), "end_effector_twist"_a, "elbow_velocity"_a = 0.0)
       .def(py::init<const RobotVelocity &>()) // Copy constructor
       .def("change_end_effector_frame", &RobotVelocity::changeEndEffectorFrame, "offset_world_frame"_a)
+      .def("with_elbow_velocity", &RobotVelocity::withElbowVelocity, "elbow_velocity"_a)
       .def_property_readonly("end_effector_twist", &RobotVelocity::end_effector_twist)
       .def_property_readonly("elbow_velocity", &RobotVelocity::elbow_velocity)
       .def("__rmul__",
