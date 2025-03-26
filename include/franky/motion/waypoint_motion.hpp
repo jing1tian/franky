@@ -89,7 +89,12 @@ class WaypointMotion : public Motion<ControlSignalType> {
         if (!target_reached_time_.has_value()) {
           target_reached_time_ = rel_time;
         }
-        if (rel_time - target_reached_time_.value() >= waypoint_iterator_->hold_target_duration) {
+        auto hold_target_duration = waypoint_iterator_->hold_target_duration;
+        if (waypoint_iterator_ + 1 != waypoints_.end()) {
+          // Allow cooldown of motion, so that the low-pass filter has time to adjust to target values
+          hold_target_duration = std::max(hold_target_duration, franka::Duration(5));
+        }
+        if (rel_time - target_reached_time_.value() >= hold_target_duration) {
           target_reached_time_ = std::nullopt;
           if (waypoint_iterator_ != waypoints_.end()) {
             ++waypoint_iterator_;
