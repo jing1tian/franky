@@ -35,7 +35,7 @@ RobotVelocity::RobotVelocity(const franka::CartesianVelocities franka_velocity)
 
 Vector7d RobotVelocity::vector_repr() const {
   Vector7d result;
-  result << end_effector_twist_.vector_repr(), elbow_velocity_;
+  result << end_effector_twist_.vector_repr(), elbow_velocity_.value_or(0.0);
   return result;
 }
 

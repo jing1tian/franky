@@ -128,7 +128,7 @@ class RobotVelocity {
 
  private:
   Twist end_effector_twist_;
-  std::optional<double> elbow_velocity_ = 0.0;
+  std::optional<double> elbow_velocity_ = std::nullopt;
 };
 
 inline RobotVelocity operator*(const Affine &affine, const RobotVelocity &robot_velocity) {
