@@ -18,10 +18,9 @@ CartesianVelocityWaypointMotion::CartesianVelocityWaypointMotion(
 
 void CartesianVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<RobotVelocity> &waypoint) const {
   auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
-  if ((waypoint.target.vector_repr().head<6>().array().abs() > vel_lim.head<6>().array()).any()) {
+  if ((waypoint.target.vector_repr().array().abs() > vel_lim.array()).any()) {
     std::stringstream ss;
-    ss << "Waypoint velocity " << waypoint.target.vector_repr().head<6>() << " exceeds maximum velocity "
-       << vel_lim.head<6>() << ".";
+    ss << "Waypoint velocity " << waypoint.target.vector_repr() << " exceeds maximum velocity " << vel_lim << ".";
     throw std::runtime_error(ss.str());
   }
 }
