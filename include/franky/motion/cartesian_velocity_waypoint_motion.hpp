@@ -54,9 +54,6 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
   [[nodiscard]] franka::CartesianVelocities getControlSignal(
       const ruckig::InputParameter<7> &input_parameter) const override;
 
-  void setInputLimits(
-      const VelocityWaypoint<RobotVelocity> &waypoint, ruckig::InputParameter<7> &input_parameter) const override;
-
  private:
   Affine ee_frame_;
 
