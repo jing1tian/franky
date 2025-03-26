@@ -83,18 +83,20 @@ class WaypointMotion : public Motion<ControlSignalType> {
       franka::Duration rel_time,
       franka::Duration abs_time,
       const std::optional<ControlSignalType> &previous_command) override {
-    const uint64_t steps = std::max<uint64_t>(time_step.toMSec(), 1);
+    const auto sub_step = franka::Duration(1);
+    const uint64_t steps = std::max<uint64_t>(time_step / sub_step, 1);
     for (size_t i = 0; i < steps; i++) {
+      auto rel_time_i = rel_time - time_step + (i + 1) * time_step / steps;
       if (prev_result_ == ruckig::Result::Finished) {
         if (!target_reached_time_.has_value()) {
-          target_reached_time_ = rel_time;
+          target_reached_time_ = rel_time_i;
         }
         auto hold_target_duration = waypoint_iterator_->hold_target_duration;
         if (waypoint_iterator_ + 1 != waypoints_.end()) {
           // Allow cooldown of motion, so that the low-pass filter has time to adjust to target values
           hold_target_duration = std::max(hold_target_duration, franka::Duration(5));
         }
-        if (rel_time - target_reached_time_.value() >= hold_target_duration) {
+        if (rel_time_i - target_reached_time_.value() >= hold_target_duration) {
           target_reached_time_ = std::nullopt;
           if (waypoint_iterator_ != waypoints_.end()) {
             ++waypoint_iterator_;
