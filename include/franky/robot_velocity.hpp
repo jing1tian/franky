@@ -96,6 +96,16 @@ class RobotVelocity {
   }
 
   /**
+   * @brief Get the velocity with a new elbow velocity.
+   *
+   * @param elbow_velocity The new elbow velocity.
+   * @return The velocity with the new elbow velocity.
+   */
+  [[nodiscard]] inline RobotVelocity withElbowVelocity(const std::optional<double> elbow_velocity) const {
+    return {end_effector_twist_, elbow_velocity};
+  }
+
+  /**
    * @brief Get the end effector twist.
    *
    * @return The end effector twist.
