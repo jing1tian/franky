@@ -154,7 +154,7 @@ void bind_state_repr(py::module &m) {
   py::implicitly_convertible<Affine, RobotPose>();
 
   py::class_<RobotVelocity>(m, "RobotVelocity")
-      .def(py::init<Twist, double>(), "end_effector_twist"_a, "elbow_velocity"_a = std::nullopt)
+      .def(py::init<Twist, std::optional<double>>(), "end_effector_twist"_a, "elbow_velocity"_a = std::nullopt)
       .def(py::init<const RobotVelocity &>()) // Copy constructor
       .def("change_end_effector_frame", &RobotVelocity::changeEndEffectorFrame, "offset_world_frame"_a)
       .def("with_elbow_velocity", &RobotVelocity::withElbowVelocity, "elbow_velocity"_a)
