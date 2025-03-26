@@ -26,9 +26,9 @@ class RobotVelocity {
 #pragma clang diagnostic ignored "-Wimplicit-conversion"
   /**
    * @param end_effector_twist The twist of the end effector.
-   * @param elbow_velocity The velocity of the elbow. Default is 0.0.
+   * @param elbow_velocity The velocity of the elbow (optional).
    */
-  RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow_velocity = 0.0);
+  RobotVelocity(const Twist &end_effector_twist, std::optional<double> elbow_velocity = std::nullopt);
 #pragma clang diagnostic pop
 
   /**
@@ -39,7 +39,7 @@ class RobotVelocity {
 
   /**
  * @param vector_repr The vector representation of the velocity.
- * @param elbow_velocity The velocity of the elbow. Optional.
+ * @param elbow_velocity The velocity of the elbow (optional).
  */
   explicit RobotVelocity(const Vector6d &vector_repr, std::optional<double> elbow_velocity = std::nullopt);
 
