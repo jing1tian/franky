@@ -5,6 +5,7 @@ LABEL maintainer="Tim Schneider <tim@robot-learning.de>"
 RUN yum -y install poco-devel* zip boost1.78-devel urdfdom-devel fmt-devel gcc-g++
 
 RUN ln -s /usr/lib64/cmake/Boost-1.78.0/ /usr/lib64/cmake/Boost
+ENV LD_LIBRARY_PATH="/usr/local/lib64"
 
 ADD docker/common/ /tmp/common/
 ARG LIBFRANKA_VERSION
