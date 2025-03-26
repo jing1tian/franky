@@ -43,7 +43,7 @@ class JointWaypointMotion : public PositionWaypointMotion<franka::JointPositions
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override;
 
   [[nodiscard]] franka::JointPositions getControlSignal(
-      const ruckig::InputParameter<7> &input_parameter) const override;
+      const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) override;
 };
 
 }  // namespace franky

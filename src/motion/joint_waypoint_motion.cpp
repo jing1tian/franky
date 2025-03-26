@@ -26,7 +26,7 @@ void JointWaypointMotion::initWaypointMotion(
 }
 
 franka::JointPositions JointWaypointMotion::getControlSignal(
-    const ruckig::InputParameter<7> &input_parameter) const {
+    const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) {
   return {input_parameter.current_position};
 }
 

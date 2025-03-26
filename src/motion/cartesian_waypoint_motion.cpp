@@ -38,7 +38,7 @@ void CartesianWaypointMotion::initWaypointMotion(
 }
 
 franka::CartesianPose CartesianWaypointMotion::getControlSignal(
-    const ruckig::InputParameter<7> &input_parameter) const {
+    const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) {
   auto has_elbow = input_parameter.enabled[6];
   return (ref_frame_ * RobotPose(toEigen<7>(input_parameter.current_position), !has_elbow)).as_franka_pose();
 }

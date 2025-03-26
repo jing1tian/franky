@@ -39,10 +39,10 @@ Vector7d RobotVelocity::vector_repr() const {
   return result;
 }
 
-franka::CartesianVelocities RobotVelocity::as_franka_velocity() const {
+franka::CartesianVelocities RobotVelocity::as_franka_velocity(std::optional<double> elbow_position) const {
   std::array<double, 6> array = toStd<6>(vector_repr().head<6>());
-  if (elbow_velocity_.has_value())
-    return franka::CartesianVelocities(array, {elbow_velocity_.value(), -1});
+  if (elbow_position.has_value())
+    return franka::CartesianVelocities(array, {elbow_position.value(), -1});
   return {array};
 }
 

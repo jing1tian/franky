@@ -59,9 +59,12 @@ class RobotVelocity {
   /**
    * @brief Get the franka velocity.
    *
+   * @param elbow_position The elbow position to use. Note, that franka::CartesianVelocities contains the elbow
+   *                       position and not the elbow velocity, contrary to RobotVelocity.
    * @return The franka velocity.
    */
-  [[nodiscard]] franka::CartesianVelocities as_franka_velocity() const;
+  [[nodiscard]] franka::CartesianVelocities as_franka_velocity(
+      std::optional<double> elbow_position = std::nullopt) const;
 
   /**
    * @brief Transform the frame of the velocity by applying the given affine transform.

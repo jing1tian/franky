@@ -21,7 +21,7 @@ void CartesianVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<Robot
   if ((waypoint.target.vector_repr().head<6>().array().abs() > vel_lim.head<6>().array()).any()) {
     std::stringstream ss;
     ss << "Waypoint velocity " << waypoint.target.vector_repr().head<6>() << " exceeds maximum velocity "
-        << vel_lim.head<6>() << ".";
+       << vel_lim.head<6>() << ".";
     throw std::runtime_error(ss.str());
   }
 }
@@ -39,12 +39,35 @@ void CartesianVelocityWaypointMotion::initWaypointMotion(
   input_parameter.current_position = toStd<7>(current_velocity.vector_repr());
   input_parameter.current_velocity = toStd<7>(initial_acceleration_with_elbow);
   input_parameter.current_acceleration = toStd<7>(Vector7d::Zero());
+
+  if (previous_command.has_value())
+    last_elbow_pos_ = previous_command.value().elbow[0];
+  else
+    last_elbow_pos_ = robot_state.elbow_c[0];
+  last_elbow_vel_ = robot_state.delbow_c[0];
 }
 
 franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
-    const ruckig::InputParameter<7> &input_parameter) const {
+    const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) {
   auto has_elbow = input_parameter.enabled[6];
-  return RobotVelocity(toEigen<7>(input_parameter.current_position), !has_elbow).as_franka_velocity();
+  RobotVelocity target_vel(toEigen<7>(input_parameter.current_position));
+  if (has_elbow) {
+    auto time_step_s = time_step.toSec();
+    auto current_elbow_vel = input_parameter.current_position[6];
+    auto current_elbow_acc = input_parameter.current_velocity[6];
+    auto last_elbow_acc = 2 * (current_elbow_vel - last_elbow_vel_) / time_step_s - current_elbow_acc;
+    auto elbow_jerk = (current_elbow_acc - last_elbow_acc) / time_step_s;
+    auto current_elbow_pos =
+        last_elbow_pos_
+            + current_elbow_vel * time_step_s
+            + 0.5 * current_elbow_acc * std::pow(time_step_s, 2)
+            + 1.0 / 6.0 * elbow_jerk * std::pow(time_step_s, 3);
+
+    last_elbow_vel_ = input_parameter.current_position[0];
+    last_elbow_pos_ = current_elbow_pos;
+    return  target_vel.as_franka_velocity(current_elbow_pos);
+  }
+  return target_vel.as_franka_velocity();
 }
 
 void CartesianVelocityWaypointMotion::setNewWaypoint(
