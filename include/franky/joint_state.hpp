@@ -1,8 +1,6 @@
 #pragma once
 
-#include <optional>
 #include <Eigen/Core>
-#include <utility>
 
 #include "franky/robot_pose.hpp"
 #include "franky/robot_velocity.hpp"
