@@ -1,6 +1,12 @@
 from typing import Union
 
-from ._franky import CartesianPoseMotion, CartesianVelocityMotion, JointPositionMotion, JointVelocityMotion, \
-    TorqueMotion
+from ._franky import BaseCartesianPoseMotion, BaseCartesianVelocityMotion, BaseJointPositionMotion, \
+    BaseJointVelocityMotion, BaseTorqueMotion
 
-Motion = Union[CartesianPoseMotion, CartesianVelocityMotion, JointPositionMotion, JointVelocityMotion, TorqueMotion]
+Motion = Union[
+    BaseCartesianPoseMotion,
+    BaseCartesianVelocityMotion,
+    BaseJointPositionMotion,
+    BaseJointVelocityMotion,
+    BaseTorqueMotion
+]

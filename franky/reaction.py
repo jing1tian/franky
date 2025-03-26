@@ -1,5 +1,5 @@
-from ._franky import Condition, CartesianPoseMotion, CartesianVelocityMotion, JointPositionMotion, \
-    JointVelocityMotion, TorqueMotion, \
+from ._franky import Condition, BaseCartesianPoseMotion, BaseCartesianVelocityMotion, BaseJointPositionMotion, \
+    BaseJointVelocityMotion, BaseTorqueMotion, \
     CartesianPoseReaction as _CartesianPoseReaction, \
     CartesianVelocityReaction as _CartesianVelocityReaction, \
     JointPositionReaction as _JointPositionReaction, \
@@ -20,23 +20,23 @@ class Reaction:
 
 
 class CartesianPoseReaction(_CartesianPoseReaction, Reaction):
-    _motion_type = CartesianPoseMotion
+    _motion_type = BaseCartesianPoseMotion
 
 
 class CartesianVelocityReaction(_CartesianVelocityReaction, Reaction):
-    _motion_type = CartesianVelocityMotion
+    _motion_type = BaseCartesianVelocityMotion
 
 
 class JointPositionReaction(_JointPositionReaction, Reaction):
-    _motion_type = JointPositionMotion
+    _motion_type = BaseJointPositionMotion
 
 
 class JointVelocityReaction(_JointVelocityReaction, Reaction):
-    _motion_type = JointVelocityMotion
+    _motion_type = BaseJointVelocityMotion
 
 
 class TorqueReaction(_TorqueReaction, Reaction):
-    _motion_type = TorqueMotion
+    _motion_type = BaseTorqueMotion
 
 
 _REACTION_TYPES = [
