@@ -275,6 +275,7 @@ void bind_state_repr(py::module &m) {
 
   py::class_<franka::CartesianVelocities>(m, "CartesianVelocities")
       .def_readonly("O_dP_EE", &franka::CartesianVelocities::O_dP_EE)
+      .def_readonly("elbow", &franka::CartesianVelocities::elbow)
       .def(py::pickle(
           [](const franka::CartesianVelocities &velocities) {  // __getstate__
             return py::make_tuple(velocities.O_dP_EE, velocities.elbow);
