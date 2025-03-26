@@ -78,7 +78,7 @@ void CartesianVelocityWaypointMotion::setNewWaypoint(
   auto new_target_transformed = new_waypoint.target.changeEndEffectorFrame(ee_frame_.inverse().translation());
   // This is a bit of an oversimplification, as the angular velocities don't work like linear velocities (but we pretend
   // they do here). However, it is probably good enough here.
-  input_parameter.target_position = toStd<7>(new_waypoint.target.vector_repr());
+  input_parameter.target_position = toStd<7>(new_target_transformed.vector_repr());
   input_parameter.target_velocity = toStd<7>(Vector7d::Zero());
   input_parameter.enabled = {true, true, true, true, true, true, new_target_transformed.elbow_velocity().has_value()};
 }
