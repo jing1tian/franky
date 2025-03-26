@@ -58,7 +58,6 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
       const VelocityWaypoint<RobotVelocity> &waypoint, ruckig::InputParameter<7> &input_parameter) const override;
 
  private:
-  RobotVelocity target_state_;
   Affine ee_frame_;
 
   static inline Vector7d vec_cart_rot_elbow(double cart, double rot, double elbow) {

@@ -37,8 +37,6 @@ void CartesianVelocityWaypointMotion::initWaypointMotion(
   auto initial_acceleration = Vector6d::Map(robot_state.O_ddP_EE_c.data());
   Vector7d initial_acceleration_with_elbow = (Vector7d() << initial_acceleration, robot_state.delbow_c[0]).finished();
 
-  target_state_ = current_velocity;
-
   Vector7d jerk_component;
   jerk_component << Vector6d::Zero(), robot_state.ddelbow_c[0];
   input_parameter.current_position = toStd<7>(current_velocity.withElbow(robot_state.elbow[0]).vector_repr());
@@ -63,7 +61,6 @@ void CartesianVelocityWaypointMotion::setNewWaypoint(
   input_parameter.target_position = toStd<7>(new_waypoint.target.vector_repr());
   input_parameter.target_velocity = toStd<7>(Vector7d::Zero());
   input_parameter.enabled = {true, true, true, true, true, true, new_target_transformed.elbow().has_value()};
-  target_state_ = new_waypoint.target;
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d>
