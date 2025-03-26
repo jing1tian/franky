@@ -32,6 +32,7 @@ class StopMotion<franka::JointVelocities> : public JointVelocityMotion {
  public:
   explicit StopMotion() : JointVelocityMotion(
       Vector7d::Zero(),
+      franka::Duration(0),
       RelativeDynamicsFactor::MAX_DYNAMICS()
   ) {}
 };
@@ -57,6 +58,7 @@ class StopMotion<franka::CartesianVelocities> : public CartesianVelocityMotion {
  public:
   explicit StopMotion() : CartesianVelocityMotion(
       RobotVelocity(),
+      franka::Duration(0),
       RelativeDynamicsFactor::MAX_DYNAMICS()
   ) {}
 };

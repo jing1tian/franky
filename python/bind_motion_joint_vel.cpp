@@ -44,10 +44,11 @@ void bind_motion_joint_vel(py::module &m) {
            "waypoints"_a,
            "relative_dynamics_factor"_a = 1.0);
 
-  py::class_<JointVelocityMotion, JointVelocityWaypointMotion, std::shared_ptr<JointVelocityMotion>>(m,
-                                                                                                     "JointVelocityMotion")
-      .def(py::init<const Vector7d &, double>(),
+  py::class_<JointVelocityMotion, JointVelocityWaypointMotion, std::shared_ptr<JointVelocityMotion>>(
+      m, "JointVelocityMotion")
+      .def(py::init<const Vector7d &, franka::Duration, double>(),
            "target"_a,
+           "hold_target_duration"_a = franka::Duration(0),
            "relative_dynamics_factor"_a = 1.0);
 
   py::class_<StopMotion<franka::JointVelocities>,

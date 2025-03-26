@@ -49,14 +49,17 @@ void bind_motion_cartesian_vel(py::module &m) {
       m, "CartesianVelocityMotion")
       .def(py::init<>([](
                const RobotVelocity &target,
+               franka::Duration hold_target_duration,
                RelativeDynamicsFactor relative_dynamics_factor,
                const std::optional<Affine> &ee_frame) {
              return std::make_shared<CartesianVelocityMotion>(
                  target,
+                 hold_target_duration,
                  relative_dynamics_factor,
                  ee_frame.value_or(Affine::Identity()));
            }),
            "target"_a,
+           "hold_target_duration"_a = franka::Duration(0),
            "relative_dynamics_factor"_a = 1.0,
            "ee_frame"_a = std::nullopt);
 
