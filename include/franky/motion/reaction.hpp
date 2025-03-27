@@ -71,10 +71,10 @@ class Reaction {
    * absolute time [s].
    */
   void registerCallback(
-      std::function<void(
+      const std::function<void(
           const franka::RobotState &,
           franka::Duration,
-          franka::Duration)> callback);
+          franka::Duration)>& callback);
 
  private:
   MotionFunc motion_func_;
