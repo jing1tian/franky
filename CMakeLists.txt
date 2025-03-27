@@ -86,16 +86,18 @@ if (BUILD_EXAMPLES)
     endforeach ()
 endif ()
 
-
 if (BUILD_TESTS)
     enable_testing()
 
     find_package(Catch2 REQUIRED)
 
-    foreach (test IN ITEMS path-test)
-        add_executable(${test} "test/${test}.cpp")
-        target_link_libraries(${test} PRIVATE franky Catch2::Catch2)
-        add_test(NAME ${test} COMMAND ${test})
+    file(GLOB TEST_FILES "test/test-*.cpp")
+
+    foreach (test_file ${TEST_FILES})
+        get_filename_component(test_name ${test_file} NAME_WE)
+        add_executable(${test_name} ${test_file})
+        target_link_libraries(${test_name} PRIVATE franky Catch2::Catch2)
+        add_test(NAME ${test_name} COMMAND ${test_name})
     endforeach ()
 endif ()
 
