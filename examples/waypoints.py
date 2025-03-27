@@ -10,7 +10,6 @@ if __name__ == "__main__":
 
     # Connect to the robot
     robot = Robot(args.host)
-    robot.relative_dynamics_factor = 0.05
     robot.recover_from_errors()
 
     # Reduce the acceleration and velocity dynamic
