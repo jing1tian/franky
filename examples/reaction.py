@@ -20,6 +20,7 @@ if __name__ == "__main__":
     # Reduce the acceleration and velocity dynamic
     robot.relative_dynamics_factor = 0.1
 
+    # Go to initial position
     robot.move(JointMotion([0.0, 0.0, 0.0, -2.2, 0.0, 2.2, 0.7]))
 
     # Define and move forwards

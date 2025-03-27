@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from franky import Affine, CartesianMotion, Robot, ReferenceType
+from franky import Affine, CartesianMotion, Robot, ReferenceType, JointMotion
 
 
 if __name__ == "__main__":
@@ -10,11 +10,13 @@ if __name__ == "__main__":
 
     # Connect to the robot
     robot = Robot(args.host)
-    robot.relative_dynamics_factor = 0.05
     robot.recover_from_errors()
 
     # Reduce the acceleration and velocity dynamic
     robot.relative_dynamics_factor = 0.15
+
+    # Go to initial position
+    robot.move(JointMotion([0.0, 0.0, 0.0, -2.2, 0.0, 2.2, 0.7]))
 
     # Define and move forwards
     target = Affine([0.0, 0.2, 0.0])
@@ -22,5 +24,5 @@ if __name__ == "__main__":
     robot.move(motion_forward)
 
     # And move backwards using the inverse motion
-    motion_backward = CartesianMotion(target.inverse)
+    motion_backward = CartesianMotion(target.inverse, ReferenceType.Relative)
     robot.move(motion_backward)
