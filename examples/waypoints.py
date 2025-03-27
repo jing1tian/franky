@@ -27,7 +27,7 @@ if __name__ == "__main__":
     wp_motion = CartesianWaypointMotion([
         CartesianWaypoint(RobotPose(Affine([0.0, 0.0, -0.12]), -0.2), ReferenceType.Relative),
         CartesianWaypoint(RobotPose(Affine([0.08, 0.0, 0.0]), 0.0), ReferenceType.Relative),
-        CartesianWaypoint(RobotPose(Affine([0.0, 0.1, 0.0, 0.0]), 0.0), ReferenceType.Relative),
+        CartesianWaypoint(RobotPose(Affine([0.0, 0.1, 0.0]), 0.0), ReferenceType.Relative),
     ])
 
     # You can try to block the robot now.
