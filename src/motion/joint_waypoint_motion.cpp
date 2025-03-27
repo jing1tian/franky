@@ -36,9 +36,10 @@ void JointWaypointMotion::setNewWaypoint(
     const PositionWaypoint<JointState> &new_waypoint,
     ruckig::InputParameter<7> &input_parameter) {
   auto new_target = new_waypoint.target;
+  auto position = new_target.position();
   if (new_waypoint.reference_type == ReferenceType::Relative)
-    new_target.position() += toEigen(input_parameter.current_position);
-  input_parameter.target_position = toStd<7>(new_target.position());
+    position += toEigen(input_parameter.current_position);
+  input_parameter.target_position = toStd<7>(position);
   input_parameter.target_velocity = toStd<7>(new_target.velocity());
   input_parameter.target_acceleration = toStd<7>(Vector7d::Zero());
 }
