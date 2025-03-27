@@ -13,7 +13,7 @@ CartesianVelocityWaypointMotion::CartesianVelocityWaypointMotion(
     const std::vector<VelocityWaypoint<RobotVelocity>> &waypoints,
     const RelativeDynamicsFactor &relative_dynamics_factor,
     Affine ee_frame)
-    : VelocityWaypointMotion<franka::CartesianVelocities, RobotVelocity>(waypoints, relative_dynamics_factor),
+    : VelocityWaypointMotion(waypoints, relative_dynamics_factor),
       ee_frame_(std::move(ee_frame)) {}
 
 void CartesianVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<RobotVelocity> &waypoint) const {
@@ -67,12 +67,12 @@ franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
 
     last_elbow_vel_ = input_parameter.current_position[0];
     last_elbow_pos_ = current_elbow_pos;
-    auto current_elbow_flip = FlipDirection(robot_state.elbow[1]);
+    auto current_elbow_flip = static_cast<FlipDirection>(robot_state.elbow[1]);
     if (previous_command.has_value() && previous_command->hasElbow()) {
-      current_elbow_flip = FlipDirection(previous_command->elbow[1]);
+      current_elbow_flip = static_cast<FlipDirection>(previous_command->elbow[1]);
     }
     ElbowState elbow_state(current_elbow_pos, current_elbow_flip);
-    return  target_vel.as_franka_velocity(elbow_state);
+    return target_vel.as_franka_velocity(elbow_state);
   }
   return target_vel.as_franka_velocity();
 }

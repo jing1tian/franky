@@ -59,8 +59,8 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
 
  private:
   Affine ee_frame_;
-  double last_elbow_pos_;
-  double last_elbow_vel_;
+  double last_elbow_pos_{};
+  double last_elbow_vel_{};
 
   static inline Vector7d vec_cart_rot_elbow(double cart, double rot, double elbow) {
     return {cart, cart, cart, rot, rot, rot, elbow};

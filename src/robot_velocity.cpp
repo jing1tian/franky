@@ -2,7 +2,6 @@
 
 #include <optional>
 #include <Eigen/Core>
-#include <utility>
 #include <franka/control_types.h>
 
 #include "franky/types.hpp"

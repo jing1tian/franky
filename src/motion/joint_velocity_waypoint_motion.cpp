@@ -7,7 +7,7 @@ namespace franky {
 JointVelocityWaypointMotion::JointVelocityWaypointMotion(
     const std::vector<VelocityWaypoint<Vector7d>> &waypoints,
     const RelativeDynamicsFactor &relative_dynamics_factor)
-    : VelocityWaypointMotion<franka::JointVelocities, Vector7d>(waypoints, relative_dynamics_factor) {}
+    : VelocityWaypointMotion(waypoints, relative_dynamics_factor) {}
 
 void JointVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<Vector7d> &waypoint) const {
   auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
