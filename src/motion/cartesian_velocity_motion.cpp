@@ -17,6 +17,7 @@ CartesianVelocityMotion::CartesianVelocityMotion(
         },
         VelocityWaypoint<RobotVelocity>{
             .target = RobotVelocity(),
+            .hold_target_duration = franka::Duration(50)
         },
     },
     relative_dynamics_factor,
