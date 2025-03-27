@@ -460,59 +460,60 @@ class Robot : public franka::Robot {
       const std::shared_ptr<Motion<ControlSignalType>> &motion,
       const std::function<void(const ControlFunc<ControlSignalType> &)> &control_func_executor,
       bool async) {
-    {
-      std::unique_lock<std::mutex> lock(control_mutex_);
-      if (is_in_control_unsafe() && motion_generator_running_) {
-        if (!std::holds_alternative<MotionGenerator<ControlSignalType>>(motion_generator_)) {
-          throw InvalidMotionTypeException("The type of motion cannot change during runtime. Please ensure that the "
-                                           "previous motion finished before using a new type of motion.");
-        } else {
-          std::get<MotionGenerator<ControlSignalType>>(motion_generator_).updateMotion(motion);
-        }
+    if (motion == nullptr) {
+      throw std::invalid_argument("The motion must not be null.");
+    }
+    std::unique_lock<std::mutex> lock(control_mutex_);
+    if (is_in_control_unsafe() && motion_generator_running_) {
+      if (!std::holds_alternative<MotionGenerator<ControlSignalType>>(motion_generator_)) {
+        throw InvalidMotionTypeException("The type of motion cannot change during runtime. Please ensure that the "
+                                         "previous motion finished before using a new type of motion.");
       } else {
-        joinMotionUnsafe(lock);
-
-        motion_generator_.emplace<MotionGenerator<ControlSignalType>>(this, motion);
-        auto motion_generator = &std::get<MotionGenerator<ControlSignalType>>(motion_generator_);
-        motion_generator->registerUpdateCallback(
-            [this](const franka::RobotState &robot_state,
-                   franka::Duration duration,
-                   franka::Duration time) {
-              std::lock_guard<std::mutex> lock(this->state_mutex_);
-              current_state_ = robot_state;
-            });
-        motion_generator_running_ = true;
-        control_thread_ = std::thread(
-            [this, control_func_executor, motion_generator]() {
-              try {
-                bool done = false;
-                while (!done) {
-                  control_func_executor(
-                      [motion_generator](const franka::RobotState &rs, franka::Duration d) {
-                        return (*motion_generator)(rs, d);
-                      });
-                  std::unique_lock<std::mutex> lock(control_mutex_);
-
-                  // This code is just for the case that a new motion is set just after the old one terminates. If this
-                  // happens, we need to continue with this motion, unless an exception occurs.
-                  done = !motion_generator->has_new_motion();
-                  if (motion_generator->has_new_motion()) {
-                    motion_generator->resetTimeUnsafe();
-                  } else {
-                    done = true;
-                    motion_generator_running_ = false;
-                    control_finished_condition_.notify_all();
-                  }
-                }
-              } catch (...) {
-                std::unique_lock<std::mutex> lock(control_mutex_);
-                control_exception_ = std::current_exception();
-                motion_generator_running_ = false;
-                control_finished_condition_.notify_all();
-              }
-            }
-        );
+        std::get<MotionGenerator<ControlSignalType>>(motion_generator_).updateMotion(motion);
       }
+    } else {
+      joinMotionUnsafe(lock);
+
+      motion_generator_.emplace<MotionGenerator<ControlSignalType>>(this, motion);
+      auto motion_generator = &std::get<MotionGenerator<ControlSignalType>>(motion_generator_);
+      motion_generator->registerUpdateCallback(
+          [this](const franka::RobotState &robot_state,
+                 franka::Duration duration,
+                 franka::Duration time) {
+            std::lock_guard<std::mutex> lock(this->state_mutex_);
+            current_state_ = robot_state;
+          });
+      motion_generator_running_ = true;
+      control_thread_ = std::thread(
+          [this, control_func_executor, motion_generator]() {
+            try {
+              bool done = false;
+              while (!done) {
+                control_func_executor(
+                    [motion_generator](const franka::RobotState &rs, franka::Duration d) {
+                      return (*motion_generator)(rs, d);
+                    });
+                std::unique_lock<std::mutex> lock(control_mutex_);
+
+                // This code is just for the case that a new motion is set just after the old one terminates. If this
+                // happens, we need to continue with this motion, unless an exception occurs.
+                done = !motion_generator->has_new_motion();
+                if (motion_generator->has_new_motion()) {
+                  motion_generator->resetTimeUnsafe();
+                } else {
+                  done = true;
+                  motion_generator_running_ = false;
+                  control_finished_condition_.notify_all();
+                }
+              }
+            } catch (...) {
+              std::unique_lock<std::mutex> lock(control_mutex_);
+              control_exception_ = std::current_exception();
+              motion_generator_running_ = false;
+              control_finished_condition_.notify_all();
+            }
+          }
+      );
     }
     if (!async)
       joinMotion();

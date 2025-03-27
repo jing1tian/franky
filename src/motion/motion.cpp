@@ -29,12 +29,16 @@ void Motion<ControlSignalType>::registerCallback(CallbackType callback) {
 
 template<typename ControlSignalType>
 void Motion<ControlSignalType>::addReaction(const std::shared_ptr<Reaction<ControlSignalType>> reaction) {
+  if (reaction == nullptr)
+    throw std::invalid_argument("The reaction must not be null.");
   const std::lock_guard<std::mutex> lock(reaction_mutex_);
   reactions_.push_back(reaction);
 }
 
 template<typename ControlSignalType>
 void Motion<ControlSignalType>::addReactionFront(const std::shared_ptr<Reaction<ControlSignalType>> reaction) {
+  if (reaction == nullptr)
+    throw std::invalid_argument("The reaction must not be null.");
   const std::lock_guard<std::mutex> lock(reaction_mutex_);
   reactions_.push_front(reaction);
 }

@@ -24,7 +24,10 @@ template<typename ControlSignalType>
 Reaction<ControlSignalType>::Reaction(
     const Condition &condition, const std::shared_ptr<Motion<ControlSignalType>> new_motion)
     : Reaction(condition, [new_motion](
-    const franka::RobotState &, franka::Duration, franka::Duration) { return new_motion; }) {}
+    const franka::RobotState &, franka::Duration, franka::Duration) { return new_motion; }) {
+  if (new_motion == nullptr)
+    throw std::invalid_argument("The new motion must not be null.");
+}
 
 template<typename ControlSignalType>
 Reaction<ControlSignalType>::Reaction(Condition condition, const Reaction::MotionFunc &motion_func)
