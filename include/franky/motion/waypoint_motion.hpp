@@ -115,9 +115,9 @@ class WaypointMotion : public Motion<ControlSignalType> {
       }
       if (waypoint_iterator_ != waypoints_.end()) {
         prev_result_ = trajectory_generator_.update(input_parameter_, output_parameter_);
-        if (prev_result_ == ruckig::Result::Working) {
+        if (prev_result_ == ruckig::Result::Working || prev_result_ == ruckig::Result::Finished) {
           output_parameter_.pass_to_input(input_parameter_);
-        } else if (prev_result_ != ruckig::Result::Finished) {
+        } else {
           throw MotionPlannerException("Motion planner failed with error code " + std::to_string(prev_result_));
         }
       }
