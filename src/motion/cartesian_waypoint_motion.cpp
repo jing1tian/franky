@@ -38,9 +38,17 @@ void CartesianWaypointMotion::initWaypointMotion(
 }
 
 franka::CartesianPose CartesianWaypointMotion::getControlSignal(
-    const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) {
+    const franka::RobotState &robot_state,
+    const franka::Duration &time_step,
+    const std::optional<franka::CartesianPose> &previous_command,
+    const ruckig::InputParameter<7> &input_parameter) {
   auto has_elbow = input_parameter.enabled[6];
-  return (ref_frame_ * RobotPose(toEigenD<7>(input_parameter.current_position), !has_elbow)).as_franka_pose();
+  auto current_elbow_flip = FlipDirection(robot_state.elbow[1]);
+  if (previous_command.has_value() && previous_command->hasElbow()) {
+    current_elbow_flip = FlipDirection(previous_command->elbow[1]);
+  }
+  RobotPose target_pose(toEigenD<7>(input_parameter.current_position), !has_elbow);
+  return (ref_frame_ * target_pose).as_franka_pose(current_elbow_flip);
 }
 
 void CartesianWaypointMotion::setNewWaypoint(
@@ -51,7 +59,7 @@ void CartesianWaypointMotion::setNewWaypoint(
   auto waypoint_has_elbow = input_parameter.enabled[6];
 
   // We first convert the current state into the frame of the current pose
-  RobotPose current_pose_old_ref_frame = RobotPose(toEigenD<7>(input_parameter.current_position), !waypoint_has_elbow);
+  RobotPose current_pose_old_ref_frame(toEigenD<7>(input_parameter.current_position), !waypoint_has_elbow);
   Affine new_ref_to_old_ref = current_pose_old_ref_frame.end_effector_pose();
   ref_frame_ = ref_frame_ * new_ref_to_old_ref;
   auto rot = new_ref_to_old_ref.inverse().rotation();
@@ -73,7 +81,7 @@ void CartesianWaypointMotion::setNewWaypoint(
     elbow_acc = robot_state.ddelbow_c[6];
   }
 
-  RobotPose zero_pose(Affine::Identity(), current_pose_old_ref_frame.elbow_position());
+  RobotPose zero_pose(Affine::Identity(), current_pose_old_ref_frame.elbow_state());
   Vector7d current_velocity_ref_frame =
       (Vector7d() << linear_vel_ref_frame, angular_vel_ref_frame, elbow_velocity).finished();
   Vector7d current_acc_ref_frame =
@@ -85,21 +93,23 @@ void CartesianWaypointMotion::setNewWaypoint(
   auto waypoint_pose = new_waypoint.target.pose();
 
   auto prev_target_robot_pose = target_state_.pose();
-  if (!waypoint_pose.elbow_position().has_value()) {
-    prev_target_robot_pose = prev_target_robot_pose.withElbowPosition(robot_state.elbow[0]);
+  if (!waypoint_pose.elbow_state().has_value()) {
+    prev_target_robot_pose = prev_target_robot_pose.withElbowState(ElbowState(robot_state.elbow));
   }
 
-  std::optional<double> new_elbow;
-  if (waypoint_pose.elbow_position().has_value() && new_waypoint.reference_type == ReferenceType::Relative) {
-    if (!prev_target_robot_pose.elbow_position().has_value())
-      new_elbow = waypoint_pose.elbow_position();
+  std::optional<ElbowState> new_elbow;
+  if (waypoint_pose.elbow_state().has_value() && new_waypoint.reference_type == ReferenceType::Relative) {
+    if (!prev_target_robot_pose.elbow_state().has_value())
+      new_elbow = waypoint_pose.elbow_state();
     else {
-      new_elbow = waypoint_pose.elbow_position().value() + prev_target_robot_pose.elbow_position().value();
+      auto new_elbow_pos = waypoint_pose.elbow_state().value().joint_3_pos()
+          + prev_target_robot_pose.elbow_state().value().joint_3_pos();
+      new_elbow = ElbowState(new_elbow_pos, waypoint_pose.elbow_state().value().joint_4_flip());
     }
   } else {
-    new_elbow = waypoint_pose.elbow_position();
+    new_elbow = waypoint_pose.elbow_state();
   }
-  CartesianState new_target(waypoint_pose.withElbowPosition(new_elbow), new_waypoint.target.velocity());
+  CartesianState new_target(waypoint_pose.withElbowState(new_elbow), new_waypoint.target.velocity());
   if (new_waypoint.reference_type == ReferenceType::Relative) {
     new_target = prev_target_robot_pose.end_effector_pose() * new_target;
   }
@@ -110,7 +120,7 @@ void CartesianWaypointMotion::setNewWaypoint(
   // This is a bit of an oversimplification, as the angular velocities don't work like linear velocities (but we pretend
   // they do here). However, it is probably good enough here.
   input_parameter.target_velocity = toStd<7>(new_target_ref_frame.velocity().vector_repr());
-  input_parameter.enabled = {true, true, true, true, true, true, waypoint_pose.elbow_position().has_value()};
+  input_parameter.enabled = {true, true, true, true, true, true, waypoint_pose.elbow_state().has_value()};
 
   target_state_ = new_target;
 }

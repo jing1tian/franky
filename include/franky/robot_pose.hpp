@@ -5,6 +5,7 @@
 #include <franka/control_types.h>
 
 #include "franky/types.hpp"
+#include "franky/elbow_state.hpp"
 
 namespace franky {
 
@@ -24,31 +25,33 @@ class RobotPose {
 #pragma clang diagnostic ignored "-Wimplicit-conversion"
   /**
    * @param end_effector_pose The pose of the end effector.
-   * @param elbow_position The position of the elbow. Optional.
+   * @param elbow_state       The state of the elbow. Optional.
    */
-  RobotPose(Affine end_effector_pose, std::optional<double> elbow_position = std::nullopt);
+  RobotPose(Affine end_effector_pose, std::optional<ElbowState> elbow_state = std::nullopt);
 #pragma clang diagnostic pop
 
   /**
-   * @param vector_repr The vector representation of the pose.
-   * @param ignore_elbow Whether to ignore the elbow position. Default is false.
+   * @param vector_repr    The vector representation of the pose.
+   * @param ignore_elbow   Whether to ignore the elbow state. Default is false.
+   * @param flip_direction The flip direction to use if the elbow is not ignored. Default is negative.
    */
-  explicit RobotPose(const Vector7d &vector_repr, bool ignore_elbow = false);
+  explicit RobotPose(
+      const Vector7d &vector_repr, bool ignore_elbow = false, FlipDirection flip_direction = FlipDirection::kNegative);
 
   /**
    * @param vector_repr The vector representation of the pose.
-   * @param elbow_position The position of the elbow. Optional.
+   * @param elbow_state The state of the elbow. Optional.
    */
-  explicit RobotPose(const Vector6d &vector_repr, std::optional<double> elbow_position = std::nullopt);
+  explicit RobotPose(const Vector6d &vector_repr, std::optional<ElbowState> elbow_state = std::nullopt);
 
   /**
    * @param franka_pose The franka pose.
    */
-  explicit RobotPose(franka::CartesianPose franka_pose);
+  explicit RobotPose(const franka::CartesianPose &franka_pose);
 
   /**
    * @brief Get the vector representation of the pose, which consists of the end effector position and orientation
-   * (as rotation vector) and the elbow position.
+   * (as rotation vector) and the elbow position. Does not contain the flip component of the elbow state.
    *
    * @return The vector representation of the pose.
    */
@@ -57,9 +60,11 @@ class RobotPose {
   /**
    * @brief Convert this pose to a franka pose.
    *
+   * @param default_elbow_flip_direction The default flip direction to use if the elbow flip direction is not set.
    * @return The franka pose.
    */
-  [[nodiscard]] franka::CartesianPose as_franka_pose() const;
+  [[nodiscard]] franka::CartesianPose as_franka_pose(
+      FlipDirection default_elbow_flip_direction = FlipDirection::kNegative) const;
 
   /**
    * @brief Transform this pose with a given affine transformation from the left side.
@@ -68,7 +73,7 @@ class RobotPose {
    * @return The transformed robot pose.
    */
   [[nodiscard]] inline RobotPose leftTransform(const Affine &transform) const {
-    return {transform * end_effector_pose_, elbow_position_};
+    return {transform * end_effector_pose_, elbow_state_};
   }
 
   /**
@@ -78,7 +83,7 @@ class RobotPose {
    * @return The transformed robot pose.
    */
   [[nodiscard]] inline RobotPose rightTransform(const Affine &transform) const {
-    return {end_effector_pose_ * transform, elbow_position_};
+    return {end_effector_pose_ * transform, elbow_state_};
   }
 
   /**
@@ -93,13 +98,13 @@ class RobotPose {
   }
 
   /**
-   * @brief Get the pose with a new elbow position.
+   * @brief Get the pose with a new elbow state.
    *
-   * @param elbow_position The new elbow position.
-   * @return The pose with the new elbow position.
+   * @param elbow_state The new elbow state.
+   * @return The pose with the new elbow state.
    */
-  [[nodiscard]] inline RobotPose withElbowPosition(const std::optional<double> elbow_position) const {
-    return {end_effector_pose_, elbow_position};
+  [[nodiscard]] inline RobotPose withElbowState(const std::optional<ElbowState> elbow_state) const {
+    return {end_effector_pose_, elbow_state};
   }
 
   /**
@@ -112,17 +117,17 @@ class RobotPose {
   }
 
   /**
-   * @brief Get the elbow position.
+   * @brief Get the elbow state.
    *
-   * @return The elbow position.
+   * @return The elbow state.
    */
-  [[nodiscard]] inline std::optional<double> elbow_position() const {
-    return elbow_position_;
+  [[nodiscard]] inline std::optional<ElbowState> elbow_state() const {
+    return elbow_state_;
   }
 
  private:
   Affine end_effector_pose_;
-  std::optional<double> elbow_position_;
+  std::optional<ElbowState> elbow_state_;
 };
 
 inline RobotPose operator*(const RobotPose &robot_pose, const Affine &right_transform) {

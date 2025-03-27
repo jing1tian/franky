@@ -103,10 +103,10 @@ class WaypointMotion : public Motion<ControlSignalType> {
           }
         }
         if (waypoint_iterator_ == waypoints_.end()) {
-          auto output_pose = getControlSignal(sub_step, input_parameter_);
+          auto command = getControlSignal(robot_state, time_step, previous_command, input_parameter_);
           if (!return_when_finished_)
-            return output_pose;
-          return franka::MotionFinished(output_pose);
+            return command;
+          return franka::MotionFinished(command);
         } else {
           checkWaypoint(*waypoint_iterator_);
           setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
@@ -123,7 +123,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
       }
     }
 
-    return getControlSignal(sub_step, input_parameter_);
+    return getControlSignal(robot_state, time_step, previous_command, input_parameter_);
   };
 
   virtual void initWaypointMotion(
@@ -142,7 +142,10 @@ class WaypointMotion : public Motion<ControlSignalType> {
   [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const = 0;
 
   [[nodiscard]] virtual ControlSignalType getControlSignal(
-      const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) = 0;
+      const franka::RobotState &robot_state,
+      const franka::Duration &time_step,
+      const std::optional<ControlSignalType> &previous_command,
+      const ruckig::InputParameter<7> &input_parameter) = 0;
 
   virtual void setInputLimits(const WaypointType &waypoint, ruckig::InputParameter<7> &input_parameter) const = 0;
 

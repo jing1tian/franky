@@ -34,4 +34,9 @@ void bind_enums(py::module &m) {
       .value("Reflex", franka::RobotMode::kReflex)
       .value("UserStopped", franka::RobotMode::kUserStopped)
       .value("AutomaticErrorRecovery", franka::RobotMode::kAutomaticErrorRecovery);
+
+  py::enum_<FlipDirection>(m, "FlipDirection")
+      .value("Negative", FlipDirection::kNegative)
+      .value("Neutral", FlipDirection::kNeutral)
+      .value("Positive", FlipDirection::kPositive);
 }

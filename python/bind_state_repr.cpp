@@ -36,11 +36,31 @@ std::string twistToStr(const Twist &twist) {
   return ss.str();
 }
 
+std::string flipDirectionToStr(const FlipDirection &flip_direction) {
+  switch (flip_direction) {
+    case FlipDirection::kNegative:
+      return "FlipDirection.Negative";
+    case FlipDirection::kNeutral:
+      return "FlipDirection.Neutral";
+    default:
+      return "FlipDirection.Positive";
+  }
+}
+
+std::string elbowStateToStr(const ElbowState &elbow_state) {
+  std::stringstream ss;
+  ss << "ElbowState(joint_3_pos=" << elbow_state.joint_3_pos();
+  if (elbow_state.joint_4_flip().has_value())
+    ss << ", joint_4_flip=" << flipDirectionToStr(elbow_state.joint_4_flip().value());
+  ss << ")";
+  return ss.str();
+}
+
 std::string robotPoseToStr(const RobotPose &robot_pose) {
   std::stringstream ss;
   ss << "RobotPose(ee_pose=" << affineToStr(robot_pose.end_effector_pose());
-  if (robot_pose.elbow_position().has_value())
-    ss << ", elbow=" << robot_pose.elbow_position().value();
+  if (robot_pose.elbow_state().has_value())
+    ss << ", elbow=" << elbowStateToStr(robot_pose.elbow_state().value());
   ss << ")";
   return ss.str();
 }
@@ -88,6 +108,24 @@ void bind_state_repr(py::module &m) {
           }
       ));
 
+  py::class_<ElbowState>(m, "ElbowState")
+      .def(py::init<double, std::optional<FlipDirection>>(), "joint_3_pos"_a, "joint_4_flip"_a = std::nullopt)
+      .def(py::init<const ElbowState &>()) // Copy constructor
+      .def_property_readonly("joint_3_pos", &ElbowState::joint_3_pos)
+      .def_property_readonly("joint_4_flip", &ElbowState::joint_4_flip)
+      .def("__repr__", &elbowStateToStr)
+      .def(py::pickle(
+          [](const ElbowState &elbow_state) {  // __getstate__
+            return py::make_tuple(elbow_state.joint_3_pos(), elbow_state.joint_4_flip());
+          },
+          [](const py::tuple &t) {  // __setstate__
+            if (t.size() != 2)
+              throw std::runtime_error("Invalid state!");
+            return ElbowState(t[0].cast<double>(), t[1].cast<std::optional<FlipDirection>>());
+          }
+      ));
+
+
   py::class_<Twist>(m, "Twist")
       .def(py::init([](
           const std::optional<Eigen::Vector3d> &linear_velocity,
@@ -126,14 +164,14 @@ void bind_state_repr(py::module &m) {
       ));
 
   py::class_<RobotPose>(m, "RobotPose")
-      .def(py::init<Affine, std::optional<double>>(),
+      .def(py::init<Affine, std::optional<ElbowState>>(),
            "end_effector_pose"_a,
-           "elbow_position"_a = std::nullopt)
+           "elbow_state"_a = std::nullopt)
       .def(py::init<const RobotPose &>()) // Copy constructor
       .def("change_end_effector_frame", &RobotPose::changeEndEffectorFrame, "offset_world_frame"_a)
-      .def("with_elbow_position", &RobotPose::withElbowPosition, "elbow_position"_a)
+      .def("with_elbow_state", &RobotPose::withElbowState, "elbow_state"_a)
       .def_property_readonly("end_effector_pose", &RobotPose::end_effector_pose)
-      .def_property_readonly("elbow_position", &RobotPose::elbow_position)
+      .def_property_readonly("elbow_state", &RobotPose::elbow_state)
       .def("__mul__",
            [](const RobotPose &robot_pose, const Affine &affine) { return robot_pose * affine; },
            py::is_operator())
@@ -143,12 +181,12 @@ void bind_state_repr(py::module &m) {
       .def("__repr__", robotPoseToStr)
       .def(py::pickle(
           [](const RobotPose &robot_pose) {  // __getstate__
-            return py::make_tuple(robot_pose.end_effector_pose(), robot_pose.elbow_position());
+            return py::make_tuple(robot_pose.end_effector_pose(), robot_pose.elbow_state());
           },
           [](const py::tuple &t) {  // __setstate__
             if (t.size() != 2)
               throw std::runtime_error("Invalid state!");
-            return RobotPose(t[0].cast<Affine>(), t[1].cast<std::optional<double>>());
+            return RobotPose(t[0].cast<Affine>(), t[1].cast<std::optional<ElbowState>>());
           }
       ));
   py::implicitly_convertible<Affine, RobotPose>();

@@ -31,7 +31,10 @@ void JointVelocityWaypointMotion::initWaypointMotion(
 }
 
 franka::JointVelocities JointVelocityWaypointMotion::getControlSignal(
-    const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) {
+    const franka::RobotState &robot_state,
+    const franka::Duration &time_step,
+    const std::optional<franka::JointVelocities> &previous_command,
+    const ruckig::InputParameter<7> &input_parameter) {
   return {input_parameter.current_position};
 }
 

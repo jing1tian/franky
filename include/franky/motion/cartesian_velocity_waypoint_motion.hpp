@@ -52,7 +52,10 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override;
 
   [[nodiscard]] franka::CartesianVelocities getControlSignal(
-      const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter) override;
+      const franka::RobotState &robot_state,
+      const franka::Duration &time_step,
+      const std::optional<franka::CartesianVelocities> &previous_command,
+      const ruckig::InputParameter<7> &input_parameter) override;
 
  private:
   Affine ee_frame_;

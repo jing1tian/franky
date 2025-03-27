@@ -6,6 +6,7 @@
 
 #include "franky/types.hpp"
 #include "franky/twist.hpp"
+#include "franky/elbow_state.hpp"
 
 namespace franky {
 
@@ -59,12 +60,14 @@ class RobotVelocity {
   /**
    * @brief Get the franka velocity.
    *
-   * @param elbow_position The elbow position to use. Note, that franka::CartesianVelocities contains the elbow
-   *                       position and not the elbow velocity, contrary to RobotVelocity.
+   * @param elbow_state                  The elbow state to use. Note, that franka::CartesianVelocities contains the
+   *                                     elbow state and not the elbow velocity, contrary to RobotVelocity.
+   * @param default_elbow_flip_direction The default flip direction of the elbow if it is not set.
    * @return The franka velocity.
    */
   [[nodiscard]] franka::CartesianVelocities as_franka_velocity(
-      std::optional<double> elbow_position = std::nullopt) const;
+      const std::optional<ElbowState> &elbow_state = std::nullopt,
+      FlipDirection default_elbow_flip_direction = FlipDirection::kNegative) const;
 
   /**
    * @brief Transform the frame of the velocity by applying the given affine transform.

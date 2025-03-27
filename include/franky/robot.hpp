@@ -248,7 +248,7 @@ class Robot : public franka::Robot {
    */
   [[nodiscard]] inline CartesianState currentCartesianState() {
     auto s = state();
-    return {{Affine(Eigen::Matrix4d::Map(s.O_T_EE.data())), s.elbow[0]},
+    return {{Affine(Eigen::Matrix4d::Map(s.O_T_EE.data())), ElbowState{s.elbow}},
             RobotVelocity(franka::CartesianVelocities(s.O_dP_EE_c, s.delbow_c))};
   }
 
