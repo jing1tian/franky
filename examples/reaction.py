@@ -15,19 +15,17 @@ if __name__ == "__main__":
 
     # Connect to the robot
     robot = Robot(args.host)
-    robot.relative_dynamics_factor = 0.05
     robot.recover_from_errors()
 
     # Reduce the acceleration and velocity dynamic
-    robot.relative_dynamics_factor = 0.2
+    robot.relative_dynamics_factor = 0.1
 
-    joint_motion = JointMotion([-1.811944, 1.179108, 1.757100, -2.14162, -1.143369, 1.633046, -0.432171])
-    robot.move(joint_motion)
+    robot.move(JointMotion([0.0, 0.0, 0.0, -2.2, 0.0, 2.2, 0.7]))
 
     # Define and move forwards
-    reaction = Reaction(Measure.ForceZ < -5.0, CartesianPoseStopMotion())
+    reaction = Reaction(Measure.FORCE_Z < -5.0, CartesianPoseStopMotion())
     reaction.register_callback(reaction_callback)
-    motion_down = CartesianMotion(RobotPose(Affine([0.0, 0.0, -0.12]), -0.2), ReferenceType.Relative)
+    motion_down = CartesianMotion(RobotPose(Affine([0.0, 0.0, 0.5])), ReferenceType.Relative)
     motion_down.add_reaction(reaction)
 
     # You can try to block the robot now.
