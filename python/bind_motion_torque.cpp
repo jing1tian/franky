@@ -32,7 +32,7 @@ void bind_motion_torque(py::module &m) {
                      force_constraints_active, exponential_decay});
            }),
            "target"_a,
-           py::arg_v("target_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
+           py::arg_v("target_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
            "translational_stiffness"_a = 2000,
            "rotational_stiffness"_a = 200,
            "force_constraints"_a = std::nullopt,
@@ -65,7 +65,7 @@ void bind_motion_torque(py::module &m) {
            }),
            "target"_a,
            "duration"_a,
-           py::arg_v("target_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
+           py::arg_v("target_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
            "translational_stiffness"_a = 2000,
            "rotational_stiffness"_a = 200,
            "force_constraints"_a = std::nullopt,

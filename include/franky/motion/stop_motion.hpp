@@ -19,7 +19,7 @@ class StopMotion<franka::JointPositions> : public JointMotion {
  public:
   explicit StopMotion() : JointMotion(
       JointState(Vector7d::Zero()),
-      ReferenceType::Relative,
+      ReferenceType::kRelative,
       RelativeDynamicsFactor::MAX_DYNAMICS()
   ) {}
 };
@@ -45,7 +45,7 @@ class StopMotion<franka::CartesianPose> : public CartesianMotion {
  public:
   explicit StopMotion() : CartesianMotion(
       RobotPose(Affine::Identity()),
-      ReferenceType::Relative,
+      ReferenceType::kRelative,
       RelativeDynamicsFactor::MAX_DYNAMICS()
   ) {}
 };

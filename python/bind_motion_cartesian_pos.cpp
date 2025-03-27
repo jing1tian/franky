@@ -23,7 +23,7 @@ void bind_motion_cartesian_pos(py::module &m) {
                }
            ),
            "target"_a,
-           py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
+           py::arg_v("reference_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
            "relative_dynamics_factor"_a = 1.0,
            "minimum_time"_a = std::nullopt,
            "hold_target_duration"_a = franka::Duration(0))
@@ -63,7 +63,7 @@ void bind_motion_cartesian_pos(py::module &m) {
                  ee_frame.value_or(Affine::Identity()));
            }),
            "target"_a,
-           py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
+           py::arg_v("reference_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
            "relative_dynamics_factor"_a = 1.0,
            "return_when_finished"_a = true,
            "ee_frame"_a = std::nullopt);

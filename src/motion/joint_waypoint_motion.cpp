@@ -40,7 +40,7 @@ void JointWaypointMotion::setNewWaypoint(
     ruckig::InputParameter<7> &input_parameter) {
   auto new_target = new_waypoint.target;
   auto position = new_target.position();
-  if (new_waypoint.reference_type == ReferenceType::Relative)
+  if (new_waypoint.reference_type == ReferenceType::kRelative)
     position += toEigen(input_parameter.current_position);
   input_parameter.target_position = toStd<7>(position);
   input_parameter.target_velocity = toStd<7>(new_target.velocity());

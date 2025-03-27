@@ -26,7 +26,7 @@ class ImpedanceMotion : public Motion<franka::Torques> {
    */
   struct Params {
     /** The type of the target reference (relative or absolute). */
-    ReferenceType target_type{ReferenceType::Absolute};
+    ReferenceType target_type{ReferenceType::kAbsolute};
 
     /** The translational stiffness in [10, 3000] N/m. */
     double translational_stiffness{2000};

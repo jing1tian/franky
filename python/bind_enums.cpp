@@ -8,8 +8,8 @@ using namespace franky;
 
 void bind_enums(py::module &m) {
   py::enum_<ReferenceType>(m, "ReferenceType")
-      .value("Relative", ReferenceType::Relative)
-      .value("Absolute", ReferenceType::Absolute);
+      .value("Relative", ReferenceType::kRelative)
+      .value("Absolute", ReferenceType::kAbsolute);
 
   py::enum_<franka::ControllerMode>(m, "ControllerMode")
       .value("JointImpedance", franka::ControllerMode::kJointImpedance)

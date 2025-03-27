@@ -24,7 +24,7 @@ void bind_motion_joint_pos(py::module &m) {
                }
            ),
            "target"_a,
-           py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
+           py::arg_v("reference_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
            "relative_dynamics_factor"_a = 1.0,
            "minimum_time"_a = std::nullopt,
            "hold_target_duration"_a = franka::Duration(0))
@@ -50,7 +50,7 @@ void bind_motion_joint_pos(py::module &m) {
   py::class_<JointMotion, JointWaypointMotion, std::shared_ptr<JointMotion>>(m, "JointMotion")
       .def(py::init<const JointState &, ReferenceType, double, bool>(),
            "target"_a,
-           py::arg_v("reference_type", ReferenceType::Absolute, "_franky.ReferenceType.Absolute"),
+           py::arg_v("reference_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
            "relative_dynamics_factor"_a = 1.0,
            "return_when_finished"_a = true);
 

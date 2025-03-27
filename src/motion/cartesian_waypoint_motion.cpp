@@ -98,7 +98,7 @@ void CartesianWaypointMotion::setNewWaypoint(
   }
 
   std::optional<ElbowState> new_elbow;
-  if (waypoint_pose.elbow_state().has_value() && new_waypoint.reference_type == ReferenceType::Relative) {
+  if (waypoint_pose.elbow_state().has_value() && new_waypoint.reference_type == ReferenceType::kRelative) {
     if (!prev_target_robot_pose.elbow_state().has_value())
       new_elbow = waypoint_pose.elbow_state();
     else {
@@ -110,7 +110,7 @@ void CartesianWaypointMotion::setNewWaypoint(
     new_elbow = waypoint_pose.elbow_state();
   }
   CartesianState new_target(waypoint_pose.withElbowState(new_elbow), new_waypoint.target.velocity());
-  if (new_waypoint.reference_type == ReferenceType::Relative) {
+  if (new_waypoint.reference_type == ReferenceType::kRelative) {
     new_target = prev_target_robot_pose.end_effector_pose() * new_target;
   }
   auto new_target_transformed = new_target.changeEndEffectorFrame(ee_frame_.inverse());

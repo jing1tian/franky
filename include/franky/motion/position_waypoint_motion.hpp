@@ -18,7 +18,7 @@ namespace franky {
  */
 template<typename TargetType>
 struct PositionWaypoint : public Waypoint<TargetType> {
-  ReferenceType reference_type{ReferenceType::Absolute};
+  ReferenceType reference_type{ReferenceType::kAbsolute};
 };
 
 /**

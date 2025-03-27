@@ -8,8 +8,8 @@ namespace franky {
  * This enum class defines the reference types for motions (absolute or relative).
  */
 enum class ReferenceType {
-  Absolute,
-  Relative
+  kAbsolute,
+  kRelative
 };
 
 }  // namespace franky

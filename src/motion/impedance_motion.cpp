@@ -26,7 +26,7 @@ void ImpedanceMotion::initImpl(
     const std::optional<franka::Torques> &previous_command) {
   auto robot_pose = Affine(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   intermediate_target_ = robot_pose;
-  if (params_.target_type == ReferenceType::Relative)
+  if (params_.target_type == ReferenceType::kRelative)
     absolute_target_ = robot_pose * target_;
   else
     absolute_target_ = target_;

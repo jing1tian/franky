@@ -21,7 +21,7 @@ class JointMotion : public JointWaypointMotion {
    */
   explicit JointMotion(
       const JointState &target,
-      ReferenceType reference_type = ReferenceType::Absolute,
+      ReferenceType reference_type = ReferenceType::kAbsolute,
       const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true);
 };
