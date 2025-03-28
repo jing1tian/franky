@@ -524,7 +524,7 @@ class Robot : public franka::Robot {
           [this](const franka::RobotState &robot_state,
                  franka::Duration duration,
                  franka::Duration time) {
-            std::lock_guard lock(*this->state_mutex_);
+            std::lock_guard lock(state_mutex_);
             current_state_ = robot_state;
           });
       motion_generator_running_ = true;
