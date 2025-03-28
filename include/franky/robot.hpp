@@ -33,7 +33,7 @@ namespace franky {
  * This exception is thrown when a motion is asynchronously executed and a new motion of a different type is set before
  * the previous one finished.
  */
-struct InvalidMotionTypeException : public std::runtime_error {
+struct InvalidMotionTypeException : std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 

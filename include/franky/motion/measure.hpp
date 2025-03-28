@@ -1,8 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <cmath>
-#include <memory>
 #include <iostream>
 #include <franka/robot_state.h>
 

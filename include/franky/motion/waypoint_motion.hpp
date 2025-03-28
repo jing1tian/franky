@@ -10,7 +10,7 @@ namespace franky {
 /**
  * @brief Exception thrown if the motion planner fails.
  */
-struct MotionPlannerException : public std::runtime_error {
+struct MotionPlannerException : std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
