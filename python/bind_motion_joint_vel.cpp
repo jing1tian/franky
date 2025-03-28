@@ -54,5 +54,5 @@ void bind_motion_joint_vel(py::module &m) {
   py::class_<StopMotion<franka::JointVelocities>,
              Motion<franka::JointVelocities>,
              std::shared_ptr<StopMotion<franka::JointVelocities>>>(m, "JointVelocityStopMotion")
-      .def(py::init<>());
+      .def(py::init<RelativeDynamicsFactor>(), "relative_dynamics_factor"_a = 1.0);
 }

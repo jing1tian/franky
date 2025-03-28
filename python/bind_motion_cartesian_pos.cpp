@@ -71,5 +71,5 @@ void bind_motion_cartesian_pos(py::module &m) {
   py::class_<StopMotion<franka::CartesianPose>,
              Motion<franka::CartesianPose>,
              std::shared_ptr<StopMotion<franka::CartesianPose>>>(m, "CartesianPoseStopMotion")
-      .def(py::init<>());
+      .def(py::init<RelativeDynamicsFactor>(), "relative_dynamics_factor"_a = 1.0);
 }

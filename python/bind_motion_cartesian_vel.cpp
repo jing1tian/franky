@@ -66,5 +66,5 @@ void bind_motion_cartesian_vel(py::module &m) {
   py::class_<StopMotion<franka::CartesianVelocities>,
              Motion<franka::CartesianVelocities>,
              std::shared_ptr<StopMotion<franka::CartesianVelocities>>>(m, "CartesianVelocitiesStopMotion")
-      .def(py::init<>());
+      .def(py::init<RelativeDynamicsFactor>(), "relative_dynamics_factor"_a = 1.0);
 }

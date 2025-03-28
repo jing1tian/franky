@@ -17,10 +17,14 @@ class StopMotion;
 template<>
 class StopMotion<franka::JointPositions> : public JointMotion {
  public:
-  explicit StopMotion() : JointMotion(
+  /**
+   *
+   * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
+   */
+  explicit StopMotion(const RelativeDynamicsFactor &relative_dynamics_factor = 1.0) : JointMotion(
       JointState(Vector7d::Zero()),
       ReferenceType::kRelative,
-      RelativeDynamicsFactor::MAX_DYNAMICS()
+      relative_dynamics_factor
   ) {}
 };
 
@@ -30,10 +34,14 @@ class StopMotion<franka::JointPositions> : public JointMotion {
 template<>
 class StopMotion<franka::JointVelocities> : public JointVelocityMotion {
  public:
-  explicit StopMotion() : JointVelocityMotion(
+  /**
+   *
+   * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
+   */
+  explicit StopMotion(const RelativeDynamicsFactor &relative_dynamics_factor = 1.0) : JointVelocityMotion(
       Vector7d::Zero(),
       franka::Duration(0),
-      RelativeDynamicsFactor::MAX_DYNAMICS()
+      relative_dynamics_factor
   ) {}
 };
 
@@ -43,7 +51,11 @@ class StopMotion<franka::JointVelocities> : public JointVelocityMotion {
 template<>
 class StopMotion<franka::CartesianPose> : public CartesianWaypointMotion {
  public:
-  explicit StopMotion() : CartesianWaypointMotion(
+  /**
+   *
+   * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
+   */
+  explicit StopMotion(const RelativeDynamicsFactor &relative_dynamics_factor = 1.0) : CartesianWaypointMotion(
     {
         PositionWaypoint<CartesianState>{
             {
@@ -53,7 +65,7 @@ class StopMotion<franka::CartesianPose> : public CartesianWaypointMotion {
             ReferenceType::kRelative
         }
     },
-    RelativeDynamicsFactor::MAX_DYNAMICS()
+    relative_dynamics_factor
 ) {}
 };
 
@@ -63,10 +75,14 @@ class StopMotion<franka::CartesianPose> : public CartesianWaypointMotion {
 template<>
 class StopMotion<franka::CartesianVelocities> : public CartesianVelocityMotion {
  public:
-  explicit StopMotion() : CartesianVelocityMotion(
+  /**
+   *
+   * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
+   */
+  explicit StopMotion(const RelativeDynamicsFactor &relative_dynamics_factor = 1.0) : CartesianVelocityMotion(
       RobotVelocity(),
       franka::Duration(0),
-      RelativeDynamicsFactor::MAX_DYNAMICS()
+      relative_dynamics_factor
   ) {}
 };
 
