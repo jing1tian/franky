@@ -38,7 +38,7 @@ std::shared_ptr<Motion<ControlSignalType>> Reaction<ControlSignalType>::operator
     const franka::RobotState &robot_state,
     franka::Duration rel_time,
     franka::Duration abs_time) {
-  std::lock_guard<std::mutex> lock(callback_mutex_);
+  std::lock_guard lock(callback_mutex_);
   for (const auto& cb : callbacks_)
     cb(robot_state, rel_time, abs_time);
   return motion_func_(robot_state, rel_time, abs_time);
@@ -48,7 +48,7 @@ template<typename ControlSignalType>
 void Reaction<ControlSignalType>::registerCallback(
     const std::function<void(
         const franka::RobotState &, franka::Duration, franka::Duration)>& callback) {
-  std::lock_guard<std::mutex> lock(callback_mutex_);
+  std::lock_guard lock(callback_mutex_);
   callbacks_.push_back(callback);
 }
 

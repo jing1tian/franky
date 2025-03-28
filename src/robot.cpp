@@ -16,7 +16,7 @@ Robot::Robot(const std::string &fci_hostname, const Params &params)
 }
 
 bool Robot::hasErrors() {
-  return bool(state().current_errors);
+  return static_cast<bool>(state().current_errors);
 }
 
 bool Robot::recoverFromErrors() {

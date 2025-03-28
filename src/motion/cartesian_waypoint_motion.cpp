@@ -38,10 +38,8 @@ void CartesianWaypointMotion::initWaypointMotion(
 }
 
 franka::CartesianPose CartesianWaypointMotion::getControlSignal(
-    const franka::RobotState &robot_state,
-    const franka::Duration &time_step,
-    const std::optional<franka::CartesianPose> &previous_command,
-    const ruckig::InputParameter<7> &input_parameter) {
+    const franka::RobotState &robot_state, const franka::Duration &time_step,
+    const std::optional<franka::CartesianPose> &previous_command, const ruckig::InputParameter<7> &input_parameter) {
   auto has_elbow = input_parameter.enabled[6];
   auto current_elbow_flip = FlipDirection(robot_state.elbow[1]);
   if (previous_command.has_value() && previous_command->hasElbow()) {
@@ -51,11 +49,10 @@ franka::CartesianPose CartesianWaypointMotion::getControlSignal(
   return (ref_frame_ * target_pose).as_franka_pose(current_elbow_flip);
 }
 
-void CartesianWaypointMotion::setNewWaypoint(
-    const franka::RobotState &robot_state,
-    const std::optional<franka::CartesianPose> &previous_command,
-    const PositionWaypoint<CartesianState> &new_waypoint,
-    ruckig::InputParameter<7> &input_parameter) {
+void CartesianWaypointMotion::setNewWaypoint(const franka::RobotState &robot_state,
+                                             const std::optional<franka::CartesianPose> &previous_command,
+                                             const PositionWaypoint<CartesianState> &new_waypoint,
+                                             ruckig::InputParameter<7> &input_parameter) {
   auto waypoint_has_elbow = input_parameter.enabled[6];
 
   // We first convert the current state into the frame of the current pose
@@ -84,8 +81,7 @@ void CartesianWaypointMotion::setNewWaypoint(
   RobotPose zero_pose(Affine::Identity(), current_pose_old_ref_frame.elbow_state());
   Vector7d current_velocity_ref_frame =
       (Vector7d() << linear_vel_ref_frame, angular_vel_ref_frame, elbow_velocity).finished();
-  Vector7d current_acc_ref_frame =
-      (Vector7d() << linear_acc_ref_frame, angular_acc_ref_frame, elbow_acc).finished();
+  Vector7d current_acc_ref_frame = (Vector7d() << linear_acc_ref_frame, angular_acc_ref_frame, elbow_acc).finished();
   input_parameter.current_position = toStd<7>(zero_pose.vector_repr());
   input_parameter.current_velocity = toStd<7>(current_velocity_ref_frame);
   input_parameter.current_acceleration = toStd<7>(current_acc_ref_frame);
@@ -102,8 +98,8 @@ void CartesianWaypointMotion::setNewWaypoint(
     if (!prev_target_robot_pose.elbow_state().has_value())
       new_elbow = waypoint_pose.elbow_state();
     else {
-      auto new_elbow_pos = waypoint_pose.elbow_state().value().joint_3_pos()
-          + prev_target_robot_pose.elbow_state().value().joint_3_pos();
+      auto new_elbow_pos = waypoint_pose.elbow_state().value().joint_3_pos() +
+                           prev_target_robot_pose.elbow_state().value().joint_3_pos();
       new_elbow = ElbowState(new_elbow_pos, waypoint_pose.elbow_state().value().joint_4_flip());
     }
   } else {
