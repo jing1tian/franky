@@ -33,7 +33,7 @@ class MotionGenerator {
    * @brief Maximum recursion limit for reactions. After more than this number of reactions are fired in a single step,
    * the motion generator will throw a ReactionRecursionException.
    */
-  static constexpr size_t REACTION_RECURSION_LIMIT = 8;
+  static constexpr size_t REACTION_RECURSION_LIMIT = 4;
 
   /**
    * @param robot The robot instance.
