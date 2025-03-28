@@ -21,6 +21,7 @@ class Reaction;
 template<typename ControlSignalType>
 class Motion {
  public:
+  virtual ~Motion() = default;
   using CallbackType = std::function<
       void(const franka::RobotState &,
            franka::Duration,
