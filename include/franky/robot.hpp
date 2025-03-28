@@ -21,9 +21,9 @@
 #include "franky/motion/motion.hpp"
 #include "franky/scope_guard.hpp"
 #include "franky/control_signal_type.hpp"
-#include "franky/util.hpp"
 #include "franky/relative_dynamics_factor.hpp"
 #include "franky/joint_state.hpp"
+#include "franky/dynamics_limit.hpp"
 
 namespace franky {
 
@@ -37,6 +37,13 @@ struct InvalidMotionTypeException : std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
+constexpr std::array<double, 7> scaleArr7(const std::array<double, 7> &arr, const double factor) {
+  std::array<double, arr.size()> result{};
+  for (size_t i = 0; i < arr.size(); ++i)
+    result[i] = arr[i] * factor;
+  return result;
+}
+
 /**
  * @brief A class representing a Franka robot.
  *
@@ -44,9 +51,6 @@ struct InvalidMotionTypeException : std::runtime_error {
  */
 class Robot : public franka::Robot {
  public:
-  template<size_t dims>
-  using ScalarOrArray = std::variant<double, std::array<double, dims>, Eigen::Vector<double, dims>>;
-
   /**
    * @brief Global parameters for the robot.
    */
@@ -96,50 +100,90 @@ class Robot : public franka::Robot {
           Eigen::Matrix<double, 3, 1>::Ones())
   );
 
-  /** Maximum translational velocity [m/s] */
-  static constexpr double max_translation_velocity{1.7};
+  // clang-format off
+  /**
+   * @brief Translational velocity limit [m/s].
+   */
+  DynamicsLimit<double> translation_velocity_limit{
+    "translational velocity", 1.7, 0.7, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum rotational velocity [rad/s] */
-  static constexpr double max_rotation_velocity{2.5};
+  /**
+ * @brief Rotational velocity limit [rad/s].
+ */
+  DynamicsLimit<double> rotation_velocity_limit{
+    "rotational velocity", 2.5, 2.5, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum elbow velocity [rad/s] */
-  static constexpr double max_elbow_velocity{2.175};
+  /**
+   * @brief Elbow velocity limit [rad/s].
+   */
+  DynamicsLimit<double> elbow_velocity_limit{
+    "elbow velocity", 2.175, 2.175, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum translational acceleration [m/s²] */
-  static constexpr double max_translation_acceleration{13.0};
+  /**
+   * @brief Translational acceleration limit [m/s²].
+   */
+  DynamicsLimit<double> translation_acceleration_limit{
+    "translational acceleration", 13.0, 2.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum rotational acceleration [rad/s²] */
-  static constexpr double max_rotation_acceleration{25.0};
+  /**
+   * @brief Rotational acceleration limit [rad/s²].
+   */
+  DynamicsLimit<double> rotation_acceleration_limit{
+    "rotational acceleration", 25.0, 10.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum elbow acceleration [rad/s²] */
-  static constexpr double max_elbow_acceleration{10.0};
+  /**
+   * @brief Elbow acceleration limit [rad/s²].
+   */
+  DynamicsLimit<double> elbow_acceleration_limit{
+    "elbow acceleration", 10.0, 4.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum translational jerk [m/s³] */
-  static constexpr double max_translation_jerk{6500.0};
+  /**
+   * @brief Translational jerk limit [m/s³].
+   */
+  DynamicsLimit<double> translation_jerk_limit{
+    "translational jerk", 6500.0, 500.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum rotational jerk [rad/s³] */
-  static constexpr double max_rotation_jerk{12500.0};
+  /**
+   * @brief Rotational jerk limit [rad/s³].
+   */
+  DynamicsLimit<double> rotation_jerk_limit{
+    "rotational jerk", 12500.0, 2000.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum elbow jerk [rad/s³] */
-  static constexpr double max_elbow_jerk{5000.0};
+  /**
+   * @brief Elbow jerk limit [rad/s³].
+   */
+  DynamicsLimit<double> elbow_jerk_limit{
+    "elbow jerk", 5000.0, 800.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-  /** Maximum joint velocity [rad/s] */
-  static constexpr std::array<double, 7>
-      max_joint_velocity{
-      {2.175, 2.175, 2.175, 2.175, 2.610, 2.610, 2.610}
+
+  /**
+   * @brief Joint velocity limit [rad/s].
+   */
+#define MAX_JOINT_VEL {2.175, 2.175, 2.175, 2.175, 2.610, 2.610, 2.610}
+  DynamicsLimit<std::array<double, 7>> joint_velocity_limit{
+    "joint_velocity", MAX_JOINT_VEL, MAX_JOINT_VEL, control_mutex_,
+    std::bind(&Robot::is_in_control_unsafe, this)
   };
 
-  /** Maximum joint acceleration [rad/s²] */
-  static constexpr std::array<double, 7>
-      max_joint_acceleration{
-      {15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0}
+  /**
+   * @brief Joint acceleration limit [rad/s²].
+   */
+#define MAX_JOINT_ACC {15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0}
+  DynamicsLimit<std::array<double, 7>> joint_acceleration_limit{
+    "joint_acceleration", MAX_JOINT_ACC, scaleArr7(MAX_JOINT_ACC, 0.3), control_mutex_,
+    std::bind(&Robot::is_in_control_unsafe, this)
   };
 
-  /** Maximum joint jerk [rad/s³] */
-  static constexpr std::array<double, 7>
-      max_joint_jerk{
-      {7500.0, 3750.0, 5000.0, 6250.0, 7500.0, 10000.0, 10000.0}
+  /**
+   * @brief Joint jerk limit [rad/s³].
+   */
+#define MAX_JOINT_JERK {7500.0, 3750.0, 5000.0, 6250.0, 7500.0, 10000.0, 10000.0}
+  DynamicsLimit<std::array<double, 7>> joint_jerk_limit{
+    "joint_jerk", MAX_JOINT_JERK, scaleArr7(MAX_JOINT_JERK, 0.3), control_mutex_,
+    std::bind(&Robot::is_in_control_unsafe, this)
   };
+
+  // clang-format on
 
   /** Number of degrees of freedom of the robot */
   static constexpr size_t degrees_of_freedoms{7};
@@ -307,7 +351,7 @@ class Robot : public franka::Robot {
    * @brief Wait for the current motion to finish. Throw any exceptions that occurred during the motion.
    */
   inline bool joinMotion() {
-    std::unique_lock<std::mutex> lock(control_mutex_);
+    std::unique_lock lock(*control_mutex_);
     return joinMotionUnsafe(lock);
   }
 
@@ -320,7 +364,7 @@ class Robot : public franka::Robot {
    */
   template<class Rep, class Period>
   inline bool joinMotion(const std::chrono::duration<Rep, Period> &timeout) {
-    std::unique_lock<std::mutex> lock(control_mutex_);
+    std::unique_lock lock(*control_mutex_);
     return joinMotionUnsafe<Rep, Period>(lock, timeout);
   }
 
@@ -423,7 +467,7 @@ class Robot : public franka::Robot {
   Params params_;
   franka::RobotState current_state_;
   std::mutex state_mutex_;
-  std::mutex control_mutex_;
+  std::shared_ptr<std::mutex> control_mutex_;
   std::condition_variable control_finished_condition_;
   std::exception_ptr control_exception_;
   std::thread control_thread_;
@@ -463,7 +507,7 @@ class Robot : public franka::Robot {
     if (motion == nullptr) {
       throw std::invalid_argument("The motion must not be null.");
     }
-    std::unique_lock<std::mutex> lock(control_mutex_);
+    std::unique_lock lock(*control_mutex_);
     if (is_in_control_unsafe() && motion_generator_running_) {
       if (!std::holds_alternative<MotionGenerator<ControlSignalType>>(motion_generator_)) {
         throw InvalidMotionTypeException("The type of motion cannot change during runtime. Please ensure that the "
@@ -480,7 +524,7 @@ class Robot : public franka::Robot {
           [this](const franka::RobotState &robot_state,
                  franka::Duration duration,
                  franka::Duration time) {
-            std::lock_guard<std::mutex> lock(this->state_mutex_);
+            std::lock_guard lock(*this->state_mutex_);
             current_state_ = robot_state;
           });
       motion_generator_running_ = true;
@@ -493,7 +537,7 @@ class Robot : public franka::Robot {
                     [motion_generator](const franka::RobotState &rs, franka::Duration d) {
                       return (*motion_generator)(rs, d);
                     });
-                std::unique_lock<std::mutex> lock(control_mutex_);
+                std::unique_lock lock(*control_mutex_);
 
                 // This code is just for the case that a new motion is set just after the old one terminates. If this
                 // happens, we need to continue with this motion, unless an exception occurs.
@@ -507,7 +551,7 @@ class Robot : public franka::Robot {
                 }
               }
             } catch (...) {
-              std::unique_lock<std::mutex> lock(control_mutex_);
+              std::unique_lock lock(*control_mutex_);
               control_exception_ = std::current_exception();
               motion_generator_running_ = false;
               control_finished_condition_.notify_all();
@@ -517,19 +561,6 @@ class Robot : public franka::Robot {
     }
     if (!async)
       joinMotion();
-  }
-
-  template<size_t dims>
-  std::array<double, dims> expand(const ScalarOrArray<dims> &input) {
-    if (std::holds_alternative<std::array<double, dims >>(input)) {
-      return std::get<std::array<double, dims >>(input);
-    } else if (std::holds_alternative<Eigen::Vector<double, dims >>(input)) {
-      return toStd<dims>(std::get<Eigen::Vector<double, dims >>(input));
-    } else {
-      std::array<double, dims> output;
-      std::fill(output.begin(), output.end(), std::get<double>(input));
-      return output;
-    }
   }
 };
 

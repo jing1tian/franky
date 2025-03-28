@@ -41,13 +41,20 @@ class StopMotion<franka::JointVelocities> : public JointVelocityMotion {
  * @brief Stop motion for cartesian pose control mode.
  */
 template<>
-class StopMotion<franka::CartesianPose> : public CartesianMotion {
+class StopMotion<franka::CartesianPose> : public CartesianWaypointMotion {
  public:
-  explicit StopMotion() : CartesianMotion(
-      RobotPose(Affine::Identity()),
-      ReferenceType::kRelative,
-      RelativeDynamicsFactor::MAX_DYNAMICS()
-  ) {}
+  explicit StopMotion() : CartesianWaypointMotion(
+    {
+        PositionWaypoint<CartesianState>{
+            {
+                .target = RobotPose(),
+                .hold_target_duration = franka::Duration(50)
+            },
+            ReferenceType::kRelative
+        }
+    },
+    RelativeDynamicsFactor::MAX_DYNAMICS()
+) {}
 };
 
 /**

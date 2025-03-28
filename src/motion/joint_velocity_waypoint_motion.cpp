@@ -45,10 +45,11 @@ void JointVelocityWaypointMotion::setNewWaypoint(const franka::RobotState &robot
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointVelocityWaypointMotion::getAbsoluteInputLimits() const {
+  const auto r = robot();
   return {
-      Vector7d::Map(Robot::max_joint_velocity.data()),
-      Vector7d::Map(Robot::max_joint_acceleration.data()),
-      Vector7d::Map(Robot::max_joint_jerk.data())
+    r->joint_velocity_limit.getAs<Vector7d>(),
+    r->joint_acceleration_limit.getAs<Vector7d>(),
+    r->joint_jerk_limit.getAs<Vector7d>()
   };
 }
 }  // namespace franky

@@ -90,15 +90,22 @@ void CartesianVelocityWaypointMotion::setNewWaypoint(
   input_parameter.enabled = {true, true, true, true, true, true, new_target_transformed.elbow_velocity().has_value()};
 }
 
-std::tuple<Vector7d, Vector7d, Vector7d>
-CartesianVelocityWaypointMotion::getAbsoluteInputLimits() const {
-  Vector7d max_vel = vec_cart_rot_elbow(
-      Robot::max_translation_velocity, Robot::max_rotation_velocity, Robot::max_elbow_velocity);
-  Vector7d max_acc = vec_cart_rot_elbow(
-      Robot::max_translation_acceleration, Robot::max_rotation_acceleration, Robot::max_elbow_acceleration);
-  Vector7d max_jerk = vec_cart_rot_elbow(
-      Robot::max_translation_jerk, Robot::max_rotation_jerk, Robot::max_elbow_jerk);
-  return {max_vel, max_acc, max_jerk};
+std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getAbsoluteInputLimits() const {
+  const auto r = robot();
+  return {
+    vec_cart_rot_elbow(
+        r->translation_velocity_limit.get(),
+        r->rotation_velocity_limit.get(),
+        r->elbow_velocity_limit.get()),
+    vec_cart_rot_elbow(
+        r->translation_acceleration_limit.get(),
+        r->rotation_acceleration_limit.get(),
+        r->elbow_acceleration_limit.get()),
+    vec_cart_rot_elbow(
+        r->translation_jerk_limit.get(),
+        r->rotation_jerk_limit.get(),
+        r->elbow_jerk_limit.get())
+  };
 }
 
 }  // namespace franky

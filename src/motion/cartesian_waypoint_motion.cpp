@@ -11,16 +11,12 @@ namespace franky {
 
 CartesianWaypointMotion::CartesianWaypointMotion(
     const std::vector<PositionWaypoint<CartesianState>> &waypoints,
-    const RelativeDynamicsFactor &relative_dynamics_factor,
-    bool return_when_finished,
-    Affine ee_frame)
-    : PositionWaypointMotion<franka::CartesianPose, CartesianState>(
-    waypoints, relative_dynamics_factor, return_when_finished),
+    const RelativeDynamicsFactor &relative_dynamics_factor, bool return_when_finished, Affine ee_frame)
+    : PositionWaypointMotion(waypoints, relative_dynamics_factor, return_when_finished),
       ee_frame_(std::move(ee_frame)) {}
 
 void CartesianWaypointMotion::initWaypointMotion(
-    const franka::RobotState &robot_state,
-    const std::optional<franka::CartesianPose> &previous_command,
+    const franka::RobotState &robot_state, const std::optional<franka::CartesianPose> &previous_command,
     ruckig::InputParameter<7> &input_parameter) {
   RobotPose robot_pose(previous_command.value_or(franka::CartesianPose{robot_state.O_T_EE_c, robot_state.elbow_c}));
   ref_frame_ = Affine::Identity();
@@ -120,24 +116,22 @@ void CartesianWaypointMotion::setNewWaypoint(
   target_state_ = new_target;
 }
 
-std::tuple<Vector7d, Vector7d, Vector7d>
-CartesianWaypointMotion::getAbsoluteInputLimits() const {
-  constexpr double translation_factor{0.4};
-  constexpr double derivative_factor{0.4};
-
-  Vector7d max_vel = vec_cart_rot_elbow(
-      translation_factor * Robot::max_translation_velocity,
-      Robot::max_rotation_velocity,
-      Robot::max_elbow_velocity);
-  Vector7d max_acc = derivative_factor * vec_cart_rot_elbow(
-      translation_factor * Robot::max_translation_acceleration,
-      Robot::max_rotation_acceleration,
-      Robot::max_elbow_acceleration);
-  Vector7d max_jerk = std::pow(derivative_factor, 2) * vec_cart_rot_elbow(
-      translation_factor * Robot::max_translation_jerk,
-      Robot::max_rotation_jerk,
-      Robot::max_elbow_jerk);
-  return {max_vel, max_acc, max_jerk};
+std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getAbsoluteInputLimits() const {
+  const auto r = robot();
+  return {
+      vec_cart_rot_elbow(
+          r->translation_velocity_limit.get(),
+          r->rotation_velocity_limit.get(),
+          r->elbow_velocity_limit.get()),
+      vec_cart_rot_elbow(
+          r->translation_acceleration_limit.get(),
+          r->rotation_acceleration_limit.get(),
+          r->elbow_acceleration_limit.get()),
+      vec_cart_rot_elbow(
+          r->translation_jerk_limit.get(),
+          r->rotation_jerk_limit.get(),
+          r->elbow_jerk_limit.get())
+  };
 }
 
 }  // namespace franky

@@ -48,8 +48,11 @@ void JointWaypointMotion::setNewWaypoint(
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getAbsoluteInputLimits() const {
-  return {Vector7d::Map(Robot::max_joint_velocity.data()),
-          (Vector7d::Map(Robot::max_joint_acceleration.data()) * 0.3).eval(),
-          (Vector7d::Map(Robot::max_joint_jerk.data()) * 0.3).eval()};
+  const auto r = robot();
+  return {
+    r->joint_velocity_limit.getAs<Vector7d>(),
+    r->joint_acceleration_limit.getAs<Vector7d>(),
+    r->joint_jerk_limit.getAs<Vector7d>()
+  };
 }
 }  // namespace franky

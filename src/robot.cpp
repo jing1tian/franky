@@ -42,9 +42,9 @@ Affine Robot::forwardKinematics(const Vector7d &q) {
 }
 
 franka::RobotState Robot::state() {
-  std::lock_guard<std::mutex> state_lock(state_mutex_);
+  std::lock_guard state_lock(state_mutex_);
   {
-    std::lock_guard<std::mutex> control_lock(control_mutex_);
+    std::lock_guard control_lock(*control_mutex_);
     if (!is_in_control_unsafe()) {
       current_state_ = readOnce();
     }
@@ -94,7 +94,7 @@ bool Robot::is_in_control_unsafe() const {
 }
 
 bool Robot::is_in_control() {
-  std::unique_lock<std::mutex> lock(control_mutex_);
+  std::unique_lock lock(*control_mutex_);
   return is_in_control_unsafe();
 }
 
@@ -103,28 +103,27 @@ std::string Robot::fci_hostname() const {
 }
 
 std::optional<ControlSignalType> Robot::current_control_signal_type() {
-  std::unique_lock<std::mutex> lock(control_mutex_);
+  std::unique_lock lock(*control_mutex_);
   if (!is_in_control_unsafe())
     return std::nullopt;
   if (std::holds_alternative<MotionGenerator<franka::Torques>>(motion_generator_))
-    return ControlSignalType::Torques;
-  else if (std::holds_alternative<MotionGenerator<franka::JointVelocities>>(motion_generator_))
-    return ControlSignalType::JointVelocities;
-  else if (std::holds_alternative<MotionGenerator<franka::JointPositions>>(motion_generator_))
-    return ControlSignalType::JointPositions;
-  else if (std::holds_alternative<MotionGenerator<franka::CartesianVelocities>>(motion_generator_))
-    return ControlSignalType::CartesianVelocities;
-  else
-    return ControlSignalType::CartesianPose;
+    return Torques;
+  if (std::holds_alternative<MotionGenerator<franka::JointVelocities>>(motion_generator_))
+    return JointVelocities;
+  if (std::holds_alternative<MotionGenerator<franka::JointPositions>>(motion_generator_))
+    return JointPositions;
+  if (std::holds_alternative<MotionGenerator<franka::CartesianVelocities>>(motion_generator_))
+    return CartesianVelocities;
+  return CartesianPose;
 }
 
 RelativeDynamicsFactor Robot::relative_dynamics_factor() {
-  std::unique_lock<std::mutex> lock(control_mutex_);
+  std::unique_lock lock(*control_mutex_);
   return params_.relative_dynamics_factor;
 }
 
 void Robot::setRelativeDynamicsFactor(const RelativeDynamicsFactor &relative_dynamics_factor) {
-  std::unique_lock<std::mutex> lock(control_mutex_);
+  std::unique_lock lock(*control_mutex_);
   params_.relative_dynamics_factor = relative_dynamics_factor;
 }
 

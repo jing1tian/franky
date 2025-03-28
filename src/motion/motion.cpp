@@ -23,7 +23,7 @@ Motion<ControlSignalType>::Motion() : robot_(nullptr) {}
 
 template<typename ControlSignalType>
 void Motion<ControlSignalType>::registerCallback(CallbackType callback) {
-  const std::lock_guard<std::mutex> lock(callback_mutex_);
+  const std::lock_guard lock(callback_mutex_);
   callbacks_.push_back(callback);
 }
 
@@ -31,7 +31,7 @@ template<typename ControlSignalType>
 void Motion<ControlSignalType>::addReaction(const std::shared_ptr<Reaction<ControlSignalType>> reaction) {
   if (reaction == nullptr)
     throw std::invalid_argument("The reaction must not be null.");
-  const std::lock_guard<std::mutex> lock(reaction_mutex_);
+  const std::lock_guard lock(reaction_mutex_);
   reactions_.push_back(reaction);
 }
 
@@ -39,13 +39,13 @@ template<typename ControlSignalType>
 void Motion<ControlSignalType>::addReactionFront(const std::shared_ptr<Reaction<ControlSignalType>> reaction) {
   if (reaction == nullptr)
     throw std::invalid_argument("The reaction must not be null.");
-  const std::lock_guard<std::mutex> lock(reaction_mutex_);
+  const std::lock_guard lock(reaction_mutex_);
   reactions_.push_front(reaction);
 }
 
 template<typename ControlSignalType>
 std::vector<std::shared_ptr<Reaction<ControlSignalType>>> Motion<ControlSignalType>::reactions() {
-  const std::lock_guard<std::mutex> lock(reaction_mutex_);
+  const std::lock_guard lock(reaction_mutex_);
   return std::vector(reactions_.begin(), reactions_.end());
 }
 
@@ -65,7 +65,7 @@ Motion<ControlSignalType>::nextCommand(
     franka::Duration abs_time,
     const std::optional<ControlSignalType> &previous_command) {
   auto next_command = nextCommandImpl(robot_state, time_step, rel_time, abs_time, previous_command);
-  const std::lock_guard<std::mutex> lock(callback_mutex_);
+  const std::lock_guard lock(callback_mutex_);
   for (auto const &cb : callbacks_)
     cb(robot_state, time_step, rel_time, abs_time, next_command);
   return next_command;
