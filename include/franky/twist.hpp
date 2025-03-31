@@ -3,6 +3,7 @@
 #include <Eigen/Core>
 
 #include "franky/types.hpp"
+#include "franky/util.hpp"
 
 namespace franky {
 
@@ -90,6 +91,8 @@ class Twist {
     return angular_velocity_;
   }
 
+  friend std::ostream& operator<<(std::ostream& os, const Twist& twist);
+
  private:
   Eigen::Vector3d linear_velocity_;
   Eigen::Vector3d angular_velocity_;
@@ -102,6 +105,11 @@ inline Twist operator*(const Affine &affine, const Twist &twist) {
 template<typename RotationMatrixType>
 inline Twist operator*(const RotationMatrixType &rotation, const Twist &twist) {
   return twist.transformWith(rotation);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Twist& twist) {
+  os << "Twist(lin=" <<twist.linear_velocity_ << ", ang=" << twist.angular_velocity_ << ")";
+  return os;
 }
 
 }  // namespace franky

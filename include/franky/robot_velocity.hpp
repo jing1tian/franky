@@ -129,6 +129,8 @@ class RobotVelocity {
     return elbow_velocity_;
   }
 
+  friend std::ostream& operator<<(std::ostream& os, const RobotVelocity& robot_velocity);
+
  private:
   Twist end_effector_twist_;
   std::optional<double> elbow_velocity_ = std::nullopt;

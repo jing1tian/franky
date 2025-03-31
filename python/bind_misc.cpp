@@ -5,6 +5,8 @@
 
 #include "franky.hpp"
 
+#include "util.hpp"
+
 namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the '_a' literal
 using namespace franky;
@@ -23,13 +25,7 @@ void bind_misc(py::module &m) {
       .def(py::self *= uint64_t())
       .def(py::self / uint64_t())
       .def(py::self /= uint64_t())
-      .def("__repr__",
-           [](const franka::Duration &duration) {
-             std::stringstream ss;
-             ss << "Duration(" << duration.toMSec() << ")";
-             return ss.str();
-           }
-      )
+      .def("__repr__", strFromStream<franka::Duration>)
       .def(py::pickle(
           [](const franka::Duration &duration) {  // __getstate__
             return py::make_tuple(duration.toMSec());

@@ -50,9 +50,16 @@ class JointState {
     return velocity_;
   }
 
+  friend std::ostream& operator<<(std::ostream& os, const JointState& joint_state);
+
  private:
   Vector7d position_;
   Vector7d velocity_;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const JointState& joint_state) {
+  os << "JointState(position=" << joint_state.position_ << ", velocity=" << joint_state.velocity_ << ")";
+  return os;
+}
 
 }  // namespace franky

@@ -6,6 +6,8 @@
 
 #include "franky.hpp"
 
+#include "util.hpp"
+
 namespace py = pybind11;
 using namespace pybind11::literals;  // to bring in the '_a' literal
 using namespace franky;
@@ -37,6 +39,7 @@ void bind_robot(py::module &m) {
   py::class_<DynamicsLimit<Vector7d>>(m, "VectorDynamicsLimit")
       .def("set", &DynamicsLimit<Vector7d>::setFrom<Array<7>>, "value"_a)
       .def("get", &DynamicsLimit<Vector7d>::get)
+      .def("__repr__", strFromStream<DynamicsLimit<Vector7d>>)
       .def_property_readonly(
           "max",
           [](const DynamicsLimit<Vector7d> &dynamics_limit) {
@@ -47,6 +50,7 @@ void bind_robot(py::module &m) {
   py::class_<DynamicsLimit<double>>(m, "DoubleDynamicsLimit")
       .def("set", &DynamicsLimit<double>::set, "value"_a)
       .def("get", &DynamicsLimit<double>::get)
+      .def("__repr__", strFromStream<DynamicsLimit<double>>)
       .def_readonly("max", &DynamicsLimit<double>::max)
       .def_readonly("desc", &DynamicsLimit<double>::desc);
 

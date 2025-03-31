@@ -68,6 +68,8 @@ class CartesianState {
     return velocity_;
   }
 
+  friend inline std::ostream &operator<<(std::ostream &os, const CartesianState &cartesian_state);
+
  private:
   RobotPose pose_;
   RobotVelocity velocity_;
@@ -75,6 +77,11 @@ class CartesianState {
 
 inline CartesianState operator*(const Affine &transform, const CartesianState &cartesian_state) {
   return cartesian_state.transformWith(transform);
+}
+
+inline std::ostream &operator<<(std::ostream &os, const CartesianState &cartesian_state) {
+  os << "CartesianState(pose=" << cartesian_state.pose_ << ", velocity=" << cartesian_state.velocity_ << ")";
+  return os;
 }
 
 }  // namespace franky

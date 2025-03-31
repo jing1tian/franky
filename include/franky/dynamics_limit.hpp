@@ -94,6 +94,9 @@ class DynamicsLimit {
    */
   const std::string desc;
 
+  template <typename LimitTypeStream>
+  friend std::ostream& operator<<(std::ostream& os, const DynamicsLimit<LimitTypeStream>& dynamics_limit);
+
  private:
   /**
    * @brief Validate the new value before setting it.
@@ -109,5 +112,11 @@ class DynamicsLimit {
   LimitType value_; /**< Current value of the limit. */
   std::function<bool()> can_write_condition_; /**< Function to check if writing is allowed. */
 };
+
+template <typename LimitTypeStream>
+std::ostream& operator<<(std::ostream& os, const DynamicsLimit<LimitTypeStream>& dynamics_limit) {
+  os << dynamics_limit.value_ << " (max: " << dynamics_limit.max << ")";
+  return os;
+}
 
 }  // namespace franky

@@ -125,6 +125,8 @@ class RobotPose {
     return elbow_state_;
   }
 
+  friend std::ostream& operator<<(std::ostream& os, const RobotPose& robot_pose);
+
  private:
   Affine end_effector_pose_;
   std::optional<ElbowState> elbow_state_;

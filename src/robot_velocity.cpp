@@ -46,4 +46,12 @@ franka::CartesianVelocities RobotVelocity::as_franka_velocity(
   return {array};
 }
 
+std::ostream &operator<<(std::ostream &os, const RobotVelocity& robot_velocity) {
+  os << "RobotVelocity(ee_twist=" << robot_velocity.end_effector_twist_;
+  if (robot_velocity.elbow_velocity_.has_value())
+    os << ", elbow_vel=" << robot_velocity.elbow_velocity_.value();
+  os << ")";
+  return os;
+}
+
 }  // namespace franky

@@ -44,4 +44,9 @@ void DynamicsLimit<Vector7d>::check(const Vector7d &value) const {
   }
 }
 
+std::ostream &operator<<(std::ostream &os, const DynamicsLimit<Vector7d> &limit) {
+  os << limit.get() << " (max: " << Vector7d::Map(limit.max.data()).eval() << ")";
+  return os;
+}
+
 }  // namespace franky

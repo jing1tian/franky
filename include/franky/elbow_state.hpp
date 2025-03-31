@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <array>
+#include <iostream>
 
 namespace franky {
 
@@ -13,6 +14,8 @@ enum class FlipDirection {
   kNeutral = 0,
   kPositive = 1
 };
+
+std::ostream& operator<<(std::ostream& os, const FlipDirection& flip_direction);
 
 /**
  * @brief Elbow state of the robot.
@@ -72,6 +75,8 @@ class ElbowState {
    * @brief The flip direction of the 4th joint.
    */
   [[nodiscard]] inline std::optional<FlipDirection> joint_4_flip() const { return joint_4_flip_; }
+
+  friend std::ostream& operator<<(std::ostream& os, const ElbowState& elbow_state);
 
  private:
   double joint_3_pos_{0.0};

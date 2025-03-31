@@ -49,4 +49,12 @@ franka::CartesianPose RobotPose::as_franka_pose(FlipDirection default_flip_direc
 
 RobotPose::RobotPose() : end_effector_pose_(Eigen::Affine3d::Identity()), elbow_state_(std::nullopt) {}
 
+std::ostream &operator<<(std::ostream &os, const RobotPose& robot_pose) {
+  os << "RobotPose(ee_pose=" << robot_pose.end_effector_pose_;
+  if (robot_pose.elbow_state_.has_value())
+    os << ", elbow=" << robot_pose.elbow_state_.value();
+  os << ")";
+  return os;
+}
+
 }  // namespace franky

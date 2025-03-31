@@ -5,74 +5,11 @@
 
 #include "franky.hpp"
 
+#include "util.hpp"
+
 namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the '_a' literal
 using namespace franky;
-
-template<int dims>
-std::string vecToStr(const Eigen::Vector<double, dims> &vec) {
-  std::stringstream ss;
-  ss << "[";
-  for (size_t i = 0; i < dims; i++) {
-    ss << vec[i];
-    if (i != dims - 1)
-      ss << " ";
-  }
-  ss << "]";
-  return ss.str();
-}
-
-std::string affineToStr(const Affine &affine) {
-  std::stringstream ss;
-  ss << "Affine(t=" << vecToStr(affine.translation().eval())
-     << ", q=" << vecToStr(Eigen::Quaterniond(affine.rotation()).coeffs()) << ")";
-  return ss.str();
-}
-
-std::string twistToStr(const Twist &twist) {
-  std::stringstream ss;
-  ss << "Twist(lin=" << vecToStr(twist.linear_velocity())
-     << ", ang=" << vecToStr(twist.angular_velocity()) << ")";
-  return ss.str();
-}
-
-std::string flipDirectionToStr(const FlipDirection &flip_direction) {
-  switch (flip_direction) {
-    case FlipDirection::kNegative:
-      return "FlipDirection.Negative";
-    case FlipDirection::kNeutral:
-      return "FlipDirection.Neutral";
-    default:
-      return "FlipDirection.Positive";
-  }
-}
-
-std::string elbowStateToStr(const ElbowState &elbow_state) {
-  std::stringstream ss;
-  ss << "ElbowState(joint_3_pos=" << elbow_state.joint_3_pos();
-  if (elbow_state.joint_4_flip().has_value())
-    ss << ", joint_4_flip=" << flipDirectionToStr(elbow_state.joint_4_flip().value());
-  ss << ")";
-  return ss.str();
-}
-
-std::string robotPoseToStr(const RobotPose &robot_pose) {
-  std::stringstream ss;
-  ss << "RobotPose(ee_pose=" << affineToStr(robot_pose.end_effector_pose());
-  if (robot_pose.elbow_state().has_value())
-    ss << ", elbow=" << elbowStateToStr(robot_pose.elbow_state().value());
-  ss << ")";
-  return ss.str();
-}
-
-std::string robotVelocityToStr(const RobotVelocity &robot_velocity) {
-  std::stringstream ss;
-  ss << "RobotVelocity(ee_twist=" << twistToStr(robot_velocity.end_effector_twist());
-  if (robot_velocity.elbow_velocity().has_value())
-    ss << ", elbow_vel=" << robot_velocity.elbow_velocity().value();
-  ss << ")";
-  return ss.str();
-}
 
 void bind_state_repr(py::module &m) {
   py::class_<Affine>(m, "Affine")
@@ -94,7 +31,7 @@ void bind_state_repr(py::module &m) {
       .def_property_readonly("matrix", [](const Affine &affine) {
         return affine.matrix();
       })
-      .def("__repr__", &affineToStr)
+      .def("__repr__", strFromStream<Affine>)
       .def(py::pickle(
           [](const Affine &affine) {  // __getstate__
             return py::make_tuple(affine.translation(), Eigen::Quaterniond(affine.rotation()).coeffs());
@@ -113,7 +50,7 @@ void bind_state_repr(py::module &m) {
       .def(py::init<const ElbowState &>()) // Copy constructor
       .def_property_readonly("joint_3_pos", &ElbowState::joint_3_pos)
       .def_property_readonly("joint_4_flip", &ElbowState::joint_4_flip)
-      .def("__repr__", &elbowStateToStr)
+      .def("__repr__", &strFromStream<ElbowState>)
       .def(py::pickle(
           [](const ElbowState &elbow_state) {  // __getstate__
             return py::make_tuple(elbow_state.joint_3_pos(), elbow_state.joint_4_flip());
@@ -151,7 +88,7 @@ void bind_state_repr(py::module &m) {
       .def("__rmul__",
            [](const Twist &twist, const Eigen::Vector4d &quaternion) { return Eigen::Quaterniond(quaternion) * twist; },
            py::is_operator())
-      .def("__repr__", &twistToStr)
+      .def("__repr__", &strFromStream<Twist>)
       .def(py::pickle(
           [](const Twist &twist) {  // __getstate__
             return py::make_tuple(twist.linear_velocity(), twist.angular_velocity());
@@ -178,7 +115,7 @@ void bind_state_repr(py::module &m) {
       .def("__rmul__",
            [](const RobotPose &robot_pose, const Affine &affine) { return affine * robot_pose; },
            py::is_operator())
-      .def("__repr__", robotPoseToStr)
+      .def("__repr__", strFromStream<RobotPose>)
       .def(py::pickle(
           [](const RobotPose &robot_pose) {  // __getstate__
             return py::make_tuple(robot_pose.end_effector_pose(), robot_pose.elbow_state());
@@ -206,7 +143,7 @@ void bind_state_repr(py::module &m) {
              return Eigen::Quaterniond(quaternion) * robot_velocity;
            },
            py::is_operator())
-      .def("__repr__", robotVelocityToStr)
+      .def("__repr__", strFromStream<RobotVelocity>)
       .def(py::pickle(
           [](const RobotVelocity &robot_velocity) {  // __getstate__
             return py::make_tuple(robot_velocity.end_effector_twist(), robot_velocity.elbow_velocity());
@@ -230,12 +167,7 @@ void bind_state_repr(py::module &m) {
       .def("__rmul__",
            [](const CartesianState &cartesian_state, const Affine &affine) { return affine * cartesian_state; },
            py::is_operator())
-      .def("__repr__", [](const CartesianState &cartesian_state) {
-        std::stringstream ss;
-        ss << "CartesianState(pose=" << robotPoseToStr(cartesian_state.pose())
-           << ", velocity=" << robotVelocityToStr(cartesian_state.velocity()) << ")";
-        return ss.str();
-      })
+      .def("__repr__", strFromStream<CartesianState>)
       .def(py::pickle(
           [](const CartesianState &cartesian_state) {  // __getstate__
             return py::make_tuple(cartesian_state.pose(), cartesian_state.velocity());
@@ -255,12 +187,7 @@ void bind_state_repr(py::module &m) {
       .def(py::init<const JointState &>()) // Copy constructor
       .def_property_readonly("position", &JointState::position)
       .def_property_readonly("velocity", &JointState::velocity)
-      .def("__repr__", [](const JointState &joint_state) {
-        std::stringstream ss;
-        ss << "JointState(position=" << vecToStr(joint_state.position())
-           << ", velocity=" << vecToStr(joint_state.velocity()) << ")";
-        return ss.str();
-      })
+      .def("__repr__", strFromStream<JointState>)
       .def(py::pickle(
           [](const JointState &joint_state) {  // __getstate__
             return py::make_tuple(joint_state.position(), joint_state.velocity());

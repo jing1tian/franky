@@ -2,6 +2,7 @@
 
 #include <array>
 #include <Eigen/Core>
+#include <franka/duration.h>
 
 namespace franky {
 
@@ -44,6 +45,29 @@ std::array<double, dims> expand(const ScalarOrArray<dims> &input) {
   std::array<double, dims> output;
   std::fill(output.begin(), output.end(), std::get<double>(input));
   return output;
+}
+
+template<int dims>
+inline std::ostream &operator<<(std::ostream &os, const Eigen::Vector<double, dims> &vec) {
+  os << "[";
+  for (size_t i = 0; i < dims; i++) {
+    os << vec[i];
+    if (i != dims - 1)
+      os << " ";
+  }
+  os << "]";
+  return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const Affine &affine) {
+  os << "Affine(t=" << affine.translation().eval() << ", q=" << Eigen::Quaterniond(affine.rotation()).coeffs()
+     << ")";
+  return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const franka::Duration &duration) {
+  os << "Duration(" << duration.toMSec() << ")";
+  return os;
 }
 
 }  // namespace franky
