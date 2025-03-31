@@ -23,6 +23,13 @@ Eigen::Matrix<double, dims, 1> toEigenD(const std::array<double, dims> &vector) 
 }
 
 template<size_t dims>
+Eigen::Vector<double, dims> ensureEigen(const Array<dims> &input) {
+  if (std::holds_alternative<Eigen::Vector<double, dims>>(input))
+    return std::get<Eigen::Vector<double, dims>>(input);
+  return toEigenD<dims>(std::get<std::array<double, dims >>(input));
+}
+
+template<size_t dims>
 std::array<double, dims> ensureStd(const Array<dims> &input) {
   if (std::holds_alternative<std::array<double, dims >>(input))
     return std::get<std::array<double, dims >>(input);

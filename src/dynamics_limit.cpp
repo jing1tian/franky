@@ -7,8 +7,8 @@
 
 namespace franky {
 
-template <>
-void DynamicsLimit<double>::check(const double &value) {
+template<>
+void DynamicsLimit<double>::check(const double &value) const {
   if (value < 0) {
     std::stringstream ss;
     ss << desc << " limit cannot be negative.";
@@ -21,20 +21,14 @@ void DynamicsLimit<double>::check(const double &value) {
   }
 }
 
-template <>
-template <>
-void DynamicsLimit<std::array<double, 7>>::setFrom<Array<7>>(const Array<7> &value) {
-  set(ensureStd<7>(value));
+template<>
+template<>
+void DynamicsLimit<Vector7d>::setFrom<Array<7>>(const Array<7> &value) {
+  set(ensureEigen<7>(value));
 }
 
-template <>
-template <>
-Vector7d DynamicsLimit<std::array<double, 7>>::getAs<Vector7d>() {
-  return Vector7d::Map(value_.data());
-}
-
-template <>
-void DynamicsLimit<std::array<double, 7>>::check(const std::array<double, 7> &value) {
+template<>
+void DynamicsLimit<Vector7d>::check(const Vector7d &value) const {
   for (int i = 0; i < value.size(); i++) {
     if (value[i] < 0) {
       std::stringstream ss;

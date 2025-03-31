@@ -72,24 +72,13 @@ class DynamicsLimit {
   }
 
   /**
-   * @brief Get the current value of the limit as a different type.
-   *
-   * Retrieves the current value of the limit and converts it to a different type.
-   *
-   * @tparam AlternativeType The type to which the value should be converted.
-   * @return The current value of the limit converted to the specified type.
-   */
-  template <typename AlternativeType>
-  AlternativeType getAs();
-
-  /**
    * @brief Get the current value of the limit.
    *
    * Retrieves the current value stored in this limit.
    *
    * @return The current value of the limit.
    */
-  LimitType get() { return value_; }
+  [[nodiscard]] LimitType get() const { return value_; }
 
   /**
    * @brief The maximum value this limit can take as defined by Franka.
@@ -114,7 +103,7 @@ class DynamicsLimit {
    *
    * @param value The value to check.
    */
-  void check(const LimitType& value);
+  void check(const LimitType& value) const;
 
   std::shared_ptr<std::mutex> write_mutex_; /**< Mutex for synchronizing writes to the limit. */
   LimitType value_; /**< Current value of the limit. */

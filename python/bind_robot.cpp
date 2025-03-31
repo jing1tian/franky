@@ -34,15 +34,15 @@ void robotMove(Robot &robot, const std::shared_ptr<Motion<ControlSignalType>> &m
 }
 
 void bind_robot(py::module &m) {
-  py::class_<DynamicsLimit<std::array<double, 7>>>(m, "VectorDynamicsLimit")
-      .def("set", &DynamicsLimit<std::array<double, 7>>::setFrom<Array<7>>, "value"_a)
-      .def("get", &DynamicsLimit<std::array<double, 7>>::getAs<Vector7d>)
+  py::class_<DynamicsLimit<Vector7d>>(m, "VectorDynamicsLimit")
+      .def("set", &DynamicsLimit<Vector7d>::setFrom<Array<7>>, "value"_a)
+      .def("get", &DynamicsLimit<Vector7d>::get)
       .def_property_readonly(
           "max",
-          [](const DynamicsLimit<std::array<double, 7>> &dynamics_limit) {
+          [](const DynamicsLimit<Vector7d> &dynamics_limit) {
             return Vector7d::Map(dynamics_limit.max.data());
           })
-      .def_readonly("desc", &DynamicsLimit<std::array<double, 7>>::desc);
+      .def_readonly("desc", &DynamicsLimit<Vector7d>::desc);
 
   py::class_<DynamicsLimit<double>>(m, "DoubleDynamicsLimit")
       .def("set", &DynamicsLimit<double>::set, "value"_a)

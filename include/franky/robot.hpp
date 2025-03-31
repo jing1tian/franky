@@ -24,6 +24,7 @@
 #include "franky/relative_dynamics_factor.hpp"
 #include "franky/joint_state.hpp"
 #include "franky/dynamics_limit.hpp"
+#include "franky/util.hpp"
 
 namespace franky {
 
@@ -36,13 +37,6 @@ namespace franky {
 struct InvalidMotionTypeException : std::runtime_error {
   using std::runtime_error::runtime_error;
 };
-
-constexpr std::array<double, 7> scaleArr7(const std::array<double, 7> &arr, const double factor) {
-  std::array<double, arr.size()> result{};
-  for (size_t i = 0; i < arr.size(); ++i)
-    result[i] = arr[i] * factor;
-  return result;
-}
 
 /**
  * @brief A class representing a Franka robot.
@@ -155,12 +149,11 @@ class Robot : public franka::Robot {
   DynamicsLimit<double> elbow_jerk_limit{
     "elbow jerk", 5000.0, 800.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
 
-
   /**
    * @brief Joint velocity limit [rad/s].
    */
-#define MAX_JOINT_VEL {2.175, 2.175, 2.175, 2.175, 2.610, 2.610, 2.610}
-  DynamicsLimit<std::array<double, 7>> joint_velocity_limit{
+#define MAX_JOINT_VEL toEigenD<7>({2.175, 2.175, 2.175, 2.175, 2.610, 2.610, 2.610})
+  DynamicsLimit<Vector7d> joint_velocity_limit{
     "joint_velocity", MAX_JOINT_VEL, MAX_JOINT_VEL, control_mutex_,
     std::bind(&Robot::is_in_control_unsafe, this)
   };
@@ -168,18 +161,18 @@ class Robot : public franka::Robot {
   /**
    * @brief Joint acceleration limit [rad/s²].
    */
-#define MAX_JOINT_ACC {15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0}
-  DynamicsLimit<std::array<double, 7>> joint_acceleration_limit{
-    "joint_acceleration", MAX_JOINT_ACC, scaleArr7(MAX_JOINT_ACC, 0.3), control_mutex_,
+#define MAX_JOINT_ACC toEigenD<7>({15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0})
+  DynamicsLimit<Vector7d> joint_acceleration_limit{
+    "joint_acceleration", MAX_JOINT_ACC, MAX_JOINT_ACC * 0.3, control_mutex_,
     std::bind(&Robot::is_in_control_unsafe, this)
   };
 
   /**
    * @brief Joint jerk limit [rad/s³].
    */
-#define MAX_JOINT_JERK {7500.0, 3750.0, 5000.0, 6250.0, 7500.0, 10000.0, 10000.0}
-  DynamicsLimit<std::array<double, 7>> joint_jerk_limit{
-    "joint_jerk", MAX_JOINT_JERK, scaleArr7(MAX_JOINT_JERK, 0.3), control_mutex_,
+#define MAX_JOINT_JERK toEigenD<7>({7500.0, 3750.0, 5000.0, 6250.0, 7500.0, 10000.0, 10000.0})
+  DynamicsLimit<Vector7d> joint_jerk_limit{
+    "joint_jerk", MAX_JOINT_JERK, MAX_JOINT_JERK * 0.3, control_mutex_,
     std::bind(&Robot::is_in_control_unsafe, this)
   };
 
