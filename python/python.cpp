@@ -8,8 +8,8 @@ using namespace pybind11::literals; // to bring in the '_a' literal
 
 void bind_enums(py::module &);
 void bind_errors(py::module &);
-void bind_kinematics(py::module &);
 void bind_misc(py::module &);
+void bind_model(py::module &);
 void bind_motion_cartesian_pos(py::module &);
 void bind_motion_cartesian_vel(py::module &);
 void bind_motion_joint_pos(py::module &);
@@ -27,8 +27,8 @@ PYBIND11_MODULE(_franky, m) {
   bind_enums(m);
   bind_errors(m);
   bind_state_repr(m);
-  bind_kinematics(m);
   bind_robot_state(m);
+  bind_model(m);
   bind_reactions(m);
   bind_motion_cartesian_pos(m);
   bind_motion_cartesian_vel(m);

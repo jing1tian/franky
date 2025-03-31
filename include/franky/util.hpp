@@ -23,6 +23,18 @@ Eigen::Matrix<double, dims, 1> toEigenD(const std::array<double, dims> &vector) 
   return Eigen::Matrix<double, dims, 1>::Map(vector.data());
 }
 
+template<size_t rows, size_t cols>
+std::array<double, rows * cols> toStdMatD(const Eigen::Matrix<double, rows, cols, Eigen::ColMajor> &matrix) {
+  std::array<double, rows * cols> result;
+  Eigen::Map<Eigen::Matrix<double, rows, cols, Eigen::ColMajor>>(result.data()) = matrix;
+  return result;
+}
+
+template<size_t rows, size_t cols>
+Eigen::Matrix<double, rows, cols, Eigen::ColMajor> toEigenMatD(const std::array<double, rows * cols> &array) {
+  return Eigen::Map<const Eigen::Matrix<double, rows, cols, Eigen::ColMajor>>(array.data());
+}
+
 template<size_t dims>
 Eigen::Vector<double, dims> ensureEigen(const Array<dims> &input) {
   if (std::holds_alternative<Eigen::Vector<double, dims>>(input))

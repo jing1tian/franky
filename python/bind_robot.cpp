@@ -208,6 +208,7 @@ void bind_robot(py::module &m) {
       .def_property_readonly("is_in_control", &Robot::is_in_control)
       .def_property_readonly("fci_hostname", &Robot::fci_hostname)
       .def_property_readonly("current_control_signal_type", &Robot::current_control_signal_type)
+      .def_property_readonly("model", &Robot::model)
       .def_readonly("translation_velocity_limit", &Robot::translation_velocity_limit, "[m/s]")
       .def_readonly("rotation_velocity_limit", &Robot::rotation_velocity_limit, "[rad/s]")
       .def_readonly("elbow_velocity_limit", &Robot::elbow_velocity_limit, "[rad/s]")
@@ -221,7 +222,5 @@ void bind_robot(py::module &m) {
       .def_readonly("joint_acceleration_limit", &Robot::joint_acceleration_limit, "[rad/s²]")
       .def_readonly("joint_jerk_limit", &Robot::joint_jerk_limit, "[rad/s^3]")
       .def_readonly_static("degrees_of_freedom", &Robot::degrees_of_freedoms)
-      .def_readonly_static("control_rate", &Robot::control_rate, "[s]")
-      .def_static("forward_kinematics", &Robot::forwardKinematics, "q"_a);
-  //  .def_static("inverse_kinematics", &Robot::inverseKinematics, "target"_a, "q0"_a);
+      .def_readonly_static("control_rate", &Robot::control_rate, "[s]");
 }

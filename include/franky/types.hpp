@@ -10,8 +10,7 @@ namespace franky {
 
 using Vector6d = Eigen::Vector<double, 6>;
 using Vector7d = Eigen::Vector<double, 7>;
-
-using Euler = Eigen::EulerAngles<double, Eigen::EulerSystemXYZ>;
+using Jacobian = Eigen::Matrix<double, 6, 7>;
 
 using Affine = Eigen::Affine3d;
 

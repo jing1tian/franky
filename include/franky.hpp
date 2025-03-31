@@ -22,7 +22,7 @@
 #include "franky/gripper.hpp"
 #include "franky/elbow_state.hpp"
 #include "franky/joint_state.hpp"
-#include "franky/kinematics.hpp"
+#include "franky/model.hpp"
 #include "franky/robot.hpp"
 #include "franky/robot_pose.hpp"
 #include "franky/robot_velocity.hpp"

@@ -16,7 +16,6 @@
 #include "franky/robot_pose.hpp"
 #include "franky/robot_velocity.hpp"
 #include "franky/cartesian_state.hpp"
-#include "franky/kinematics.hpp"
 #include "franky/motion/motion_generator.hpp"
 #include "franky/motion/motion.hpp"
 #include "franky/scope_guard.hpp"
@@ -25,6 +24,7 @@
 #include "franky/joint_state.hpp"
 #include "franky/dynamics_limit.hpp"
 #include "franky/util.hpp"
+#include "franky/model.hpp"
 
 namespace franky {
 
@@ -75,24 +75,6 @@ class Robot : public franka::Robot {
      */
     franka::RealtimeConfig realtime_config{franka::RealtimeConfig::kEnforce};
   };
-
-  /**
-   * @brief The kinematic chain of the robot.
-   */
-  const KinematicChain<7> kinematics = KinematicChain<7>(
-      {{
-           {0.0, 0.333, 0.0},
-           {-M_PI / 2, 0.0, 0.0},
-           {M_PI / 2, 0.316, 0.0},
-           {M_PI / 2, 0.0, 0.0825},
-           {-M_PI / 2, 0.384, -0.0825},
-           {M_PI / 2, 0.0, 0.0},
-           {M_PI / 2, 0.0, 0.088}}},
-      Affine().fromPositionOrientationScale(
-          Eigen::Vector3d(0, 0, 0.107),
-          Euler(M_PI / 4, 0, M_PI),
-          Eigen::Matrix<double, 3, 1>::Ones())
-  );
 
   // clang-format off
   /**
@@ -341,6 +323,15 @@ class Robot : public franka::Robot {
   [[nodiscard]] std::optional<ControlSignalType> current_control_signal_type();
 
   /**
+   * @brief The model of the robot.
+   *
+   * The model is loaded in the constructor, so calling this function does not incur any overhead.
+   */
+  [[nodiscard]] inline std::shared_ptr<const Model> model() const {
+    return model_;
+  }
+
+  /**
    * @brief Wait for the current motion to finish. Throw any exceptions that occurred during the motion.
    */
   inline bool joinMotion() {
@@ -428,22 +419,9 @@ class Robot : public franka::Robot {
     }, async);
   }
 
-  /**
-   * @brief Calculate the inverse kinematics for the given target pose.
-   * @param target The target pose.
-   * @param q0 The initial guess for the joint positions.
-   * @return A vector containing the joint positions.
-   */
-  // [[nodiscard]] static Vector7d inverseKinematics(const Affine &target, const Vector7d &q0);
-
-  /**
-   * @brief Calculate the forward kinematics for the given joint positions.
-   * @param q The joint positions.
-   * @return The forward kinematics.
-   */
-  [[nodiscard]] static Affine forwardKinematics(const Vector7d &q);
-
  private:
+  std::shared_ptr<const Model> model_;
+
   template<typename ControlSignalType>
   using ControlFunc = std::function<ControlSignalType(const franka::RobotState &, franka::Duration)>;
   using MotionGeneratorVariant = std::variant<
