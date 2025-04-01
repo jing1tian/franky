@@ -40,7 +40,7 @@ Vector7d RobotPose::vector_repr() const {
 }
 
 franka::CartesianPose RobotPose::as_franka_pose(FlipDirection default_flip_direction) const {
-  std::array<double, 16> array = toStd<16>(Eigen::Map<const Eigen::Vector<double, 16>>(end_effector_pose_.data()));
+  std::array<double, 16> array = toStdD<16>(Eigen::Map<const Eigen::Vector<double, 16>>(end_effector_pose_.data()));
   if (elbow_state_.has_value()) {
     return {array, elbow_state_.value().to_array(default_flip_direction)};
   }

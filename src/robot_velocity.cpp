@@ -40,7 +40,7 @@ Vector7d RobotVelocity::vector_repr() const {
 
 franka::CartesianVelocities RobotVelocity::as_franka_velocity(
     const std::optional<ElbowState> &elbow_state, FlipDirection default_elbow_flip_direction) const {
-  std::array<double, 6> array = toStd<6>(vector_repr().head<6>());
+  std::array<double, 6> array = toStdD<6>(vector_repr().head<6>());
   if (elbow_state.has_value())
     return {array, elbow_state->to_array(default_elbow_flip_direction)};
   return {array};

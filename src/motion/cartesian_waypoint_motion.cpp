@@ -28,9 +28,9 @@ void CartesianWaypointMotion::initWaypointMotion(
 
   target_state_ = robot_pose;
 
-  input_parameter.current_position = toStd<7>(robot_pose.vector_repr());
-  input_parameter.current_velocity = toStd<7>(initial_velocity.vector_repr());
-  input_parameter.current_acceleration = toStd<7>(initial_acceleration_with_elbow);
+  input_parameter.current_position = toStdD<7>(robot_pose.vector_repr());
+  input_parameter.current_velocity = toStdD<7>(initial_velocity.vector_repr());
+  input_parameter.current_acceleration = toStdD<7>(initial_acceleration_with_elbow);
 }
 
 franka::CartesianPose CartesianWaypointMotion::getControlSignal(
@@ -77,9 +77,9 @@ void CartesianWaypointMotion::setNewWaypoint(
   Vector7d current_velocity_ref_frame =
       (Vector7d() << linear_vel_ref_frame, angular_vel_ref_frame, elbow_velocity).finished();
   Vector7d current_acc_ref_frame = (Vector7d() << linear_acc_ref_frame, angular_acc_ref_frame, elbow_acc).finished();
-  input_parameter.current_position = toStd<7>(zero_pose.vector_repr());
-  input_parameter.current_velocity = toStd<7>(current_velocity_ref_frame);
-  input_parameter.current_acceleration = toStd<7>(current_acc_ref_frame);
+  input_parameter.current_position = toStdD<7>(zero_pose.vector_repr());
+  input_parameter.current_velocity = toStdD<7>(current_velocity_ref_frame);
+  input_parameter.current_acceleration = toStdD<7>(current_acc_ref_frame);
 
   auto waypoint_pose = new_waypoint.target.pose();
 
@@ -107,10 +107,10 @@ void CartesianWaypointMotion::setNewWaypoint(
   auto new_target_transformed = new_target.changeEndEffectorFrame(ee_frame_.inverse());
   auto new_target_ref_frame = ref_frame_.inverse() * new_target_transformed;
 
-  input_parameter.target_position = toStd<7>(new_target_ref_frame.pose().vector_repr());
+  input_parameter.target_position = toStdD<7>(new_target_ref_frame.pose().vector_repr());
   // This is a bit of an oversimplification, as the angular velocities don't work like linear velocities (but we pretend
   // they do here). However, it is probably good enough here.
-  input_parameter.target_velocity = toStd<7>(new_target_ref_frame.velocity().vector_repr());
+  input_parameter.target_velocity = toStdD<7>(new_target_ref_frame.velocity().vector_repr());
   input_parameter.enabled = {true, true, true, true, true, true, waypoint_pose.elbow_state().has_value()};
 
   target_state_ = new_target;

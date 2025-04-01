@@ -42,9 +42,9 @@ void JointWaypointMotion::setNewWaypoint(
   auto position = new_target.position();
   if (new_waypoint.reference_type == ReferenceType::kRelative)
     position += toEigen(input_parameter.current_position);
-  input_parameter.target_position = toStd<7>(position);
-  input_parameter.target_velocity = toStd<7>(new_target.velocity());
-  input_parameter.target_acceleration = toStd<7>(Vector7d::Zero());
+  input_parameter.target_position = toStdD<7>(position);
+  input_parameter.target_velocity = toStdD<7>(new_target.velocity());
+  input_parameter.target_acceleration = toStdD<7>(Vector7d::Zero());
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getAbsoluteInputLimits() const {

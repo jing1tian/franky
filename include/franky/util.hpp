@@ -6,25 +6,30 @@
 
 namespace franky {
 
-template<size_t dims>
-std::array<double, dims> toStd(const Eigen::Matrix<double, dims, 1> &vector) {
-  std::array<double, dims> result;
-  Eigen::Matrix<double, dims, 1>::Map(result.data()) = vector;
+template<typename T, size_t dims>
+std::array<T, dims> toStd(const Eigen::Matrix<T, dims, 1> &vector) {
+  std::array<T, dims> result;
+  Eigen::Matrix<T, dims, 1>::Map(result.data()) = vector;
   return result;
 }
 
-template<size_t dims, typename T>
+template<size_t dims>
+std::array<double, dims> toStdD(const Eigen::Matrix<double, dims, 1> &vector) {
+  return toStd<double, dims>(vector);
+}
+
+template<typename T, size_t dims>
 Eigen::Matrix<T, dims, 1> toEigen(const std::array<T, dims> &vector) {
   return Eigen::Matrix<T, dims, 1>::Map(vector.data());
 }
 
 template<size_t dims>
 Eigen::Matrix<double, dims, 1> toEigenD(const std::array<double, dims> &vector) {
-  return Eigen::Matrix<double, dims, 1>::Map(vector.data());
+  return toEigen<double, dims>(vector);
 }
 
 template<size_t rows, size_t cols>
-std::array<double, rows * cols> toStdMatD(const Eigen::Matrix<double, rows, cols, Eigen::ColMajor> &matrix) {
+std::array<double, rows * cols> toStdDMatD(const Eigen::Matrix<double, rows, cols, Eigen::ColMajor> &matrix) {
   std::array<double, rows * cols> result;
   Eigen::Map<Eigen::Matrix<double, rows, cols, Eigen::ColMajor>>(result.data()) = matrix;
   return result;
@@ -46,7 +51,7 @@ template<size_t dims>
 std::array<double, dims> ensureStd(const Array<dims> &input) {
   if (std::holds_alternative<std::array<double, dims >>(input))
     return std::get<std::array<double, dims >>(input);
-  return toStd<dims>(std::get<Eigen::Vector<double, dims >>(input));
+  return toStdD<dims>(std::get<Eigen::Vector<double, dims >>(input));
 }
 
 template<size_t dims>

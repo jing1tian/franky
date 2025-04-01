@@ -48,9 +48,9 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
     auto relative_dynamics_factor =
         waypoint.relative_dynamics_factor * relative_dynamics_factor_ * this->robot()->relative_dynamics_factor();
 
-    input_parameter.max_velocity = toStd<7>(relative_dynamics_factor.acceleration() * acc_lim);
-    input_parameter.max_acceleration = toStd<7>(relative_dynamics_factor.jerk() * jerk_lim);
-    input_parameter.max_jerk = toStd<7>(Vector7d::Constant(std::numeric_limits<double>::infinity()));
+    input_parameter.max_velocity = toStdD<7>(relative_dynamics_factor.acceleration() * acc_lim);
+    input_parameter.max_acceleration = toStdD<7>(relative_dynamics_factor.jerk() * jerk_lim);
+    input_parameter.max_jerk = toStdD<7>(Vector7d::Constant(std::numeric_limits<double>::infinity()));
 
     if (relative_dynamics_factor.max_dynamics()) {
       input_parameter.synchronization = ruckig::Synchronization::TimeIfNecessary;

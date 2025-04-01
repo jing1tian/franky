@@ -25,7 +25,7 @@ void JointVelocityWaypointMotion::initWaypointMotion(const franka::RobotState &r
   else
     input_parameter.current_position = robot_state.dq_d;
   input_parameter.current_velocity = robot_state.ddq_d;
-  input_parameter.current_acceleration = toStd<7>(Vector7d::Zero());
+  input_parameter.current_acceleration = toStdD<7>(Vector7d::Zero());
 }
 
 franka::JointVelocities JointVelocityWaypointMotion::getControlSignal(
@@ -39,9 +39,9 @@ void JointVelocityWaypointMotion::setNewWaypoint(const franka::RobotState &robot
                                                  const VelocityWaypoint<Vector7d> &new_waypoint,
                                                  ruckig::InputParameter<7> &input_parameter) {
   auto new_target = new_waypoint.target;
-  input_parameter.target_position = toStd<7>(new_target);
-  input_parameter.target_velocity = toStd<7>(Vector7d::Zero());
-  input_parameter.target_acceleration = toStd<7>(Vector7d::Zero());
+  input_parameter.target_position = toStdD<7>(new_target);
+  input_parameter.target_velocity = toStdD<7>(Vector7d::Zero());
+  input_parameter.target_acceleration = toStdD<7>(Vector7d::Zero());
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointVelocityWaypointMotion::getAbsoluteInputLimits() const {
