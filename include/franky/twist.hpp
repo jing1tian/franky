@@ -15,8 +15,8 @@ class Twist {
   Twist(const Twist &twist) = default;
 
   /**
-   * @param linear_velocity The linear velocity.
-   * @param angular_velocity The angular velocity.
+   * @param linear_velocity The linear velocity in [m/s].
+   * @param angular_velocity The angular velocity in [rad/s].
    */
   explicit Twist(Eigen::Vector3d linear_velocity = Eigen::Vector3d::Zero(),
                  Eigen::Vector3d angular_velocity = Eigen::Vector3d::Zero())
@@ -25,7 +25,7 @@ class Twist {
   /**
    * @param vector_repr The vector representation of the twist.
    */
-  [[nodiscard]] static inline Twist fromVectorRepr(const Vector6d &vector_repr) {
+  [[nodiscard]] static Twist fromVectorRepr(const Vector6d &vector_repr) {
     return Twist{vector_repr.head<3>(), vector_repr.tail<3>()};
   }
 
@@ -34,7 +34,7 @@ class Twist {
    *
    * @return The vector representation of the twist.
    */
-  [[nodiscard]] inline Vector6d vector_repr() const {
+  [[nodiscard]] Vector6d vector_repr() const {
     Vector6d result;
     result << linear_velocity_, angular_velocity_;
     return result;
@@ -46,7 +46,7 @@ class Twist {
    * @param transformation The transformation to apply.
    * @return The twist after the transformation.
    */
-  [[nodiscard]] inline Twist transformWith(const Affine &transformation) const {
+  [[nodiscard]] Twist transformWith(const Affine &transformation) const {
     return transformWith(transformation.rotation());
   }
 
@@ -57,7 +57,7 @@ class Twist {
    * @return The twist after the transformation.
    */
   template<typename RotationMatrixType>
-  [[nodiscard]] inline Twist transformWith(const RotationMatrixType &rotation) const {
+  [[nodiscard]] Twist transformWith(const RotationMatrixType &rotation) const {
     return Twist{rotation * linear_velocity_, rotation * angular_velocity_};
   }
 
@@ -69,25 +69,25 @@ class Twist {
    * @param link_translation: The translation of the link. Must be in the same reference frame as this twist.
    * @return The twist propagated through the link.
    */
-  [[nodiscard]] inline Twist propagateThroughLink(const Eigen::Vector3d &link_translation) const {
+  [[nodiscard]] Twist propagateThroughLink(const Eigen::Vector3d &link_translation) const {
     return Twist{linear_velocity_ + angular_velocity_.cross(link_translation), angular_velocity_};
   }
 
   /**
    * @brief Get the linear velocity.
    *
-   * @return The linear velocity.
+   * @return The linear velocity [m/s].
    */
-  [[nodiscard]] inline Eigen::Vector3d linear_velocity() const {
+  [[nodiscard]] Eigen::Vector3d linear_velocity() const {
     return linear_velocity_;
   }
 
   /**
    * @brief Get the angular velocity.
    *
-   * @return The angular velocity.
+   * @return The angular velocity [rad/s].
    */
-  [[nodiscard]] inline Eigen::Vector3d angular_velocity() const {
+  [[nodiscard]] Eigen::Vector3d angular_velocity() const {
     return angular_velocity_;
   }
 
@@ -103,7 +103,7 @@ inline Twist operator*(const Affine &affine, const Twist &twist) {
 }
 
 template<typename RotationMatrixType>
-inline Twist operator*(const RotationMatrixType &rotation, const Twist &twist) {
+Twist operator*(const RotationMatrixType &rotation, const Twist &twist) {
   return twist.transformWith(rotation);
 }
 
