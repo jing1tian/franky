@@ -22,7 +22,7 @@ ImpedanceMotion::ImpedanceMotion(Affine target, const ImpedanceMotion::Params &p
 }
 
 void ImpedanceMotion::initImpl(
-    const franka::RobotState &robot_state,
+    const RobotState &robot_state,
     const std::optional<franka::Torques> &previous_command) {
   auto robot_pose = Affine(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   intermediate_target_ = robot_pose;
@@ -30,29 +30,24 @@ void ImpedanceMotion::initImpl(
     absolute_target_ = robot_pose * target_;
   else
     absolute_target_ = target_;
-  model_ = std::make_unique<franka::Model>(robot()->loadModel());
 }
 
 franka::Torques
 ImpedanceMotion::nextCommandImpl(
-    const franka::RobotState &robot_state,
+    const RobotState &robot_state,
     franka::Duration time_step,
     franka::Duration rel_time,
     franka::Duration abs_time,
     const std::optional<franka::Torques> &previous_command) {
-  std::array<double, 7> coriolis_array = model_->coriolis(robot_state);
-  std::array<double, 42> jacobian_array = model_->zeroJacobian(franka::Frame::kEndEffector, robot_state);
+  auto model = robot()->model();
+  Vector7d coriolis = model->coriolis(robot_state);
+  Jacobian jacobian = model->zeroJacobian(franka::Frame::kEndEffector, robot_state);
 
-  Eigen::Map<const Eigen::Matrix<double, 7, 1>> coriolis(coriolis_array.data());
-  Eigen::Map<const Eigen::Matrix<double, 6, 7>> jacobian(jacobian_array.data());
-  Eigen::Map<const Eigen::Matrix<double, 7, 1>> q(robot_state.q.data());
-  Eigen::Map<const Eigen::Matrix<double, 7, 1>> dq(robot_state.dq.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
-  Eigen::Vector3d position(transform.translation());
-  Eigen::Quaterniond orientation(transform.linear());
+  Eigen::Quaterniond orientation(transform.rotation());
 
   Eigen::Matrix<double, 6, 1> error;
-  error.head(3) << position - intermediate_target_.translation();
+  error.head(3) << robot_state.O_T_EE.translation() - intermediate_target_.translation();
 
   Eigen::Quaterniond quat(target().rotation());
   if (quat.coeffs().dot(orientation.coeffs()) < 0.0) {
@@ -63,7 +58,7 @@ ImpedanceMotion::nextCommandImpl(
   error.tail(3) << error_quaternion.x(), error_quaternion.y(), error_quaternion.z();
   error.tail(3) << -transform.linear() * error.tail(3);
 
-  auto wrench_cartesian_default = -stiffness * error - damping * (jacobian * dq);
+  auto wrench_cartesian_default = -stiffness * error - damping * (jacobian * robot_state.dq);
   auto wrench_cartesian = params_.force_constraints_active.select(
       params_.force_constraints, wrench_cartesian_default);
 

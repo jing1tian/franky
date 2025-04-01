@@ -26,14 +26,18 @@ void CartesianVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<Robot
 }
 
 void CartesianVelocityWaypointMotion::initWaypointMotion(
-    const franka::RobotState &robot_state,
+    const RobotState &robot_state,
     const std::optional<franka::CartesianVelocities> &previous_command,
     ruckig::InputParameter<7> &input_parameter) {
-  RobotVelocity current_velocity
-      (previous_command.value_or(franka::CartesianVelocities{robot_state.O_dP_EE_c, robot_state.delbow_c}));
+  RobotVelocity current_velocity;
+  if (previous_command.has_value()) {
+    current_velocity = RobotVelocity(previous_command.value());
+  } else {
+    current_velocity = RobotVelocity(robot_state.O_dP_EE_c, robot_state.delbow_c);
+  }
 
   auto initial_acceleration = Vector6d::Map(robot_state.O_ddP_EE_c.data());
-  Vector7d initial_acceleration_with_elbow = (Vector7d() << initial_acceleration, robot_state.ddelbow_c[0]).finished();
+  Vector7d initial_acceleration_with_elbow = (Vector7d() << initial_acceleration, robot_state.ddelbow_c).finished();
 
   input_parameter.current_position = toStdD<7>(current_velocity.vector_repr());
   input_parameter.current_velocity = toStdD<7>(initial_acceleration_with_elbow);
@@ -42,12 +46,12 @@ void CartesianVelocityWaypointMotion::initWaypointMotion(
   if (previous_command.has_value())
     last_elbow_pos_ = previous_command.value().elbow[0];
   else
-    last_elbow_pos_ = robot_state.elbow_c[0];
-  last_elbow_vel_ = robot_state.delbow_c[0];
+    last_elbow_pos_ = robot_state.elbow_c.joint_3_pos();
+  last_elbow_vel_ = robot_state.delbow_c;
 }
 
 franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
-    const franka::RobotState &robot_state,
+    const RobotState &robot_state,
     const franka::Duration &time_step,
     const std::optional<franka::CartesianVelocities> &previous_command,
     const ruckig::InputParameter<7> &input_parameter) {
@@ -67,7 +71,7 @@ franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
 
     last_elbow_vel_ = input_parameter.current_position[0];
     last_elbow_pos_ = current_elbow_pos;
-    auto current_elbow_flip = static_cast<FlipDirection>(robot_state.elbow[1]);
+    auto current_elbow_flip = robot_state.elbow.joint_4_flip();
     if (previous_command.has_value() && previous_command->hasElbow()) {
       current_elbow_flip = static_cast<FlipDirection>(previous_command->elbow[1]);
     }
@@ -78,7 +82,7 @@ franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
 }
 
 void CartesianVelocityWaypointMotion::setNewWaypoint(
-    const franka::RobotState &robot_state,
+    const RobotState &robot_state,
     const std::optional<franka::CartesianVelocities> &previous_command,
     const VelocityWaypoint<RobotVelocity> &new_waypoint,
     ruckig::InputParameter<7> &input_parameter) {

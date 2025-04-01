@@ -59,7 +59,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
       : waypoints_(std::move(waypoints)), return_when_finished_(return_when_finished), prev_result_() {}
 
  protected:
-  void initImpl(const franka::RobotState &robot_state,
+  void initImpl(const RobotState &robot_state,
                 const std::optional<ControlSignalType> &previous_command) override {
     target_reached_time_ = std::nullopt;
 
@@ -78,7 +78,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
 
   ControlSignalType
   nextCommandImpl(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       franka::Duration time_step,
       franka::Duration rel_time,
       franka::Duration abs_time,
@@ -127,12 +127,12 @@ class WaypointMotion : public Motion<ControlSignalType> {
   };
 
   virtual void initWaypointMotion(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const std::optional<ControlSignalType> &previous_command,
       ruckig::InputParameter<7> &input_parameter) = 0;
 
   virtual void setNewWaypoint(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const std::optional<ControlSignalType> &previous_command,
       const WaypointType &new_waypoint,
       ruckig::InputParameter<7> &input_parameter) = 0;
@@ -142,7 +142,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
   [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const = 0;
 
   [[nodiscard]] virtual ControlSignalType getControlSignal(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const franka::Duration &time_step,
       const std::optional<ControlSignalType> &previous_command,
       const ruckig::InputParameter<7> &input_parameter) = 0;

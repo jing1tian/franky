@@ -17,7 +17,7 @@ namespace franky {
  */
 class Measure {
   using MeasureFunc = std::function<double(
-      const franka::RobotState &, franka::Duration, franka::Duration)>;
+      const RobotState &, franka::Duration, franka::Duration)>;
 
  public:
   /**
@@ -42,7 +42,7 @@ class Measure {
    * @return The value of the measure.
    */
   inline double operator()(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       franka::Duration rel_time,
       franka::Duration abs_time) const {
     return measure_func_(robot_state, rel_time, abs_time);

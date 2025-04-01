@@ -1,10 +1,7 @@
 #pragma once
 
 #include <functional>
-#include <cmath>
-#include <memory>
-#include <iostream>
-#include <franka/robot_state.h>
+#include <franky/robot_state.hpp>
 
 namespace franky {
 
@@ -18,7 +15,7 @@ namespace franky {
 class Condition {
  public:
   using CheckFunc = std::function<bool(
-      const franka::RobotState &, franka::Duration, franka::Duration)>;
+      const RobotState &, franka::Duration, franka::Duration)>;
 
   /**
    * @param check_func A function that returns true if the condition is met.
@@ -42,7 +39,7 @@ class Condition {
    * @return True if the condition is met.
    */
   inline bool operator()(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       franka::Duration rel_time,
       franka::Duration abs_time) const {
     return check_func_(robot_state, rel_time, abs_time);

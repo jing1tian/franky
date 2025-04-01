@@ -32,12 +32,12 @@ class JointVelocityWaypointMotion : public VelocityWaypointMotion<franka::JointV
   void checkWaypoint(const VelocityWaypoint<Vector7d> &waypoint) const override;
 
   void initWaypointMotion(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const std::optional<franka::JointVelocities> &previous_command,
       ruckig::InputParameter<7> &input_parameter) override;
 
   void setNewWaypoint(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const std::optional<franka::JointVelocities> &previous_command,
       const VelocityWaypoint<Vector7d> &new_waypoint,
       ruckig::InputParameter<7> &input_parameter) override;
@@ -45,7 +45,7 @@ class JointVelocityWaypointMotion : public VelocityWaypointMotion<franka::JointV
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override;
 
   [[nodiscard]] franka::JointVelocities getControlSignal(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const franka::Duration &time_step,
       const std::optional<franka::JointVelocities> &previous_command,
       const ruckig::InputParameter<7> &input_parameter) override;

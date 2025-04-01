@@ -249,7 +249,7 @@ class Robot : public franka::Robot {
    * @brief Returns the current pose of the robot.
    * @return The current pose of the robot.
    */
-  [[nodiscard]] inline RobotPose currentPose() {
+  [[nodiscard]] RobotPose currentPose() {
     return currentCartesianState().pose();
   }
 
@@ -257,7 +257,7 @@ class Robot : public franka::Robot {
    * @brief Returns the current cartesian velocity of the robot.
    * @return The current cartesian velocity of the robot.
    */
-  [[nodiscard]] inline RobotVelocity currentCartesianVelocity() {
+  [[nodiscard]] RobotVelocity currentCartesianVelocity() {
     return currentCartesianState().velocity();
   }
 
@@ -265,35 +265,42 @@ class Robot : public franka::Robot {
    * @brief Returns the current cartesian state of the robot.
    * @return The current cartesian state of the robot.
    */
-  [[nodiscard]] inline CartesianState currentCartesianState() {
+  [[nodiscard]] CartesianState currentCartesianState() {
     auto s = state();
     return {{Affine(Eigen::Matrix4d::Map(s.O_T_EE.data())), ElbowState{s.elbow}},
-            RobotVelocity(franka::CartesianVelocities(s.O_dP_EE_c, s.delbow_c))};
+            RobotVelocity(s.O_dP_EE_c, s.delbow_c)};
   }
 
   /**
    * @brief Returns the current joint state of the robot.
    * @return The current joint state of the robot.
    */
-  [[nodiscard]] JointState currentJointState();
+  [[nodiscard]] JointState currentJointState() {
+    auto s = state();
+    return {s.q, s.dq};
+  }
 
   /**
    * @brief Returns the current joint positions of the robot.
    * @return The current joint positions of the robot.
    */
-  [[nodiscard]] Vector7d currentJointPositions();
+  [[nodiscard]] Vector7d currentJointPositions() {
+    return currentJointState().position();
+  }
 
   /**
    * @brief Returns the current joint velocities of the robot.
    * @return The current joint velocities of the robot.
    */
-  [[nodiscard]] Vector7d currentJointVelocities();
+  [[nodiscard]] Vector7d currentJointVelocities() {
+    return currentJointState().velocity();
+  }
 
   /**
    * @brief Returns the current state of the robot.
    * @return The current state of the robot.
    */
-  [[nodiscard]] franka::RobotState state();
+  [[nodiscard]] RobotState state();
 
   /**
    * @brief Returns the current global relative dynamics factor of the robot.
@@ -327,14 +334,14 @@ class Robot : public franka::Robot {
    *
    * The model is loaded in the constructor, so calling this function does not incur any overhead.
    */
-  [[nodiscard]] inline std::shared_ptr<const Model> model() const {
+  [[nodiscard]] std::shared_ptr<const Model> model() const {
     return model_;
   }
 
   /**
    * @brief Wait for the current motion to finish. Throw any exceptions that occurred during the motion.
    */
-  inline bool joinMotion() {
+  bool joinMotion() {
     std::unique_lock lock(*control_mutex_);
     return joinMotionUnsafe(lock);
   }
@@ -347,7 +354,7 @@ class Robot : public franka::Robot {
    * @return Whether the motion finished before the timeout expired.
    */
   template<class Rep, class Period>
-  inline bool joinMotion(const std::chrono::duration<Rep, Period> &timeout) {
+  bool joinMotion(const std::chrono::duration<Rep, Period> &timeout) {
     std::unique_lock lock(*control_mutex_);
     return joinMotionUnsafe<Rep, Period>(lock, timeout);
   }
@@ -358,7 +365,7 @@ class Robot : public franka::Robot {
    * @return Whether the robot is still in motion.
    */
   [[nodiscard]]
-  inline bool pollMotion() {
+  bool pollMotion() {
     return joinMotion(std::chrono::milliseconds(0));
   }
 
@@ -369,7 +376,7 @@ class Robot : public franka::Robot {
    * @param motion The motion to execute.
    * @param async Whether to execute the motion asynchronously.
    */
-  inline void move(const std::shared_ptr<Motion<franka::CartesianPose>> &motion, bool async = false) {
+  void move(const std::shared_ptr<Motion<franka::CartesianPose>> &motion, bool async = false) {
     moveInternal<franka::CartesianPose>(motion, [this](const ControlFunc<franka::CartesianPose> &m) {
       control(m, params_.controller_mode);
     }, async);
@@ -380,7 +387,7 @@ class Robot : public franka::Robot {
    * @param motion The motion to execute.
    * @param async Whether to execute the motion asynchronously.
    */
-  inline void move(const std::shared_ptr<Motion<franka::CartesianVelocities>> &motion, bool async = false) {
+  void move(const std::shared_ptr<Motion<franka::CartesianVelocities>> &motion, bool async = false) {
     moveInternal<franka::CartesianVelocities>(motion, [this](const ControlFunc<franka::CartesianVelocities> &m) {
       control(m, params_.controller_mode);
     }, async);
@@ -391,7 +398,7 @@ class Robot : public franka::Robot {
    * @param motion The motion to execute.
    * @param async Whether to execute the motion asynchronously.
    */
-  inline void move(const std::shared_ptr<Motion<franka::JointPositions>> &motion, bool async = false) {
+  void move(const std::shared_ptr<Motion<franka::JointPositions>> &motion, bool async = false) {
     moveInternal<franka::JointPositions>(motion, [this](const ControlFunc<franka::JointPositions> &m) {
       control(m, params_.controller_mode);
     }, async);
@@ -402,7 +409,7 @@ class Robot : public franka::Robot {
    * @param motion The motion to execute.
    * @param async Whether to execute the motion asynchronously.
    */
-  inline void move(const std::shared_ptr<Motion<franka::JointVelocities>> &motion, bool async = false) {
+  void move(const std::shared_ptr<Motion<franka::JointVelocities>> &motion, bool async = false) {
     moveInternal<franka::JointVelocities>(motion, [this](const ControlFunc<franka::JointVelocities> &m) {
       control(m, params_.controller_mode);
     }, async);
@@ -413,7 +420,7 @@ class Robot : public franka::Robot {
    * @param motion The motion to execute.
    * @param async Whether to execute the motion asynchronously.
    */
-  inline void move(const std::shared_ptr<Motion<franka::Torques>> &motion, bool async = false) {
+  void move(const std::shared_ptr<Motion<franka::Torques>> &motion, bool async = false) {
     moveInternal<franka::Torques>(motion, [this](const ControlFunc<franka::Torques> &m) {
       control(m);
     }, async);
@@ -436,7 +443,7 @@ class Robot : public franka::Robot {
   //! The robot's hostname / IP address
   std::string fci_hostname_;
   Params params_;
-  franka::RobotState current_state_;
+  RobotState current_state_;
   std::mutex state_mutex_;
   std::shared_ptr<std::mutex> control_mutex_;
   std::condition_variable control_finished_condition_;
@@ -493,7 +500,7 @@ class Robot : public franka::Robot {
         motion_generator_.emplace<MotionGenerator<ControlSignalType>>(this, motion);
         auto motion_generator = &std::get<MotionGenerator<ControlSignalType>>(motion_generator_);
         motion_generator->registerUpdateCallback(
-            [this](const franka::RobotState &robot_state,
+            [this](const RobotState &robot_state,
                    franka::Duration duration,
                    franka::Duration time) {
               std::lock_guard lock(state_mutex_);
@@ -506,8 +513,8 @@ class Robot : public franka::Robot {
                 bool done = false;
                 while (!done) {
                   control_func_executor(
-                      [motion_generator](const franka::RobotState &rs, franka::Duration d) {
-                        return (*motion_generator)(rs, d);
+                      [this, motion_generator](const franka::RobotState &rs, franka::Duration d) {
+                        return (*motion_generator)(RobotState::from_franka(rs), d);
                       });
                   std::unique_lock lock(*control_mutex_);
 

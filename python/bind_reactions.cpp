@@ -28,7 +28,7 @@ void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal
           const typename Motion<ControlSignalType>::CallbackType &callback
       ) {
         motion.registerCallback([callback](
-            const franka::RobotState &robot_state,
+            const RobotState &robot_state,
             franka::Duration time_step,
             franka::Duration rel_time,
             franka::Duration abs_time,
@@ -51,10 +51,10 @@ void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal
       .def("register_callback", [](
           Reaction<ControlSignalType> &reaction,
           const std::function<void(
-              const franka::RobotState &, franka::Duration, franka::Duration)> &callback
+              const RobotState &, franka::Duration, franka::Duration)> &callback
       ) {
         reaction.registerCallback([callback](
-            const franka::RobotState &robot_state,
+            const RobotState &robot_state,
             franka::Duration rel_time,
             franka::Duration abs_time) {
           callback_executor.add([callback, robot_state, rel_time, abs_time]() {

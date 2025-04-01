@@ -24,7 +24,7 @@ class Motion;
 template<typename ControlSignalType>
 class Reaction {
   using MotionFunc = std::function<std::shared_ptr<Motion<ControlSignalType>>(
-      const franka::RobotState &, franka::Duration, franka::Duration)>;
+      const RobotState &, franka::Duration, franka::Duration)>;
 
  public:
   /**
@@ -47,7 +47,7 @@ class Reaction {
    * robot started moving, and is only reset if a motion expires without being replaced by a new motion.
    * @return The new motion if the condition is met, or nullptr otherwise.
    */
-  std::shared_ptr<Motion<ControlSignalType>> operator()(const franka::RobotState &robot_state,
+  std::shared_ptr<Motion<ControlSignalType>> operator()(const RobotState &robot_state,
                                                         franka::Duration rel_time,
                                                         franka::Duration abs_time);
 
@@ -59,7 +59,7 @@ class Reaction {
    * robot started moving, and is only reset if a motion expires without being replaced by a new motion.
    * @return True if the condition is met, false otherwise.
    */
-  [[nodiscard]] inline bool condition(const franka::RobotState &robot_state,
+  [[nodiscard]] inline bool condition(const RobotState &robot_state,
                                       franka::Duration rel_time,
                                       franka::Duration abs_time) const {
     return condition_(robot_state, rel_time, abs_time);
@@ -72,7 +72,7 @@ class Reaction {
    */
   void registerCallback(
       const std::function<void(
-          const franka::RobotState &,
+          const RobotState &,
           franka::Duration,
           franka::Duration)>& callback);
 
@@ -81,7 +81,7 @@ class Reaction {
   Condition condition_;
   std::mutex callback_mutex_;
   std::vector<std::function<void(
-      const franka::RobotState &,
+      const RobotState &,
       franka::Duration,
       franka::Duration)>> callbacks_{};
 };

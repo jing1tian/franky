@@ -24,42 +24,40 @@ void bind_model(py::module &m) {
       .value("Stiffness", franka::Frame::kStiffness);
 
   py::class_<Model>(m, "Model")
-      .def("pose", py::overload_cast<franka::Frame, const franka::RobotState &>(&Model::pose, py::const_),
+      .def("pose", py::overload_cast<franka::Frame, const RobotState &>(&Model::pose, py::const_),
            "frame"_a, "state"_a)
       .def("pose", py::overload_cast<franka::Frame, const Vector7d &, const Affine &, const Affine &>(
                &Model::pose, py::const_),
            "frame"_a, "q"_a, "F_T_EE"_a, "EE_T_K"_a)
 
-      .def("body_jacobian", py::overload_cast<franka::Frame, const franka::RobotState &>(
+      .def("body_jacobian", py::overload_cast<franka::Frame, const RobotState &>(
                &Model::bodyJacobian, py::const_),
            "frame"_a, "state"_a)
       .def("body_jacobian", py::overload_cast<franka::Frame, const Vector7d &, const Affine &, const Affine &>(
                &Model::bodyJacobian, py::const_),
            "frame"_a, "q"_a, "F_T_EE"_a, "EE_T_K"_a)
 
-      .def("zero_jacobian", py::overload_cast<franka::Frame, const franka::RobotState &>(
+      .def("zero_jacobian", py::overload_cast<franka::Frame, const RobotState &>(
                &Model::zeroJacobian, py::const_),
            "frame"_a, "state"_a)
       .def("zero_jacobian", py::overload_cast<franka::Frame, const Vector7d &, const Affine &, const Affine &>(
                &Model::zeroJacobian, py::const_),
            "frame"_a, "q"_a, "F_T_EE"_a, "EE_T_K"_a)
 
-      .def("mass", py::overload_cast<const franka::RobotState &>(&Model::mass, py::const_),
-           "state"_a)
+      .def("mass", py::overload_cast<const RobotState &>(&Model::mass, py::const_), "state"_a)
       .def("mass", py::overload_cast<const Vector7d &, const Eigen::Matrix3d &, double, const Eigen::Vector3d &>(
                &Model::mass, py::const_),
            "q"_a, "I_total"_a, "m_total"_a, "F_x_Ctotal"_a)
 
-      .def("coriolis", py::overload_cast<const franka::RobotState &>(&Model::coriolis, py::const_),
+      .def("coriolis", py::overload_cast<const RobotState &>(&Model::coriolis, py::const_),
            "state"_a)
       .def("coriolis", py::overload_cast<const Vector7d &, const Vector7d &, const Eigen::Matrix3d &, double,
                                          const Eigen::Vector3d &>(&Model::coriolis, py::const_),
            "q"_a, "dq"_a, "I_total"_a, "m_total"_a, "F_x_Ctotal"_a)
 
-      .def("gravity", py::overload_cast<const franka::RobotState &, const Eigen::Vector3d &>(
-               &Model::gravity, py::const_),
+      .def("gravity", py::overload_cast<const RobotState &, const Eigen::Vector3d &>( &Model::gravity, py::const_),
            "state"_a, "gravity_earth"_a)
-      .def("gravity", py::overload_cast<const franka::RobotState &>(&Model::gravity, py::const_),
+      .def("gravity", py::overload_cast<const RobotState &>(&Model::gravity, py::const_),
            "state"_a)
       .def("gravity", py::overload_cast<const Vector7d &, double, const Eigen::Vector3d &,
                                         const Eigen::Vector3d &>(&Model::gravity, py::const_),

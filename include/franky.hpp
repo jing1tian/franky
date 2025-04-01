@@ -25,6 +25,7 @@
 #include "franky/model.hpp"
 #include "franky/robot.hpp"
 #include "franky/robot_pose.hpp"
+#include "franky/robot_state.hpp"
 #include "franky/robot_velocity.hpp"
 #include "franky/twist.hpp"
 #include "franky/types.hpp"

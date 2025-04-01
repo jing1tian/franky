@@ -1,8 +1,9 @@
 #pragma once
 
-#include <array>
-#include <Eigen/Core>
 #include <franka/duration.h>
+
+#include <Eigen/Core>
+#include <array>
 
 namespace franky {
 
@@ -35,9 +36,15 @@ std::array<double, rows * cols> toStdDMatD(const Eigen::Matrix<double, rows, col
   return result;
 }
 
-template<size_t rows, size_t cols>
+template <size_t rows, size_t cols>
 Eigen::Matrix<double, rows, cols, Eigen::ColMajor> toEigenMatD(const std::array<double, rows * cols> &array) {
   return Eigen::Map<const Eigen::Matrix<double, rows, cols, Eigen::ColMajor>>(array.data());
+}
+
+inline Affine stdToAffine(const std::array<double, 16> &array) {
+  Affine result;
+  result.matrix() = toEigenMatD<4, 4>(array);
+  return result;
 }
 
 template<size_t dims>
@@ -65,7 +72,7 @@ std::array<double, dims> expand(const ScalarOrArray<dims> &input) {
 }
 
 template<int dims>
-inline std::ostream &operator<<(std::ostream &os, const Eigen::Vector<double, dims> &vec) {
+std::ostream &operator<<(std::ostream &os, const Eigen::Vector<double, dims> &vec) {
   os << "[";
   for (size_t i = 0; i < dims; i++) {
     os << vec[i];

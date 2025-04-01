@@ -21,7 +21,7 @@ MotionGenerator<ControlSignalType>::MotionGenerator(
 
 template<typename ControlSignalType>
 ControlSignalType
-MotionGenerator<ControlSignalType>::operator()(const franka::RobotState &robot_state, franka::Duration period) {
+MotionGenerator<ControlSignalType>::operator()(const RobotState &robot_state, franka::Duration period) {
   abs_time_ += std::chrono::duration<uint64_t, std::milli>(period);
   {
     if (abs_time_ == franka::Duration(0))

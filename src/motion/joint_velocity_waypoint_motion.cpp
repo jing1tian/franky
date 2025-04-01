@@ -17,24 +17,24 @@ void JointVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<Vector7d>
   }
 }
 
-void JointVelocityWaypointMotion::initWaypointMotion(const franka::RobotState &robot_state,
+void JointVelocityWaypointMotion::initWaypointMotion(const RobotState &robot_state,
                                                      const std::optional<franka::JointVelocities> &previous_command,
                                                      ruckig::InputParameter<7> &input_parameter) {
   if (previous_command.has_value())
     input_parameter.current_position = previous_command->dq;
   else
-    input_parameter.current_position = robot_state.dq_d;
-  input_parameter.current_velocity = robot_state.ddq_d;
+    input_parameter.current_position = toStdD<7>(robot_state.dq_d);
+  input_parameter.current_velocity = toStdD<7>(robot_state.ddq_d);
   input_parameter.current_acceleration = toStdD<7>(Vector7d::Zero());
 }
 
 franka::JointVelocities JointVelocityWaypointMotion::getControlSignal(
-    const franka::RobotState &robot_state, const franka::Duration &time_step,
+    const RobotState &robot_state, const franka::Duration &time_step,
     const std::optional<franka::JointVelocities> &previous_command, const ruckig::InputParameter<7> &input_parameter) {
   return {input_parameter.current_position};
 }
 
-void JointVelocityWaypointMotion::setNewWaypoint(const franka::RobotState &robot_state,
+void JointVelocityWaypointMotion::setNewWaypoint(const RobotState &robot_state,
                                                  const std::optional<franka::JointVelocities> &previous_command,
                                                  const VelocityWaypoint<Vector7d> &new_waypoint,
                                                  ruckig::InputParameter<7> &input_parameter) {

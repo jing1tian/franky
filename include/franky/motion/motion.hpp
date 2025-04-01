@@ -5,6 +5,7 @@
 
 #include "reaction.hpp"
 #include "franky/robot.hpp"
+#include "franky/robot_state.hpp"
 
 namespace franky {
 
@@ -23,7 +24,7 @@ class Motion {
  public:
   virtual ~Motion() = default;
   using CallbackType = std::function<
-      void(const franka::RobotState &,
+      void(const RobotState &,
            franka::Duration,
            franka::Duration,
            franka::Duration,
@@ -64,7 +65,7 @@ class Motion {
    * @param previous_command The previous command.
    */
   void init(
-      Robot *robot, const franka::RobotState &robot_state, const std::optional<ControlSignalType> &previous_command);
+      Robot *robot, const RobotState &robot_state, const std::optional<ControlSignalType> &previous_command);
 
   /**
    * @brief Get the next command of the motion.
@@ -77,7 +78,7 @@ class Motion {
    */
   ControlSignalType
   nextCommand(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       franka::Duration time_step,
       franka::Duration rel_time,
       franka::Duration abs_time,
@@ -92,7 +93,7 @@ class Motion {
    */
   std::shared_ptr<Motion<ControlSignalType>>
   checkAndCallReactions(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       franka::Duration rel_time,
       franka::Duration abs_time);
 
@@ -100,11 +101,11 @@ class Motion {
   explicit Motion();
 
   virtual void initImpl(
-      const franka::RobotState &robot_state, const std::optional<ControlSignalType> &previous_command) {}
+      const RobotState &robot_state, const std::optional<ControlSignalType> &previous_command) {}
 
   virtual ControlSignalType
   nextCommandImpl(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       franka::Duration time_step,
       franka::Duration rel_time,
       franka::Duration abs_time,

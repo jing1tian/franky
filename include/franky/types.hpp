@@ -11,6 +11,7 @@ namespace franky {
 using Vector6d = Eigen::Vector<double, 6>;
 using Vector7d = Eigen::Vector<double, 7>;
 using Jacobian = Eigen::Matrix<double, 6, 7>;
+using IntertiaMatrix = Eigen::Matrix<double, 3, 3>;
 
 using Affine = Eigen::Affine3d;
 

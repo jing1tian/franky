@@ -1,11 +1,8 @@
 #pragma once
 
-#include <Eigen/Dense>
-#include <memory>
-
 #include <franka/model.h>
-#include <franka/robot_state.h>
 
+#include <franky/robot_state.hpp>
 #include "franky/types.hpp"
 
 namespace franky {
@@ -36,7 +33,7 @@ class Model {
    * @param state The current robot state.
    * @return The pose as an affine transformation matrix.
    */
-  [[nodiscard]] Affine pose(franka::Frame frame, const franka::RobotState &state) const;
+  [[nodiscard]] Affine pose(franka::Frame frame, const RobotState &state) const;
 
   /**
    * @brief Calculates the pose of a frame relative to the base frame.
@@ -56,7 +53,7 @@ class Model {
    * @param state The current robot state.
    * @return The 6x7 body Jacobian matrix.
    */
-  [[nodiscard]] Jacobian bodyJacobian(franka::Frame frame, const franka::RobotState &state) const;
+  [[nodiscard]] Jacobian bodyJacobian(franka::Frame frame, const RobotState &state) const;
 
   /**
    * @brief Calculates the body Jacobian in base frame.
@@ -79,7 +76,7 @@ class Model {
    * @param state The current robot state.
    * @return The 6x7 zero Jacobian matrix.
    */
-  [[nodiscard]] Jacobian zeroJacobian(franka::Frame frame, const franka::RobotState &state) const;
+  [[nodiscard]] Jacobian zeroJacobian(franka::Frame frame, const RobotState &state) const;
 
   /**
    * @brief Calculates the zero Jacobian in base frame.
@@ -101,7 +98,7 @@ class Model {
    * @param state The current robot state.
    * @return The 7x7 mass matrix.
    */
-  [[nodiscard]] Eigen::Matrix<double, 7, 7> mass(const franka::RobotState &state) const;
+  [[nodiscard]] Eigen::Matrix<double, 7, 7> mass(const RobotState &state) const;
 
   /**
    * @brief Calculates the mass matrix.
@@ -123,7 +120,7 @@ class Model {
    * @param state The current robot state.
    * @return The Coriolis vector [Nm].
    */
-  [[nodiscard]] Vector7d coriolis(const franka::RobotState &state) const;
+  [[nodiscard]] Vector7d coriolis(const RobotState &state) const;
 
   /**
    * @brief Calculates the Coriolis force vector.
@@ -148,7 +145,7 @@ class Model {
    * @param gravity_earth Gravity vector in base frame [m/s²].
    * @return The gravity vector [Nm].
    */
-  [[nodiscard]] Vector7d gravity(const franka::RobotState &state, const Eigen::Vector3d &gravity_earth) const;
+  [[nodiscard]] Vector7d gravity(const RobotState &state, const Eigen::Vector3d &gravity_earth) const;
 
   /**
    * @brief Calculates the gravity vector using default gravity direction (0, 0, -9.81).
@@ -156,7 +153,7 @@ class Model {
    * @param state The current robot state.
    * @return The gravity vector [Nm].
    */
-  [[nodiscard]] Vector7d gravity(const franka::RobotState &state) const;
+  [[nodiscard]] Vector7d gravity(const RobotState &state) const;
 
   /**
    * @brief Calculates the gravity vector.

@@ -39,12 +39,12 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
   void checkWaypoint(const VelocityWaypoint<RobotVelocity> &waypoint) const override;
 
   void initWaypointMotion(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const std::optional<franka::CartesianVelocities> &previous_command,
       ruckig::InputParameter<7> &input_parameter) override;
 
   void setNewWaypoint(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const std::optional<franka::CartesianVelocities> &previous_command,
       const VelocityWaypoint<RobotVelocity> &new_waypoint,
       ruckig::InputParameter<7> &input_parameter) override;
@@ -52,7 +52,7 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override;
 
   [[nodiscard]] franka::CartesianVelocities getControlSignal(
-      const franka::RobotState &robot_state,
+      const RobotState &robot_state,
       const franka::Duration &time_step,
       const std::optional<franka::CartesianVelocities> &previous_command,
       const ruckig::InputParameter<7> &input_parameter) override;

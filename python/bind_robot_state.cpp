@@ -1,12 +1,15 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <franka/robot_state.h>
+#include <pybind11/eigen.h>
 #include <franka/gripper_state.h>
+
+#include "franky.hpp"
 
 #include "macros.hpp"
 
 namespace py = pybind11;
 using namespace pybind11::literals; // to bring in the '_a' literal
+using namespace franky;
 
 #define ADD_FIELD_RO(obj_type, unused, name) .def_readonly(#name, &obj_type::name)
 #define ADD_FIELDS_RO(obj, obj_type, ...) obj MAP_C1(ADD_FIELD_RO, obj_type, __VA_ARGS__);
@@ -77,16 +80,16 @@ using namespace pybind11::literals; // to bring in the '_a' literal
 #define GRIPPER_STATE_FIELDS width, max_width, is_grasped, temperature, time
 
 void bind_robot_state(py::module &m) {
-  py::class_<franka::RobotState> robot_state(m, "RobotState");
-  ADD_FIELDS_RO(robot_state, franka::RobotState, ROBOT_STATE_FIELDS)
+  py::class_<RobotState> robot_state(m, "RobotState");
+  ADD_FIELDS_RO(robot_state, RobotState, ROBOT_STATE_FIELDS)
   robot_state.def(py::pickle(
-      [](const franka::RobotState &state) {  // __getstate__
+      [](const RobotState &state) {  // __getstate__
         return PACK_TUPLE(state, ROBOT_STATE_FIELDS);
       },
       [](const py::tuple &t) {  // __setstate__
         if (t.size() != COUNT(ROBOT_STATE_FIELDS))
           throw std::runtime_error("Invalid state!");
-        return UNPACK_TUPLE(franka::RobotState, t, ROBOT_STATE_FIELDS);
+        return UNPACK_TUPLE(RobotState, t, ROBOT_STATE_FIELDS);
       }
   ));
 

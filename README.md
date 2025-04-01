@@ -263,7 +263,7 @@ current_pose = robot.current_pose
 
 The robot state can be retrieved by calling the following methods:
 
-* `state`: Object of type `franky.RobotState`, which is a wrapper of the libfranka [franka::RobotState](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html) structure.
+* `state`: Object of type `franky.RobotState`, which extends the libfranka [franka::RobotState](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html) structure by additional state elements.
 
 * `current_cartesian_state`: Object of type `franky.CartesianState`, which contains the end-effector pose and velocity obtained from [franka::RobotState::O_T_EE](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html#a193781d47722b32925e0ea7ac415f442) and [franka::RobotState::O_dP_EE_c](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html#a4be112bd1a9a7d777a67aea4a18a8dcc).
 

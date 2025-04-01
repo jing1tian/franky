@@ -51,7 +51,7 @@ std::vector<std::shared_ptr<Reaction<ControlSignalType>>> Motion<ControlSignalTy
 
 template<typename ControlSignalType>
 void Motion<ControlSignalType>::init(
-    Robot *robot, const franka::RobotState &robot_state, const std::optional<ControlSignalType> &previous_command) {
+    Robot *robot, const RobotState &robot_state, const std::optional<ControlSignalType> &previous_command) {
   robot_ = robot;
   initImpl(robot_state, previous_command);
 }
@@ -59,7 +59,7 @@ void Motion<ControlSignalType>::init(
 template<typename ControlSignalType>
 ControlSignalType
 Motion<ControlSignalType>::nextCommand(
-    const franka::RobotState &robot_state,
+    const RobotState &robot_state,
     franka::Duration time_step,
     franka::Duration rel_time,
     franka::Duration abs_time,
@@ -73,7 +73,7 @@ Motion<ControlSignalType>::nextCommand(
 
 template<typename ControlSignalType>
 std::shared_ptr<Motion<ControlSignalType>> Motion<ControlSignalType>::checkAndCallReactions(
-    const franka::RobotState &robot_state,
+    const RobotState &robot_state,
     franka::Duration rel_time,
     franka::Duration abs_time) {
   for (auto &reaction : reactions_) {

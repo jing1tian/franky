@@ -8,6 +8,7 @@
 #include "ruckig/ruckig.hpp"
 
 #include "franky/types.hpp"
+#include "franky/robot_state.hpp"
 
 namespace franky {
 
@@ -47,7 +48,7 @@ class MotionGenerator {
    * @param period The time step.
    * @return The control signal for the robot.
    */
-  ControlSignalType operator()(const franka::RobotState &robot_state, franka::Duration period);
+  ControlSignalType operator()(const RobotState &robot_state, franka::Duration period);
 
   /**
    * @brief Register a callback that is called in every step of the motion.
@@ -57,7 +58,7 @@ class MotionGenerator {
   inline void
   registerUpdateCallback(
       const std::function<void(
-          const franka::RobotState &, franka::Duration, franka::Duration)> &callback) {
+          const RobotState &, franka::Duration, franka::Duration)> &callback) {
     update_callbacks_.push_back(callback);
   }
 
@@ -81,7 +82,7 @@ class MotionGenerator {
   std::shared_ptr<Motion<ControlSignalType>> initial_motion_;
   std::shared_ptr<Motion<ControlSignalType>> current_motion_;
   std::shared_ptr<Motion<ControlSignalType>> new_motion_;
-  std::vector<std::function<void(const franka::RobotState &, franka::Duration, franka::Duration)>>
+  std::vector<std::function<void(const RobotState &, franka::Duration, franka::Duration)>>
       update_callbacks_;
   std::mutex new_motion_mutex_;
   std::optional<ControlSignalType> previous_command_;

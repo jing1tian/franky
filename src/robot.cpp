@@ -25,25 +25,12 @@ bool Robot::recoverFromErrors() {
   return !hasErrors();
 }
 
-JointState Robot::currentJointState() {
-  auto s = state();
-  return {Eigen::Map<const Vector7d>(state().q.data()), Eigen::Map<const Vector7d>(state().dq.data())};
-}
-
-Vector7d Robot::currentJointPositions() {
-  return currentJointState().position();
-}
-
-Vector7d Robot::currentJointVelocities() {
-  return currentJointState().velocity();
-}
-
-franka::RobotState Robot::state() {
+RobotState Robot::state() {
   std::lock_guard state_lock(state_mutex_);
   {
     std::lock_guard control_lock(*control_mutex_);
     if (!is_in_control_unsafe()) {
-      current_state_ = readOnce();
+      current_state_ = RobotState::from_franka(readOnce());
     }
   }
   return current_state_;

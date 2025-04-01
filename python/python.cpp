@@ -28,8 +28,8 @@ PYBIND11_MODULE(_franky, m) {
   bind_errors(m);
   bind_state_repr(m);
   bind_robot_state(m);
-  bind_model(m);
   bind_reactions(m);
+  bind_model(m);
   bind_motion_cartesian_pos(m);
   bind_motion_cartesian_vel(m);
   bind_motion_joint_pos(m);
