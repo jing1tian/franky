@@ -41,7 +41,7 @@ git submodule update
 
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF -DCMAKE_POLICY_DEFAULT_CMP0167=NEW ..
+cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.10 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF -DCMAKE_POLICY_DEFAULT_CMP0167=NEW ..
 make -j "$(nproc)"
 sudo make install || make install
 
