@@ -8,12 +8,11 @@
 namespace franky {
 
 //! Connects to a robot at the given FCI IP address.
-Robot::Robot(const std::string &fci_hostname) : Robot(fci_hostname, Params()) {
-  model_ = std::make_shared<const Model>(loadModel());
-}
+Robot::Robot(const std::string &fci_hostname) : Robot(fci_hostname, Params()) { }
 
 Robot::Robot(const std::string &fci_hostname, const Params &params)
     : fci_hostname_(fci_hostname), params_(params), franka::Robot(fci_hostname, params.realtime_config) {
+  model_ = std::make_shared<const Model>(loadModel());
   setCollisionBehavior(params_.default_torque_threshold, params_.default_force_threshold);
 }
 
