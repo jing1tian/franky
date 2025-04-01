@@ -60,9 +60,9 @@ with (Path(__file__).resolve().parent / "VERSION").open() as f:
     version = f.read()
 
 setup(
-    name="franky-panda",
+    name="franky-control",
     version=version,
-    description="High-level motion library for Franka robots.",
+    description="High-level control library for Franka robots.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Tim Schneider",

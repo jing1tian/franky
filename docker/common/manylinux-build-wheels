@@ -71,7 +71,7 @@ for PYBIN in /opt/python/*/bin/; do
     venv_dir=".venv_$(basename "$(dirname "$PYBIN")")"
     "${PYBIN}/python" -m venv "${venv_dir}"
     source "${venv_dir}/bin/activate"
-    "${PYBIN}/pip" install franky-panda --no-index -f dist_full
+    "${PYBIN}/pip" install franky-control --no-index -f dist_full
   fi
 done
 

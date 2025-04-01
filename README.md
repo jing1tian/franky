@@ -106,7 +106,7 @@ If realtime is not listed in your groups, try rebooting.
 ### Installing franky
 To start using franky with Python and libfranka *0.15.0*, just install it via
 ```bash
-pip install franky-panda
+pip install franky-control
 ```
 We also provide wheels for libfranka versions *0.7.1*, *0.8.0*, *0.9.2*, *0.10.0*, *0.11.0*, *0.12.1*, *0.13.3*, *0.14.2*, and *0.15.0*.
 They can be installed via
@@ -115,7 +115,7 @@ VERSION=0-9-2
 wget https://github.com/TimSchneider42/franky/releases/latest/download/libfranka_${VERSION}_wheels.zip
 unzip libfranka_${VERSION}_wheels.zip
 pip install numpy
-pip install --no-index --find-links=./dist franky-panda
+pip install --no-index --find-links=./dist franky-control
 ```
 
 Franky is based on [libfranka](https://github.com/frankaemika/libfranka), [Eigen](https://eigen.tuxfamily.org) for transformation calculations and [pybind11](https://github.com/pybind/pybind11) for the Python bindings.
