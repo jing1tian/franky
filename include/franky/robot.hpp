@@ -81,55 +81,55 @@ class Robot : public franka::Robot {
    * @brief Translational velocity limit [m/s].
    */
   DynamicsLimit<double> translation_velocity_limit{
-    "translational velocity", 1.7, 0.7, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "translational velocity", 1.7, 0.7, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
  * @brief Rotational velocity limit [rad/s].
  */
   DynamicsLimit<double> rotation_velocity_limit{
-    "rotational velocity", 2.5, 2.5, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "rotational velocity", 2.5, 2.5, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow velocity limit [rad/s].
    */
   DynamicsLimit<double> elbow_velocity_limit{
-    "elbow velocity", 2.175, 2.175, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "elbow velocity", 2.175, 2.175, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Translational acceleration limit [m/s²].
    */
   DynamicsLimit<double> translation_acceleration_limit{
-    "translational acceleration", 13.0, 2.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "translational acceleration", 13.0, 2.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Rotational acceleration limit [rad/s²].
    */
   DynamicsLimit<double> rotation_acceleration_limit{
-    "rotational acceleration", 25.0, 10.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "rotational acceleration", 25.0, 10.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow acceleration limit [rad/s²].
    */
   DynamicsLimit<double> elbow_acceleration_limit{
-    "elbow acceleration", 10.0, 4.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "elbow acceleration", 10.0, 4.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Translational jerk limit [m/s³].
    */
   DynamicsLimit<double> translation_jerk_limit{
-    "translational jerk", 6500.0, 500.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "translational jerk", 6500.0, 500.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Rotational jerk limit [rad/s³].
    */
   DynamicsLimit<double> rotation_jerk_limit{
-    "rotational jerk", 12500.0, 2000.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "rotational jerk", 12500.0, 2000.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow jerk limit [rad/s³].
    */
   DynamicsLimit<double> elbow_jerk_limit{
-    "elbow jerk", 5000.0, 800.0, control_mutex_, std::bind(&Robot::is_in_control_unsafe, this)};
+    "elbow jerk", 5000.0, 800.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Joint velocity limit [rad/s].
@@ -137,7 +137,7 @@ class Robot : public franka::Robot {
 #define MAX_JOINT_VEL toEigenD<7>({2.175, 2.175, 2.175, 2.175, 2.610, 2.610, 2.610})
   DynamicsLimit<Vector7d> joint_velocity_limit{
     "joint_velocity", MAX_JOINT_VEL, MAX_JOINT_VEL, control_mutex_,
-    std::bind(&Robot::is_in_control_unsafe, this)
+    [this] { return is_in_control_unsafe(); }
   };
 
   /**
@@ -146,7 +146,7 @@ class Robot : public franka::Robot {
 #define MAX_JOINT_ACC toEigenD<7>({15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0})
   DynamicsLimit<Vector7d> joint_acceleration_limit{
     "joint_acceleration", MAX_JOINT_ACC, MAX_JOINT_ACC * 0.3, control_mutex_,
-    std::bind(&Robot::is_in_control_unsafe, this)
+    [this] { return is_in_control_unsafe(); }
   };
 
   /**
@@ -155,7 +155,7 @@ class Robot : public franka::Robot {
 #define MAX_JOINT_JERK toEigenD<7>({7500.0, 3750.0, 5000.0, 6250.0, 7500.0, 10000.0, 10000.0})
   DynamicsLimit<Vector7d> joint_jerk_limit{
     "joint_jerk", MAX_JOINT_JERK, MAX_JOINT_JERK * 0.3, control_mutex_,
-    std::bind(&Robot::is_in_control_unsafe, this)
+    [this] { return is_in_control_unsafe(); }
   };
 
   // clang-format on
