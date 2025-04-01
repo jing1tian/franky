@@ -39,7 +39,7 @@ class CartesianState {
    * @param transform The transformation to apply.
    * @return The state after the transformation.
    */
-  [[nodiscard]] inline CartesianState transformWith(const Affine &transform) const {
+  [[nodiscard]] CartesianState transformWith(const Affine &transform) const {
     return {transform * pose_, transform * velocity_};
   }
 
@@ -57,14 +57,14 @@ class CartesianState {
   /*
    * @brief Pose component of the state.
    */
-  [[nodiscard]] inline RobotPose pose() const {
+  [[nodiscard]] RobotPose pose() const {
     return pose_;
   }
 
   /*
    * @brief Velocity component of the state.
    */
-  [[nodiscard]] inline RobotVelocity velocity() const {
+  [[nodiscard]] RobotVelocity velocity() const {
     return velocity_;
   }
 

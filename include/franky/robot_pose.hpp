@@ -72,7 +72,7 @@ class RobotPose {
    * @param transform The transform to apply.
    * @return The transformed robot pose.
    */
-  [[nodiscard]] inline RobotPose leftTransform(const Affine &transform) const {
+  [[nodiscard]] RobotPose leftTransform(const Affine &transform) const {
     return {transform * end_effector_pose_, elbow_state_};
   }
 
@@ -82,7 +82,7 @@ class RobotPose {
    * @param transform The transform to apply.
    * @return The transformed robot pose.
    */
-  [[nodiscard]] inline RobotPose rightTransform(const Affine &transform) const {
+  [[nodiscard]] RobotPose rightTransform(const Affine &transform) const {
     return {end_effector_pose_ * transform, elbow_state_};
   }
 
@@ -93,7 +93,7 @@ class RobotPose {
    * @param transform The transform to apply.
    * @return The robot pose with the new end effector frame.
    */
-  [[nodiscard]] inline RobotPose changeEndEffectorFrame(const Affine &transform) const {
+  [[nodiscard]] RobotPose changeEndEffectorFrame(const Affine &transform) const {
     return rightTransform(transform);
   }
 
@@ -103,7 +103,7 @@ class RobotPose {
    * @param elbow_state The new elbow state.
    * @return The pose with the new elbow state.
    */
-  [[nodiscard]] inline RobotPose withElbowState(const std::optional<ElbowState> elbow_state) const {
+  [[nodiscard]] RobotPose withElbowState(const std::optional<ElbowState> elbow_state) const {
     return {end_effector_pose_, elbow_state};
   }
 
@@ -112,7 +112,7 @@ class RobotPose {
    *
    * @return The end effector pose.
    */
-  [[nodiscard]] inline Affine end_effector_pose() const {
+  [[nodiscard]] Affine end_effector_pose() const {
     return end_effector_pose_;
   }
 
@@ -121,7 +121,7 @@ class RobotPose {
    *
    * @return The elbow state.
    */
-  [[nodiscard]] inline std::optional<ElbowState> elbow_state() const {
+  [[nodiscard]] std::optional<ElbowState> elbow_state() const {
     return elbow_state_;
   }
 
