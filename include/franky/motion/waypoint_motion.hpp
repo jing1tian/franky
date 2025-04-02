@@ -105,7 +105,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
         // Allow cooldown of motion, so that the low-pass filter has time to adjust to target values
         hold_target_duration = std::max(hold_target_duration, franka::Duration(5));
       }
-      if (rel_time - target_reached_time_.value() >= hold_target_duration) {
+      if (rel_time - target_reached_time_.value() >= hold_target_duration || max_time_reached) {
         target_reached_time_ = std::nullopt;
         if (waypoint_iterator_ != waypoints_.end()) {
           ++waypoint_iterator_;
