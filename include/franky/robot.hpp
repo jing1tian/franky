@@ -337,11 +337,13 @@ class Robot : public franka::Robot {
    */
   [[nodiscard]] std::shared_ptr<const Model> model() const { return model_; }
 
+#ifdef FRANKA_0_15
   /**
    * @brief The URDF of the robot model as string.
    *
    */
   [[nodiscard]] std::string model_urdf() const { return model_urdf_; }
+#endif
 
   /**
    * @brief Wait for the current motion to finish. Throw any exceptions that occurred during the motion.
@@ -429,7 +431,9 @@ class Robot : public franka::Robot {
 
  private:
   std::shared_ptr<const Model> model_;
+#ifdef FRANKA_0_15
   std::string model_urdf_;
+#endif
 
   template <typename ControlSignalType>
   using ControlFunc = std::function<ControlSignalType(const franka::RobotState &, franka::Duration)>;
