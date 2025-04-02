@@ -61,6 +61,23 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
     }
   }
 
+  void extrapolateMotion(
+      const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter,
+      ruckig::OutputParameter<7> &output_parameter) const override {
+    auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
+
+    auto acc = toEigenD<7>(input_parameter.current_velocity);
+    auto vel = toEigenD<7>(input_parameter.current_position);
+
+    auto new_vel = (vel + acc * time_step.toSec()).cwiseMin(vel_lim).cwiseMax(-vel_lim);
+
+    // Franka assumes a constant acceleration model if no new input is received.
+    // See https://frankaemika.github.io/docs/libfranka.html#under-the-hood
+    output_parameter.new_acceleration = toStdD<7>(Vector7d::Zero());
+    output_parameter.new_velocity = input_parameter.current_velocity;
+    output_parameter.new_position = toStdD<7>(new_vel);
+  }
+
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override = 0;
 
  private:

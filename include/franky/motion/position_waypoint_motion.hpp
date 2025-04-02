@@ -2,10 +2,10 @@
 
 #include <ruckig/ruckig.hpp>
 
-#include "franky/util.hpp"
-#include "franky/relative_dynamics_factor.hpp"
 #include "franky/motion/reference_type.hpp"
 #include "franky/motion/waypoint_motion.hpp"
+#include "franky/relative_dynamics_factor.hpp"
+#include "franky/util.hpp"
 
 namespace franky {
 
@@ -16,7 +16,7 @@ namespace franky {
  *
  * @param reference_type The reference type (absolute or relative).
  */
-template<typename TargetType>
+template <typename TargetType>
 struct PositionWaypoint : public Waypoint<TargetType> {
   ReferenceType reference_type{ReferenceType::kAbsolute};
 };
@@ -28,7 +28,7 @@ struct PositionWaypoint : public Waypoint<TargetType> {
  * franka::CartesianVelocities, franka::JointPositions or franka::CartesianPose.
  * @tparam TargetType The type of the target of the waypoints.
  */
-template<typename ControlSignalType, typename TargetType>
+template <typename ControlSignalType, typename TargetType>
 class PositionWaypointMotion : public WaypointMotion<ControlSignalType, PositionWaypoint<TargetType>, TargetType> {
  public:
   /**
@@ -40,10 +40,8 @@ class PositionWaypointMotion : public WaypointMotion<ControlSignalType, Position
    *                                 last target.
    */
   explicit PositionWaypointMotion(
-      std::vector<PositionWaypoint<TargetType>> waypoints,
-      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
-      bool return_when_finished = true
-  )
+      std::vector<PositionWaypoint<TargetType>> waypoints, const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
+      bool return_when_finished = true)
       : WaypointMotion<ControlSignalType, PositionWaypoint<TargetType>, TargetType>(waypoints, return_when_finished),
         relative_dynamics_factor_(relative_dynamics_factor) {}
 
@@ -63,9 +61,27 @@ class PositionWaypointMotion : public WaypointMotion<ControlSignalType, Position
       input_parameter.synchronization = ruckig::Synchronization::TimeIfNecessary;
     } else {
       input_parameter.synchronization = ruckig::Synchronization::Time;
-      if (waypoint.minimum_time.has_value())
-        input_parameter.minimum_duration = waypoint.minimum_time.value();
+      if (waypoint.minimum_time.has_value()) input_parameter.minimum_duration = waypoint.minimum_time.value();
     }
+  }
+
+  void extrapolateMotion(
+      const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter,
+      ruckig::OutputParameter<7> &output_parameter) const override {
+    auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
+
+    auto acc = toEigenD<7>(input_parameter.current_acceleration);
+    auto vel = toEigenD<7>(input_parameter.current_velocity);
+    auto pos = toEigenD<7>(input_parameter.current_position);
+
+    auto new_vel = (vel + acc * time_step.toSec()).cwiseMin(vel_lim).cwiseMax(-vel_lim);
+    auto new_pos = pos + (vel + new_vel) * time_step.toSec() / 2.0;
+
+    // Franka assumes a constant acceleration model if no new input is received.
+    // See https://frankaemika.github.io/docs/libfranka.html#under-the-hood
+    output_parameter.new_acceleration = input_parameter.current_acceleration;
+    output_parameter.new_velocity = toStdD<7>(new_vel);
+    output_parameter.new_position = toStdD<7>(new_pos);
   }
 
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override = 0;
