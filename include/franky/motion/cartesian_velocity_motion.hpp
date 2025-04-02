@@ -13,7 +13,7 @@ class CartesianVelocityMotion : public CartesianVelocityWaypointMotion {
    * @brief Construct a Cartesian motion.
    *
    * @param target                   The target Cartesian velocity.
-   * @param hold_target_duration     For how long to hold the target velocity after it has been reached.
+   * @param max_total_duration       Maximum time this command is active. Default is infinite.
    * @param relative_dynamics_factor The relative dynamics factor for this motion. The factor will get multiplied with
    *                                 the robot's global dynamics factor to get the actual dynamics factor for this
    *                                 motion.
@@ -23,7 +23,7 @@ class CartesianVelocityMotion : public CartesianVelocityWaypointMotion {
    */
   explicit CartesianVelocityMotion(
       const RobotVelocity &target,
-      const franka::Duration &hold_target_duration = franka::Duration(0),
+      const std::optional<franka::Duration> &max_total_duration = std::nullopt,
       const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       const Affine &frame = Affine::Identity());
 };

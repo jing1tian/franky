@@ -15,20 +15,23 @@ void bind_motion_cartesian_vel(py::module &m) {
                    const RobotVelocity &target,
                    RelativeDynamicsFactor relative_dynamics_factor,
                    std::optional<double> minimum_time,
-                   franka::Duration hold_target_duration
+                   franka::Duration hold_target_duration,
+                   std::optional<franka::Duration> max_total_duration
                ) {
                  return VelocityWaypoint<RobotVelocity>{
-                     target, relative_dynamics_factor, minimum_time, hold_target_duration};
+                     target, relative_dynamics_factor, minimum_time, hold_target_duration, max_total_duration};
                }
            ),
            "target"_a,
            "relative_dynamics_factor"_a = 1.0,
            "minimum_time"_a = std::nullopt,
-           "hold_target_duration"_a = franka::Duration(0))
+           "hold_target_duration"_a = franka::Duration(0),
+           "max_total_duration"_a = std::nullopt)
       .def_readonly("target", &VelocityWaypoint<RobotVelocity>::target)
       .def_readonly("relative_dynamics_factor", &VelocityWaypoint<RobotVelocity>::relative_dynamics_factor)
       .def_readonly("minimum_time", &VelocityWaypoint<RobotVelocity>::minimum_time)
-      .def_readonly("hold_target_duration", &VelocityWaypoint<RobotVelocity>::hold_target_duration);
+      .def_readonly("hold_target_duration", &VelocityWaypoint<RobotVelocity>::hold_target_duration)
+      .def_readonly("max_total_duration", &VelocityWaypoint<RobotVelocity>::max_total_duration);
 
   py::class_<CartesianVelocityWaypointMotion,
              Motion<franka::CartesianVelocities>,
@@ -49,17 +52,17 @@ void bind_motion_cartesian_vel(py::module &m) {
       m, "CartesianVelocityMotion")
       .def(py::init<>([](
                const RobotVelocity &target,
-               franka::Duration hold_target_duration,
+               std::optional<franka::Duration> max_total_duration,
                RelativeDynamicsFactor relative_dynamics_factor,
                const std::optional<Affine> &ee_frame) {
              return std::make_shared<CartesianVelocityMotion>(
                  target,
-                 hold_target_duration,
+                 max_total_duration,
                  relative_dynamics_factor,
                  ee_frame.value_or(Affine::Identity()));
            }),
            "target"_a,
-           "hold_target_duration"_a = franka::Duration(0),
+           "max_total_duration"_a = std::nullopt,
            "relative_dynamics_factor"_a = 1.0,
            "ee_frame"_a = std::nullopt);
 

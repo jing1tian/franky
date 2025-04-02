@@ -6,14 +6,14 @@ namespace franky {
 
 CartesianVelocityMotion::CartesianVelocityMotion(
     const RobotVelocity &target,
-    const franka::Duration &hold_target_duration,
+    const std::optional<franka::Duration> &max_total_duration,
     const RelativeDynamicsFactor &relative_dynamics_factor,
     const Affine &frame)
     : CartesianVelocityWaypointMotion(
     {
         VelocityWaypoint<RobotVelocity>{
             .target = target,
-            .hold_target_duration = hold_target_duration
+            .max_total_duration = max_total_duration
         },
         VelocityWaypoint<RobotVelocity>{
             .target = RobotVelocity(),

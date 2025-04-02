@@ -19,13 +19,15 @@ struct MotionPlannerException : std::runtime_error {
  *
  * @tparam TargetType The type of the target.
  *
- * @param target The target of this waypoint.
- * @param reference_type The reference type (absolute or relative).
- * @param relative_dynamics_factor The relative dynamics factor for this waypoint. This factor will get multiplied with
- * the robot's global dynamics factor and the motion dynamics factor to get the actual dynamics factor for this
- * waypoint.
- * @param minimum_time The minimum time to get to the next waypoint in [s].
- * @param hold_target_duration For how long to hold the target of this waypoint after it has been reached.
+ * @param target                    The target of this waypoint.
+ * @param reference_type            The reference type (absolute or relative).
+ * @param relative_dynamics_factor  The relative dynamics factor for this waypoint. This factor will get multiplied with
+ *                                  the robot's global dynamics factor and the motion dynamics factor to get the actual
+ *                                  dynamics factor for this waypoint.
+ * @param minimum_time              The minimum time to get to the next waypoint.
+ * @param hold_target_duration      For how long to hold the target of this waypoint after it has been reached.
+ * @param max_total_duration        The maximum time to try reaching this waypoint before moving on to the next
+ *                                  waypoint. Default is infinite.
  */
 template <typename TargetType>
 struct Waypoint {
@@ -36,6 +38,8 @@ struct Waypoint {
   std::optional<double> minimum_time{std::nullopt};
 
   franka::Duration hold_target_duration{0};
+
+  std::optional<franka::Duration> max_total_duration{std::nullopt};
 };
 
 /**
@@ -62,6 +66,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
  protected:
   void initImpl(const RobotState &robot_state, const std::optional<ControlSignalType> &previous_command) override {
     target_reached_time_ = std::nullopt;
+    waypoint_started_time_ = franka::Duration(0);
 
     initWaypointMotion(robot_state, previous_command, input_parameter_);
 
@@ -87,7 +92,11 @@ class WaypointMotion : public Motion<ControlSignalType> {
       extrapolateMotion(time_step - expected_time_step, input_parameter_, output_parameter_);
       output_parameter_.pass_to_input(input_parameter_);
     }
-    if (prev_result_ == ruckig::Result::Finished) {
+    auto max_time_reached = false;
+    if (waypoint_iterator_ != waypoints_.end() && waypoint_iterator_->max_total_duration.has_value()) {
+      max_time_reached = rel_time - waypoint_started_time_ >= waypoint_iterator_->max_total_duration.value();
+    }
+    if (prev_result_ == ruckig::Result::Finished || max_time_reached) {
       if (!target_reached_time_.has_value()) {
         target_reached_time_ = rel_time;
       }
@@ -110,6 +119,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
         checkWaypoint(*waypoint_iterator_);
         setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
         setInputLimits(*waypoint_iterator_, input_parameter_);
+        waypoint_started_time_ = rel_time;
       }
     }
     if (waypoint_iterator_ != waypoints_.end()) {
@@ -158,6 +168,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
   typename std::vector<WaypointType>::iterator waypoint_iterator_;
 
   std::optional<franka::Duration> target_reached_time_;
+  franka::Duration waypoint_started_time_;
 };
 
 }  // namespace franky
