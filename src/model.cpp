@@ -66,7 +66,15 @@ Vector7d Model::gravity(const RobotState &state, const Eigen::Vector3d &gravity_
   return gravity(state.q, state.m_total, state.F_x_Ctotal, gravity_earth);
 }
 
-Vector7d Model::gravity(const RobotState &state) const { return gravity(state, state.O_ddP_O); }
+Vector7d Model::gravity(const RobotState &state) const {
+#ifdef FRANKA_0_9
+  return gravity(state, state.O_ddP_O);
+#else
+  franka::RobotState franka_robot_state;
+  franka_robot_state.q = toStdD<7>(state.q);
+  return toEigenD(model_.gravity(franka_robot_state));
+#endif
+}
 
 Vector7d Model::gravity(
     const Vector7d &q, double m_total, const Eigen::Vector3d &F_x_Ctotal, const Eigen::Vector3d &gravity_earth) const {
