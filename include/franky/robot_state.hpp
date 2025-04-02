@@ -4,10 +4,10 @@
 #include <franka/robot_state.h>
 
 #include "franky/elbow_state.hpp"
-#include "franky/types.hpp"
-#include "franky/util.hpp"
 #include "franky/twist.hpp"
 #include "franky/twist_acceleration.hpp"
+#include "franky/types.hpp"
+#include "franky/util.hpp"
 
 namespace franky {
 
@@ -18,8 +18,13 @@ namespace franky {
  * "_est". Unlike franka::RobotState, all fields are converted to appropriate Eigen/franky types.
  */
 struct RobotState {
+  static RobotState from_franka(
+      const franka::RobotState& robot_state, std::optional<Vector7d> ddq_est = std::nullopt,
+      std::optional<Twist> O_dP_EE_est = std::nullopt, std::optional<TwistAcceleration> O_ddP_EE_est = std::nullopt,
+      std::optional<double> delbow_est = std::nullopt, std::optional<double> ddelbow_est = std::nullopt);
 
-  static RobotState from_franka(const franka::RobotState &robot_state);
+  static RobotState from_franka(
+      const franka::RobotState& robot_state, const Jacobian& ee_jacobian, const Vector7d& ddq_est);
 
   /**
    * \f$^{O}T_{EE}\f$
@@ -346,6 +351,40 @@ struct RobotState {
    * instead.
    */
   franka::Duration time{};
+
+  /**
+   * Estimated joint acceleration computed by franky. This value does not come from the franka firmware.
+   * Unit: \f$[\frac{rad}{s^2}]\f$.
+   */
+  std::optional<Vector7d> ddq_est{};
+
+  /**
+   * Estimated end-effector twist (linear and angular velocity) expressed in @ref o-frame "base frame".
+   * Computed by franky; not provided by franka firmware.
+   * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
+   */
+  std::optional<Twist> O_dP_EE_est{};
+
+  /**
+   * Estimated end-effector spatial acceleration (linear and angular acceleration) expressed in
+   * @ref o-frame "base frame". Computed by franky; not provided by franka firmware.
+   * Unit: \f$[\frac{m}{s^2},\frac{m}{s^2},\frac{m}{s^2},\frac{rad}{s^2},\frac{rad}{s^2},\frac{rad}{s^2}]\f$.
+   */
+  std::optional<TwistAcceleration> O_ddP_EE_est{};
+
+  /**
+   * Estimated elbow velocity (velocity of the third joint), computed by franky.
+   * Not provided by franka firmware.
+   * Unit: \f$[\frac{rad}{s}]\f$.
+   */
+  std::optional<double> delbow_est{};
+
+  /**
+   * Estimated elbow acceleration (acceleration of the third joint), computed by franky.
+   * Not provided by franka firmware.
+   * Unit: \f$[\frac{rad}{s^2}]\f$.
+   */
+  std::optional<double> ddelbow_est{};
 };
 
 }  // namespace franky

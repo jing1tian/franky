@@ -1,10 +1,5 @@
 #pragma once
 
-#include <future>
-#include <variant>
-#include <exception>
-#include <stdexcept>
-#include <optional>
 #include <franka/control_types.h>
 #include <franka/duration.h>
 #include <franka/exception.h>
@@ -12,19 +7,25 @@
 #include <franka/robot.h>
 #include <franka/robot_state.h>
 
-#include "franky/types.hpp"
+#include <exception>
+#include <future>
+#include <optional>
+#include <stdexcept>
+#include <variant>
+
+#include "franky/cartesian_state.hpp"
+#include "franky/control_signal_type.hpp"
+#include "franky/dynamics_limit.hpp"
+#include "franky/joint_state.hpp"
+#include "franky/model.hpp"
+#include "franky/motion/motion.hpp"
+#include "franky/motion/motion_generator.hpp"
+#include "franky/relative_dynamics_factor.hpp"
 #include "franky/robot_pose.hpp"
 #include "franky/robot_velocity.hpp"
-#include "franky/cartesian_state.hpp"
-#include "franky/motion/motion_generator.hpp"
-#include "franky/motion/motion.hpp"
 #include "franky/scope_guard.hpp"
-#include "franky/control_signal_type.hpp"
-#include "franky/relative_dynamics_factor.hpp"
-#include "franky/joint_state.hpp"
-#include "franky/dynamics_limit.hpp"
+#include "franky/types.hpp"
 #include "franky/util.hpp"
-#include "franky/model.hpp"
 
 namespace franky {
 
@@ -50,30 +51,44 @@ class Robot : public franka::Robot {
    */
   struct Params {
     /**
-     * The relative dynamics factor for the robot. The maximum velocity, acceleration and jerk of the robot are
-     * scaled by the factors specified here.
+     * @brief Relative dynamics factor for the robot.
+     *
+     * The maximum velocity, acceleration and jerk of the robot are scaled by the factors specified here.
      */
     RelativeDynamicsFactor relative_dynamics_factor{1.0};
 
     /**
-     * The default torque threshold for collision behavior.
+     * @brief Default torque threshold for collision behavior.
      */
     double default_torque_threshold{20.0};
 
     /**
-     * The default force threshold for collision behavior.
+     * @brief Default force threshold for collision behavior.
      */
     double default_force_threshold{30.0};
 
     /**
-     * The default controller mode for the robot, see libfranka documentation for details.
+     * @brief Default controller mode for the robot.
+     *
+     * See libfranka documentation for details.
      */
     franka::ControllerMode controller_mode{franka::ControllerMode::kJointImpedance};
 
     /**
-     * The default realtime configuration for the robot, see libfranka documentation for details.
+     * @brief Default realtime configuration for the robot.
+     *
+     * See libfranka documentation for details.
      */
     franka::RealtimeConfig realtime_config{franka::RealtimeConfig::kEnforce};
+
+    /**
+     * @brief Joint acceleration estimator decay.
+     *
+     * This parameter is used to smooth the joint acceleration estimates. The acceleration estimates are computed as
+     * \f$ \ddot{q}_{t + \Delta t} = \alpha \ddot{q}_{t}
+     * + ( 1 - \alpha)\left(\frac{\dot{q}_{t + \Delta t} - \dot{q}_{t}}{\Delta t}\right) \f$
+     */
+     double joint_acceleration_estimator_decay{0.9};
   };
 
   // clang-format off
@@ -185,9 +200,7 @@ class Robot : public franka::Robot {
    * @param torque_threshold The torque threshold for the collision behavior in Nm.
    * @param force_threshold The force threshold for the collision behavior in N.
    */
-  void setCollisionBehavior(
-      const ScalarOrArray<7> &torque_threshold,
-      const ScalarOrArray<6> &force_threshold);
+  void setCollisionBehavior(const ScalarOrArray<7> &torque_threshold, const ScalarOrArray<6> &force_threshold);
 
   /**
    * @brief Set the collision behavior of the robot.
@@ -198,10 +211,8 @@ class Robot : public franka::Robot {
    * @param upper_force_threshold The upper force threshold for the collision behavior in N.
    */
   void setCollisionBehavior(
-      const ScalarOrArray<7> &lower_torque_threshold,
-      const ScalarOrArray<7> &upper_torque_threshold,
-      const ScalarOrArray<6> &lower_force_threshold,
-      const ScalarOrArray<6> &upper_force_threshold);
+      const ScalarOrArray<7> &lower_torque_threshold, const ScalarOrArray<7> &upper_torque_threshold,
+      const ScalarOrArray<6> &lower_force_threshold, const ScalarOrArray<6> &upper_force_threshold);
 
   /**
    * @brief Set the collision behavior of the robot.
@@ -226,11 +237,9 @@ class Robot : public franka::Robot {
   void setCollisionBehavior(
       const ScalarOrArray<7> &lower_torque_threshold_acceleration,
       const ScalarOrArray<7> &upper_torque_threshold_acceleration,
-      const ScalarOrArray<7> &lower_torque_threshold_nominal,
-      const ScalarOrArray<7> &upper_torque_threshold_nominal,
+      const ScalarOrArray<7> &lower_torque_threshold_nominal, const ScalarOrArray<7> &upper_torque_threshold_nominal,
       const ScalarOrArray<6> &lower_force_threshold_acceleration,
-      const ScalarOrArray<6> &upper_force_threshold_acceleration,
-      const ScalarOrArray<6> &lower_force_threshold_nominal,
+      const ScalarOrArray<6> &upper_force_threshold_acceleration, const ScalarOrArray<6> &lower_force_threshold_nominal,
       const ScalarOrArray<6> &upper_force_threshold_nominal);
 
   /**
@@ -249,17 +258,13 @@ class Robot : public franka::Robot {
    * @brief Returns the current pose of the robot.
    * @return The current pose of the robot.
    */
-  [[nodiscard]] RobotPose currentPose() {
-    return currentCartesianState().pose();
-  }
+  [[nodiscard]] RobotPose currentPose() { return currentCartesianState().pose(); }
 
   /**
    * @brief Returns the current cartesian velocity of the robot.
    * @return The current cartesian velocity of the robot.
    */
-  [[nodiscard]] RobotVelocity currentCartesianVelocity() {
-    return currentCartesianState().velocity();
-  }
+  [[nodiscard]] RobotVelocity currentCartesianVelocity() { return currentCartesianState().velocity(); }
 
   /**
    * @brief Returns the current cartesian state of the robot.
@@ -267,8 +272,8 @@ class Robot : public franka::Robot {
    */
   [[nodiscard]] CartesianState currentCartesianState() {
     auto s = state();
-    return {{Affine(Eigen::Matrix4d::Map(s.O_T_EE.data())), ElbowState{s.elbow}},
-            RobotVelocity(s.O_dP_EE_c, s.delbow_c)};
+    return {
+        {Affine(Eigen::Matrix4d::Map(s.O_T_EE.data())), ElbowState{s.elbow}}, RobotVelocity(s.O_dP_EE_c, s.delbow_c)};
   }
 
   /**
@@ -284,17 +289,13 @@ class Robot : public franka::Robot {
    * @brief Returns the current joint positions of the robot.
    * @return The current joint positions of the robot.
    */
-  [[nodiscard]] Vector7d currentJointPositions() {
-    return currentJointState().position();
-  }
+  [[nodiscard]] Vector7d currentJointPositions() { return currentJointState().position(); }
 
   /**
    * @brief Returns the current joint velocities of the robot.
    * @return The current joint velocities of the robot.
    */
-  [[nodiscard]] Vector7d currentJointVelocities() {
-    return currentJointState().velocity();
-  }
+  [[nodiscard]] Vector7d currentJointVelocities() { return currentJointState().velocity(); }
 
   /**
    * @brief Returns the current state of the robot.
@@ -334,9 +335,7 @@ class Robot : public franka::Robot {
    *
    * The model is loaded in the constructor, so calling this function does not incur any overhead.
    */
-  [[nodiscard]] std::shared_ptr<const Model> model() const {
-    return model_;
-  }
+  [[nodiscard]] std::shared_ptr<const Model> model() const { return model_; }
 
   /**
    * @brief Wait for the current motion to finish. Throw any exceptions that occurred during the motion.
@@ -353,7 +352,7 @@ class Robot : public franka::Robot {
    * @param timeout The timeout to wait for the motion to finish.
    * @return Whether the motion finished before the timeout expired.
    */
-  template<class Rep, class Period>
+  template <class Rep, class Period>
   bool joinMotion(const std::chrono::duration<Rep, Period> &timeout) {
     std::unique_lock lock(*control_mutex_);
     return joinMotionUnsafe<Rep, Period>(lock, timeout);
@@ -377,9 +376,8 @@ class Robot : public franka::Robot {
    * @param async Whether to execute the motion asynchronously.
    */
   void move(const std::shared_ptr<Motion<franka::CartesianPose>> &motion, bool async = false) {
-    moveInternal<franka::CartesianPose>(motion, [this](const ControlFunc<franka::CartesianPose> &m) {
-      control(m, params_.controller_mode);
-    }, async);
+    moveInternal<franka::CartesianPose>(
+        motion, [this](const ControlFunc<franka::CartesianPose> &m) { control(m, params_.controller_mode); }, async);
   }
 
   /**
@@ -388,9 +386,10 @@ class Robot : public franka::Robot {
    * @param async Whether to execute the motion asynchronously.
    */
   void move(const std::shared_ptr<Motion<franka::CartesianVelocities>> &motion, bool async = false) {
-    moveInternal<franka::CartesianVelocities>(motion, [this](const ControlFunc<franka::CartesianVelocities> &m) {
-      control(m, params_.controller_mode);
-    }, async);
+    moveInternal<franka::CartesianVelocities>(
+        motion,
+        [this](const ControlFunc<franka::CartesianVelocities> &m) { control(m, params_.controller_mode); },
+        async);
   }
 
   /**
@@ -399,9 +398,8 @@ class Robot : public franka::Robot {
    * @param async Whether to execute the motion asynchronously.
    */
   void move(const std::shared_ptr<Motion<franka::JointPositions>> &motion, bool async = false) {
-    moveInternal<franka::JointPositions>(motion, [this](const ControlFunc<franka::JointPositions> &m) {
-      control(m, params_.controller_mode);
-    }, async);
+    moveInternal<franka::JointPositions>(
+        motion, [this](const ControlFunc<franka::JointPositions> &m) { control(m, params_.controller_mode); }, async);
   }
 
   /**
@@ -410,9 +408,8 @@ class Robot : public franka::Robot {
    * @param async Whether to execute the motion asynchronously.
    */
   void move(const std::shared_ptr<Motion<franka::JointVelocities>> &motion, bool async = false) {
-    moveInternal<franka::JointVelocities>(motion, [this](const ControlFunc<franka::JointVelocities> &m) {
-      control(m, params_.controller_mode);
-    }, async);
+    moveInternal<franka::JointVelocities>(
+        motion, [this](const ControlFunc<franka::JointVelocities> &m) { control(m, params_.controller_mode); }, async);
   }
 
   /**
@@ -421,24 +418,18 @@ class Robot : public franka::Robot {
    * @param async Whether to execute the motion asynchronously.
    */
   void move(const std::shared_ptr<Motion<franka::Torques>> &motion, bool async = false) {
-    moveInternal<franka::Torques>(motion, [this](const ControlFunc<franka::Torques> &m) {
-      control(m);
-    }, async);
+    moveInternal<franka::Torques>(motion, [this](const ControlFunc<franka::Torques> &m) { control(m); }, async);
   }
 
  private:
   std::shared_ptr<const Model> model_;
 
-  template<typename ControlSignalType>
+  template <typename ControlSignalType>
   using ControlFunc = std::function<ControlSignalType(const franka::RobotState &, franka::Duration)>;
   using MotionGeneratorVariant = std::variant<
-      std::nullopt_t,
-      MotionGenerator<franka::Torques>,
-      MotionGenerator<franka::JointVelocities>,
-      MotionGenerator<franka::JointPositions>,
-      MotionGenerator<franka::CartesianVelocities>,
-      MotionGenerator<franka::CartesianPose>
-  >;
+      std::nullopt_t, MotionGenerator<franka::Torques>, MotionGenerator<franka::JointVelocities>,
+      MotionGenerator<franka::JointPositions>, MotionGenerator<franka::CartesianVelocities>,
+      MotionGenerator<franka::CartesianPose>>;
 
   //! The robot's hostname / IP address
   std::string fci_hostname_;
@@ -452,9 +443,34 @@ class Robot : public franka::Robot {
   MotionGeneratorVariant motion_generator_{std::nullopt};
   bool motion_generator_running_{false};
 
+  RobotState convertState(const franka::RobotState &franka_robot_state, Vector7d ddq_est) const {
+    auto ee_jacobian = model_->bodyJacobian(
+        franka::Frame::kEndEffector,
+        toEigenD(franka_robot_state.q),
+        stdToAffine(franka_robot_state.F_T_EE),
+        stdToAffine(franka_robot_state.EE_T_K));
+    return RobotState::from_franka(franka_robot_state, ee_jacobian, ddq_est);
+  }
+
+  RobotState initState(const franka::RobotState &franka_robot_state) const {
+    // Use the desired joint accelerations as the initial joint accelerations
+    return convertState(franka_robot_state, toEigenD(franka_robot_state.ddq_d));
+  }
+
+  RobotState updateState(const RobotState &robot_state, const franka::RobotState &franka_robot_state) const {
+    auto prev_ddq_est = robot_state.ddq_est.value();
+    auto prev_dq = robot_state.dq;
+    auto new_dq = toEigenD(franka_robot_state.dq);
+    auto dt = franka_robot_state.time - robot_state.time;
+    auto new_ddq_est = (new_dq - prev_dq) / dt.toSec();
+    auto smooth_ddq_est = params_.joint_acceleration_estimator_decay * prev_ddq_est +
+                          (1.0 - params_.joint_acceleration_estimator_decay) * new_ddq_est;
+    return convertState(franka_robot_state, smooth_ddq_est);
+  }
+
   [[nodiscard]] bool is_in_control_unsafe() const;
 
-  template<class Rep = long, class Period = std::ratio<1>>
+  template <class Rep = long, class Period = std::ratio<1>>
   bool joinMotionUnsafe(
       std::unique_lock<std::mutex> &lock,
       const std::optional<std::chrono::duration<Rep, Period>> &timeout = std::nullopt) {
@@ -467,8 +483,7 @@ class Robot : public franka::Robot {
         control_finished_condition_.wait(lock);
       }
     }
-    if (control_thread_.joinable())
-      control_thread_.join();
+    if (control_thread_.joinable()) control_thread_.join();
     if (control_exception_ != nullptr) {
       auto control_exception = control_exception_;
       control_exception_ = nullptr;
@@ -477,11 +492,10 @@ class Robot : public franka::Robot {
     return true;
   }
 
-  template<typename ControlSignalType>
+  template <typename ControlSignalType>
   void moveInternal(
       const std::shared_ptr<Motion<ControlSignalType>> &motion,
-      const std::function<void(const ControlFunc<ControlSignalType> &)> &control_func_executor,
-      bool async) {
+      const std::function<void(const ControlFunc<ControlSignalType> &)> &control_func_executor, bool async) {
     if (motion == nullptr) {
       throw std::invalid_argument("The motion must not be null.");
     }
@@ -489,58 +503,58 @@ class Robot : public franka::Robot {
       std::unique_lock lock(*control_mutex_);
       if (is_in_control_unsafe() && motion_generator_running_) {
         if (!std::holds_alternative<MotionGenerator<ControlSignalType>>(motion_generator_)) {
-          throw InvalidMotionTypeException("The type of motion cannot change during runtime. Please ensure that the "
-                                           "previous motion finished before using a new type of motion.");
-        } else {
-          std::get<MotionGenerator<ControlSignalType>>(motion_generator_).updateMotion(motion);
+          throw InvalidMotionTypeException(
+              "The type of motion cannot change during runtime. Please ensure that the "
+              "previous motion finished before using a new type of motion.");
         }
+        std::get<MotionGenerator<ControlSignalType>>(motion_generator_).updateMotion(motion);
       } else {
         joinMotionUnsafe(lock);
 
         motion_generator_.emplace<MotionGenerator<ControlSignalType>>(this, motion);
         auto motion_generator = &std::get<MotionGenerator<ControlSignalType>>(motion_generator_);
         motion_generator->registerUpdateCallback(
-            [this](const RobotState &robot_state,
-                   franka::Duration duration,
-                   franka::Duration time) {
+            [this](const RobotState &robot_state, franka::Duration duration, franka::Duration time) {
               std::lock_guard lock(state_mutex_);
               current_state_ = robot_state;
             });
         motion_generator_running_ = true;
-        control_thread_ = std::thread(
-            [this, control_func_executor, motion_generator]() {
-              try {
-                bool done = false;
-                while (!done) {
-                  control_func_executor(
-                      [this, motion_generator](const franka::RobotState &rs, franka::Duration d) {
-                        return (*motion_generator)(RobotState::from_franka(rs), d);
-                      });
-                  std::unique_lock lock(*control_mutex_);
+        control_thread_ = std::thread([this, control_func_executor, motion_generator]() {
+          try {
+            bool done = false;
+            std::optional<RobotState> robot_state;
+            while (!done) {
+              control_func_executor(
+                  [this, motion_generator, &robot_state](const franka::RobotState &rs, franka::Duration d) {
+                    if (!robot_state.has_value())
+                      robot_state = initState(rs);
+                    else
+                      robot_state = updateState(robot_state.value(), rs);
+                    return (*motion_generator)(robot_state.value(), d);
+                  });
+              std::unique_lock lock(*control_mutex_);
 
-                  // This code is just for the case that a new motion is set just after the old one terminates. If this
-                  // happens, we need to continue with this motion, unless an exception occurs.
-                  done = !motion_generator->has_new_motion();
-                  if (motion_generator->has_new_motion()) {
-                    motion_generator->resetTimeUnsafe();
-                  } else {
-                    done = true;
-                    motion_generator_running_ = false;
-                    control_finished_condition_.notify_all();
-                  }
-                }
-              } catch (...) {
-                std::unique_lock lock(*control_mutex_);
-                control_exception_ = std::current_exception();
+              // This code is just for the case that a new motion is set just after the old one terminates. If this
+              // happens, we need to continue with this motion, unless an exception occurs.
+              done = !motion_generator->has_new_motion();
+              if (motion_generator->has_new_motion()) {
+                motion_generator->resetTimeUnsafe();
+              } else {
+                done = true;
                 motion_generator_running_ = false;
                 control_finished_condition_.notify_all();
               }
             }
-        );
+          } catch (...) {
+            std::unique_lock lock(*control_mutex_);
+            control_exception_ = std::current_exception();
+            motion_generator_running_ = false;
+            control_finished_condition_.notify_all();
+          }
+        });
       }
     }
-    if (!async)
-      joinMotion();
+    if (!async) joinMotion();
   }
 };
 

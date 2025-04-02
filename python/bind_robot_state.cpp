@@ -75,7 +75,12 @@ using namespace franky;
     last_motion_errors, \
     control_command_success_rate, \
     robot_mode, \
-    time
+    time, \
+    ddq_est, \
+    O_dP_EE_est, \
+    O_ddP_EE_est, \
+    delbow_est, \
+    ddelbow_est
 
 #define GRIPPER_STATE_FIELDS width, max_width, is_grasped, temperature, time
 
