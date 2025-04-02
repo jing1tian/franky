@@ -28,8 +28,8 @@ void CartesianWaypointMotion::initWaypointMotion(
 
   const RobotVelocity initial_velocity(robot_state.O_dP_EE_c, robot_state.delbow_c);
 
-  const auto initial_acceleration = Vector6d::Map(robot_state.O_ddP_EE_c.data());
-  Vector7d initial_acceleration_with_elbow = (Vector7d() << initial_acceleration, robot_state.ddelbow_c).finished();
+  Vector7d initial_acceleration_with_elbow =
+      (Vector7d() << robot_state.O_ddP_EE_c.vector_repr(), robot_state.ddelbow_c).finished();
 
   target_state_ = robot_pose;
 

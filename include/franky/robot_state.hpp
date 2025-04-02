@@ -7,6 +7,7 @@
 #include "franky/types.hpp"
 #include "franky/util.hpp"
 #include "franky/twist.hpp"
+#include "franky/twist_acceleration.hpp"
 
 namespace franky {
 
@@ -269,7 +270,7 @@ struct RobotState {
    * Desired end effector twist in @ref o-frame "base frame".
    * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
    */
-  Vector6d O_dP_EE_d{};  // NOLINT(readability-identifier-naming)
+  Twist O_dP_EE_d{};  // NOLINT(readability-identifier-naming)
 
 #ifdef FRANKA_0_9
   /**
@@ -300,7 +301,7 @@ struct RobotState {
    * Unit:
    * \f$[\frac{m}{s^2},\frac{m}{s^2},\frac{m}{s^2},\frac{rad}{s^2},\frac{rad}{s^2},\frac{rad}{s^2}]\f$.
    */
-  Vector6d O_ddP_EE_c{};  // NOLINT(readability-identifier-naming)
+  TwistAcceleration O_ddP_EE_c{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$\theta\f$

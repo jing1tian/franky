@@ -11,10 +11,8 @@ namespace franky {
 
 CartesianVelocityWaypointMotion::CartesianVelocityWaypointMotion(
     const std::vector<VelocityWaypoint<RobotVelocity>> &waypoints,
-    const RelativeDynamicsFactor &relative_dynamics_factor,
-    Affine ee_frame)
-    : VelocityWaypointMotion(waypoints, relative_dynamics_factor),
-      ee_frame_(std::move(ee_frame)) {}
+    const RelativeDynamicsFactor &relative_dynamics_factor, Affine ee_frame)
+    : VelocityWaypointMotion(waypoints, relative_dynamics_factor), ee_frame_(std::move(ee_frame)) {}
 
 void CartesianVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<RobotVelocity> &waypoint) const {
   auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
@@ -26,8 +24,7 @@ void CartesianVelocityWaypointMotion::checkWaypoint(const VelocityWaypoint<Robot
 }
 
 void CartesianVelocityWaypointMotion::initWaypointMotion(
-    const RobotState &robot_state,
-    const std::optional<franka::CartesianVelocities> &previous_command,
+    const RobotState &robot_state, const std::optional<franka::CartesianVelocities> &previous_command,
     ruckig::InputParameter<7> &input_parameter) {
   RobotVelocity current_velocity;
   if (previous_command.has_value()) {
@@ -36,8 +33,8 @@ void CartesianVelocityWaypointMotion::initWaypointMotion(
     current_velocity = RobotVelocity(robot_state.O_dP_EE_c, robot_state.delbow_c);
   }
 
-  auto initial_acceleration = Vector6d::Map(robot_state.O_ddP_EE_c.data());
-  Vector7d initial_acceleration_with_elbow = (Vector7d() << initial_acceleration, robot_state.ddelbow_c).finished();
+  Vector7d initial_acceleration_with_elbow =
+      (Vector7d() << robot_state.O_ddP_EE_c.vector_repr(), robot_state.ddelbow_c).finished();
 
   input_parameter.current_position = toStdD<7>(current_velocity.vector_repr());
   input_parameter.current_velocity = toStdD<7>(initial_acceleration_with_elbow);
@@ -51,8 +48,7 @@ void CartesianVelocityWaypointMotion::initWaypointMotion(
 }
 
 franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
-    const RobotState &robot_state,
-    const franka::Duration &time_step,
+    const RobotState &robot_state, const franka::Duration &time_step,
     const std::optional<franka::CartesianVelocities> &previous_command,
     const ruckig::InputParameter<7> &input_parameter) {
   auto has_elbow = input_parameter.enabled[6];
@@ -63,11 +59,9 @@ franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
     auto current_elbow_acc = input_parameter.current_velocity[6];
     auto last_elbow_acc = 2 * (current_elbow_vel - last_elbow_vel_) / time_step_s - current_elbow_acc;
     auto elbow_jerk = (current_elbow_acc - last_elbow_acc) / time_step_s;
-    auto current_elbow_pos =
-        last_elbow_pos_
-            + current_elbow_vel * time_step_s
-            + 0.5 * current_elbow_acc * std::pow(time_step_s, 2)
-            + 1.0 / 6.0 * elbow_jerk * std::pow(time_step_s, 3);
+    auto current_elbow_pos = last_elbow_pos_ + current_elbow_vel * time_step_s +
+                             0.5 * current_elbow_acc * std::pow(time_step_s, 2) +
+                             1.0 / 6.0 * elbow_jerk * std::pow(time_step_s, 3);
 
     last_elbow_vel_ = input_parameter.current_position[0];
     last_elbow_pos_ = current_elbow_pos;
@@ -82,10 +76,8 @@ franka::CartesianVelocities CartesianVelocityWaypointMotion::getControlSignal(
 }
 
 void CartesianVelocityWaypointMotion::setNewWaypoint(
-    const RobotState &robot_state,
-    const std::optional<franka::CartesianVelocities> &previous_command,
-    const VelocityWaypoint<RobotVelocity> &new_waypoint,
-    ruckig::InputParameter<7> &input_parameter) {
+    const RobotState &robot_state, const std::optional<franka::CartesianVelocities> &previous_command,
+    const VelocityWaypoint<RobotVelocity> &new_waypoint, ruckig::InputParameter<7> &input_parameter) {
   auto new_target_transformed = new_waypoint.target.changeEndEffectorFrame(ee_frame_.inverse().translation());
   // This is a bit of an oversimplification, as the angular velocities don't work like linear velocities (but we pretend
   // they do here). However, it is probably good enough here.

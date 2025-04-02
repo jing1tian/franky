@@ -43,13 +43,13 @@ namespace franky {
       .tau_ext_hat_filtered = toEigen(robot_state.tau_ext_hat_filtered),
       .O_F_ext_hat_K = toEigen(robot_state.O_F_ext_hat_K),
       .K_F_ext_hat_K = toEigen(robot_state.K_F_ext_hat_K),
-      .O_dP_EE_d = toEigen(robot_state.O_dP_EE_d),
+      .O_dP_EE_d = Twist::fromVectorRepr(toEigen(robot_state.O_dP_EE_d)),
       #ifdef FRANKA_0_8
         .O_ddP_O = toEigen(robot_state.O_ddP_O),
       #endif
       .O_T_EE_c = stdToAffine(robot_state.O_T_EE_c),
       .O_dP_EE_c = Twist::fromVectorRepr(toEigen(robot_state.O_dP_EE_c)),
-      .O_ddP_EE_c = toEigen(robot_state.O_ddP_EE_c),
+      .O_ddP_EE_c = TwistAcceleration::fromVectorRepr(toEigen(robot_state.O_ddP_EE_c)),
       .theta = toEigen(robot_state.theta),
       .dtheta = toEigen(robot_state.dtheta),
       .current_errors = robot_state.current_errors,
