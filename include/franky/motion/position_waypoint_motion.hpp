@@ -61,7 +61,7 @@ class PositionWaypointMotion : public WaypointMotion<ControlSignalType, Position
       input_parameter.synchronization = ruckig::Synchronization::TimeIfNecessary;
     } else {
       input_parameter.synchronization = ruckig::Synchronization::Time;
-      if (waypoint.minimum_time.has_value()) input_parameter.minimum_duration = waypoint.minimum_time.value();
+      if (waypoint.minimum_time.has_value()) input_parameter.minimum_duration = waypoint.minimum_time.value().toSec();
     }
   }
 

@@ -35,7 +35,7 @@ struct Waypoint {
 
   RelativeDynamicsFactor relative_dynamics_factor{1.0};
 
-  std::optional<double> minimum_time{std::nullopt};
+  std::optional<franka::Duration> minimum_time{std::nullopt};
 
   franka::Duration hold_target_duration{0};
 

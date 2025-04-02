@@ -57,7 +57,7 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
     } else {
       input_parameter.synchronization = ruckig::Synchronization::Time;
       if (waypoint.minimum_time.has_value())
-        input_parameter.minimum_duration = waypoint.minimum_time.value();
+        input_parameter.minimum_duration = waypoint.minimum_time.value().toSec();
     }
   }
 

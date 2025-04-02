@@ -14,7 +14,7 @@ void bind_motion_cartesian_vel(py::module &m) {
                [](
                    const RobotVelocity &target,
                    RelativeDynamicsFactor relative_dynamics_factor,
-                   std::optional<double> minimum_time,
+                   std::optional<franka::Duration> minimum_time,
                    franka::Duration hold_target_duration,
                    std::optional<franka::Duration> max_total_duration
                ) {

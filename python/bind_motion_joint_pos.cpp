@@ -14,8 +14,7 @@ void bind_motion_joint_pos(py::module &m) {
           py::init<>([](const JointState &target,
                         ReferenceType reference_type,
                         RelativeDynamicsFactor relative_dynamics_factor,
-                        std::optional<double>
-                            minimum_time,
+                        std::optional<franka::Duration> minimum_time,
                         franka::Duration hold_target_duration,
                         std::optional<franka::Duration>
                             max_total_duration) {
