@@ -209,6 +209,7 @@ void bind_robot(py::module &m) {
       .def_property_readonly("fci_hostname", &Robot::fci_hostname)
       .def_property_readonly("current_control_signal_type", &Robot::current_control_signal_type)
       .def_property_readonly("model", &Robot::model)
+      .def_property_readonly("model_urdf", &Robot::model_urdf)
       .def_readonly("translation_velocity_limit", &Robot::translation_velocity_limit, "[m/s]")
       .def_readonly("rotation_velocity_limit", &Robot::rotation_velocity_limit, "[rad/s]")
       .def_readonly("elbow_velocity_limit", &Robot::elbow_velocity_limit, "[rad/s]")
