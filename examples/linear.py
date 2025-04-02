@@ -20,9 +20,9 @@ if __name__ == "__main__":
 
     # Define and move forwards
     target = Affine([0.0, 0.2, 0.0])
-    motion_forward = CartesianMotion(target, ReferenceType.Relative)
+    motion_forward = CartesianMotion(target, reference_type=ReferenceType.Relative)
     robot.move(motion_forward)
 
     # And move backwards using the inverse motion
-    motion_backward = CartesianMotion(target.inverse, ReferenceType.Relative)
+    motion_backward = CartesianMotion(target.inverse, reference_type=ReferenceType.Relative)
     robot.move(motion_backward)

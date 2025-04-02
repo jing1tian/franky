@@ -21,11 +21,11 @@ int main(int argc, char *argv[]) {
 
   // Define and move forwards
   auto way = mk_affine(0.0, 0.05, 0.0);
-  auto motion_forward = std::make_shared<CartesianMotion>(RobotPose(way), ReferenceType::kRelative);
+  auto motion_forward = std::make_shared<CartesianMotion>(RobotPose(way), 0.0, ReferenceType::kRelative);
   robot.move(motion_forward);
 
   // And move backwards using the inverse motion
-  auto motion_backward = std::make_shared<CartesianMotion>(RobotPose(way.inverse()), ReferenceType::kRelative);
+  auto motion_backward = std::make_shared<CartesianMotion>(RobotPose(way.inverse()), 0.0, ReferenceType::kRelative);
   robot.move(motion_backward);
 
   return 0;
