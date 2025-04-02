@@ -57,6 +57,9 @@ class CartesianVelocityWaypointMotion : public VelocityWaypointMotion<franka::Ca
       const std::optional<franka::CartesianVelocities> &previous_command,
       const ruckig::InputParameter<7> &input_parameter) override;
 
+  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(
+      const RobotState &robot_state) const override;
+
  private:
   Affine ee_frame_;
   double last_elbow_pos_{};

@@ -14,12 +14,19 @@ void bind_motion_joint_pos(py::module &m) {
           py::init<>([](const JointState &target,
                         ReferenceType reference_type,
                         RelativeDynamicsFactor relative_dynamics_factor,
-                        std::optional<franka::Duration> minimum_time,
+                        std::optional<franka::Duration>
+                            minimum_time,
                         franka::Duration hold_target_duration,
                         std::optional<franka::Duration>
-                            max_total_duration) {
+                            max_total_duration,
+                        double state_estimate_weight) {
             return PositionWaypoint<JointState>{
-                {target, relative_dynamics_factor, minimum_time, hold_target_duration, max_total_duration},
+                {target,
+                 relative_dynamics_factor,
+                 minimum_time,
+                 hold_target_duration,
+                 max_total_duration,
+                 state_estimate_weight},
                 reference_type};
           }),
           "target"_a,
@@ -27,13 +34,15 @@ void bind_motion_joint_pos(py::module &m) {
           "relative_dynamics_factor"_a = 1.0,
           "minimum_time"_a = std::nullopt,
           "hold_target_duration"_a = franka::Duration(0),
-          "max_total_duration"_a = std::nullopt)
+          "max_total_duration"_a = std::nullopt,
+          "state_estimate_weight"_a = 0.0)
       .def_readonly("target", &PositionWaypoint<JointState>::target)
       .def_readonly("reference_type", &PositionWaypoint<JointState>::reference_type)
       .def_readonly("relative_dynamics_factor", &PositionWaypoint<JointState>::relative_dynamics_factor)
       .def_readonly("minimum_time", &PositionWaypoint<JointState>::minimum_time)
       .def_readonly("hold_target_duration", &PositionWaypoint<JointState>::hold_target_duration)
-      .def_readonly("max_total_duration", &PositionWaypoint<JointState>::max_total_duration);
+      .def_readonly("max_total_duration", &PositionWaypoint<JointState>::max_total_duration)
+      .def_readonly("state_estimate_weight", &PositionWaypoint<JointState>::state_estimate_weight);
 
   py::class_<JointWaypointMotion, Motion<franka::JointPositions>, std::shared_ptr<JointWaypointMotion>>(
       m, "JointWaypointMotion")
@@ -49,8 +58,9 @@ void bind_motion_joint_pos(py::module &m) {
 
   py::class_<JointMotion, JointWaypointMotion, std::shared_ptr<JointMotion>>(m, "JointMotion")
       .def(
-          py::init<const JointState &, ReferenceType, RelativeDynamicsFactor, bool>(),
+          py::init<const JointState &, double, ReferenceType, RelativeDynamicsFactor, bool>(),
           "target"_a,
+          "state_estimate_weight"_a = 0.0,
           py::arg_v("reference_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
           "relative_dynamics_factor"_a = 1.0,
           "return_when_finished"_a = true);
@@ -59,5 +69,8 @@ void bind_motion_joint_pos(py::module &m) {
       StopMotion<franka::JointPositions>,
       Motion<franka::JointPositions>,
       std::shared_ptr<StopMotion<franka::JointPositions>>>(m, "JointPositionStopMotion")
-      .def(py::init<RelativeDynamicsFactor>(), "relative_dynamics_factor"_a = 1.0);
+      .def(
+          py::init<RelativeDynamicsFactor, double>(),
+          "relative_dynamics_factor"_a = 1.0,
+          "state_estimate_weight"_a = 0.0);
 }

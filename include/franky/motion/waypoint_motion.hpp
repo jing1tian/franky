@@ -28,6 +28,11 @@ struct MotionPlannerException : std::runtime_error {
  * @param hold_target_duration      For how long to hold the target of this waypoint after it has been reached.
  * @param max_total_duration        The maximum time to try reaching this waypoint before moving on to the next
  *                                  waypoint. Default is infinite.
+ * @param state_estimate_weight     Weighting of the robot state estimate vs the target when computing the current state
+ *                                  to continue planning from. A value of 0 means that the planner always assumes it
+ *                                  reached its last target perfectly (open loop control), while a value of 1 means that
+ *                                  the planner always uses the robot state estimate (closed loop control). A value
+ *                                  between 0 and 1 means that the planner uses a weighted average of the two.
  */
 template <typename TargetType>
 struct Waypoint {
@@ -40,6 +45,8 @@ struct Waypoint {
   franka::Duration hold_target_duration{0};
 
   std::optional<franka::Duration> max_total_duration{std::nullopt};
+
+  double state_estimate_weight{0.0};
 };
 
 /**
@@ -72,7 +79,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
 
     waypoint_iterator_ = waypoints_.begin();
     if (waypoint_iterator_ != waypoints_.end()) {
-      checkWaypoint(*waypoint_iterator_);
+      checkWaypointPrivate(*waypoint_iterator_);
       setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
       setInputLimits(*waypoint_iterator_, input_parameter_);
       prev_result_ = ruckig::Result::Working;
@@ -116,13 +123,30 @@ class WaypointMotion : public Motion<ControlSignalType> {
         if (!return_when_finished_) return command;
         return franka::MotionFinished(command);
       } else {
-        checkWaypoint(*waypoint_iterator_);
+        checkWaypointPrivate(*waypoint_iterator_);
         setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
         setInputLimits(*waypoint_iterator_, input_parameter_);
         waypoint_started_time_ = rel_time;
       }
     }
     if (waypoint_iterator_ != waypoints_.end()) {
+      auto blend = waypoint_iterator_->state_estimate_weight;
+
+      if (blend != 0) {
+        auto [pos_s, vel_s, acc_s] = getStateEstimate(robot_state);
+        auto pos_t = toEigen(input_parameter_.current_position);
+        auto vel_t = toEigen(input_parameter_.current_velocity);
+        auto acc_t = toEigen(input_parameter_.current_acceleration);
+
+        auto pos_b = (1 - blend) * pos_t + blend * pos_s;
+        auto vel_b = (1 - blend) * vel_t + blend * vel_s;
+        auto acc_b = (1 - blend) * acc_t + blend * acc_s;
+
+        input_parameter_.current_position = toStdD<7>(pos_b);
+        input_parameter_.current_velocity = toStdD<7>(vel_b);
+        input_parameter_.current_acceleration = toStdD<7>(acc_b);
+      }
+
       prev_result_ = trajectory_generator_.update(input_parameter_, output_parameter_);
       if (prev_result_ == ruckig::Result::Working || prev_result_ == ruckig::Result::Finished) {
         output_parameter_.pass_to_input(input_parameter_);
@@ -148,6 +172,9 @@ class WaypointMotion : public Motion<ControlSignalType> {
 
   virtual void checkWaypoint(const WaypointType &waypoint) const {}
 
+  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(
+      const RobotState &robot_state) const = 0;
+
   [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const = 0;
 
   [[nodiscard]] virtual ControlSignalType getControlSignal(
@@ -169,6 +196,13 @@ class WaypointMotion : public Motion<ControlSignalType> {
 
   std::optional<franka::Duration> target_reached_time_;
   franka::Duration waypoint_started_time_;
+
+  void checkWaypointPrivate(const WaypointType &waypoint) const {
+    if (waypoint.state_estimate_weight < 0 || waypoint.state_estimate_weight > 1)
+      throw std::runtime_error(
+          "state_estimate_weight must be between 0 and 1. Got " + std::to_string(waypoint.state_estimate_weight));
+    checkWaypoint(waypoint);
+  }
 };
 
 }  // namespace franky

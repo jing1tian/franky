@@ -59,6 +59,9 @@ class CartesianWaypointMotion : public PositionWaypointMotion<franka::CartesianP
       const std::optional<franka::CartesianPose> &previous_command,
       const ruckig::InputParameter<7> &input_parameter) override;
 
+  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(
+      const RobotState &robot_state) const override;
+
  private:
   CartesianState target_state_;
   Affine ref_frame_;

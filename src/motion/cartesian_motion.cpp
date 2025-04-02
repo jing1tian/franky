@@ -7,6 +7,7 @@ namespace franky {
 
 CartesianMotion::CartesianMotion(
     const CartesianState &target,
+    double state_estimate_weight,
     ReferenceType reference_type,
     const RelativeDynamicsFactor &relative_dynamics_factor,
     bool return_when_finished,
@@ -16,6 +17,7 @@ CartesianMotion::CartesianMotion(
         PositionWaypoint<CartesianState>{
             {
                 .target = target,
+                .state_estimate_weight = state_estimate_weight
             },
             reference_type
         }

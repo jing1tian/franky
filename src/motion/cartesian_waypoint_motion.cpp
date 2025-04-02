@@ -125,18 +125,26 @@ std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getAbsoluteInp
   const auto r = robot();
   return {
       vec_cart_rot_elbow(
-          r->translation_velocity_limit.get(),
-          r->rotation_velocity_limit.get(),
-          r->elbow_velocity_limit.get()),
+          r->translation_velocity_limit.get(), r->rotation_velocity_limit.get(), r->elbow_velocity_limit.get()),
       vec_cart_rot_elbow(
           r->translation_acceleration_limit.get(),
           r->rotation_acceleration_limit.get(),
           r->elbow_acceleration_limit.get()),
-      vec_cart_rot_elbow(
-          r->translation_jerk_limit.get(),
-          r->rotation_jerk_limit.get(),
-          r->elbow_jerk_limit.get())
-  };
+      vec_cart_rot_elbow(r->translation_jerk_limit.get(), r->rotation_jerk_limit.get(), r->elbow_jerk_limit.get())};
+}
+
+std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getStateEstimate(
+    const RobotState &robot_state) const {
+  auto ref_frame_inv = ref_frame_.inverse();
+  auto current_pose_ref_frame = ref_frame_inv * RobotPose(robot_state.O_T_EE, robot_state.elbow);
+  auto current_vel_ref_frame =
+      ref_frame_inv * RobotVelocity(robot_state.O_dP_EE_est.value(), robot_state.delbow_est.value());
+  auto current_ee_acc_ref_frame = ref_frame_inv * robot_state.O_ddP_EE_est.value();
+  auto current_elbow_acc = robot_state.ddelbow_est.value();
+
+  Vector7d current_acc_ref_frame = (Vector7d() << current_ee_acc_ref_frame.vector_repr(), current_elbow_acc).finished();
+
+  return {current_pose_ref_frame.vector_repr(), current_vel_ref_frame.vector_repr(), current_acc_ref_frame};
 }
 
 }  // namespace franky

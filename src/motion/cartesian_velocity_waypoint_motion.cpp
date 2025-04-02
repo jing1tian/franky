@@ -89,19 +89,22 @@ void CartesianVelocityWaypointMotion::setNewWaypoint(
 std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getAbsoluteInputLimits() const {
   const auto r = robot();
   return {
-    vec_cart_rot_elbow(
-        r->translation_velocity_limit.get(),
-        r->rotation_velocity_limit.get(),
-        r->elbow_velocity_limit.get()),
-    vec_cart_rot_elbow(
-        r->translation_acceleration_limit.get(),
-        r->rotation_acceleration_limit.get(),
-        r->elbow_acceleration_limit.get()),
-    vec_cart_rot_elbow(
-        r->translation_jerk_limit.get(),
-        r->rotation_jerk_limit.get(),
-        r->elbow_jerk_limit.get())
-  };
+      vec_cart_rot_elbow(
+          r->translation_velocity_limit.get(), r->rotation_velocity_limit.get(), r->elbow_velocity_limit.get()),
+      vec_cart_rot_elbow(
+          r->translation_acceleration_limit.get(),
+          r->rotation_acceleration_limit.get(),
+          r->elbow_acceleration_limit.get()),
+      vec_cart_rot_elbow(r->translation_jerk_limit.get(), r->rotation_jerk_limit.get(), r->elbow_jerk_limit.get())};
+}
+
+std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getStateEstimate(
+    const RobotState &robot_state) const {
+  RobotVelocity current_velocity(robot_state.O_dP_EE_est.value(), robot_state.delbow_est.value());
+  Vector7d current_acceleration =
+      (Vector7d() << robot_state.O_ddP_EE_est.value().vector_repr(), robot_state.ddelbow_est.value()).finished();
+
+  return {current_velocity.vector_repr(), current_acceleration, Vector7d::Zero()};
 }
 
 }  // namespace franky

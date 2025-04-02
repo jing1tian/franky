@@ -6,6 +6,7 @@ namespace franky {
 
 JointMotion::JointMotion(
     const JointState &target,
+    double state_estimate_weight,
     ReferenceType reference_type,
     const RelativeDynamicsFactor &relative_dynamics_factor,
     bool return_when_finished)
@@ -14,6 +15,7 @@ JointMotion::JointMotion(
         PositionWaypoint<JointState>{
             {
                 .target = target,
+                .state_estimate_weight = state_estimate_weight
             },
             reference_type,
         }
