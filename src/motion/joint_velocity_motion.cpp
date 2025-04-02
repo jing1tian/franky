@@ -6,13 +6,14 @@ namespace franky {
 
 JointVelocityMotion::JointVelocityMotion(
     const Vector7d &target,
-    const std::optional<franka::Duration> &max_total_duration,
+    const franka::Duration &duration,
     const RelativeDynamicsFactor &relative_dynamics_factor)
     : JointVelocityWaypointMotion(
     {
         VelocityWaypoint<Vector7d>{
             .target = target,
-            .max_total_duration = max_total_duration
+            .hold_target_duration = duration,
+            .max_total_duration = duration
         },
         VelocityWaypoint<Vector7d>{
             .target = Vector7d::Zero()

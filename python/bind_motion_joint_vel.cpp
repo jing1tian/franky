@@ -49,9 +49,9 @@ void bind_motion_joint_vel(py::module &m) {
 
   py::class_<JointVelocityMotion, JointVelocityWaypointMotion, std::shared_ptr<JointVelocityMotion>>(
       m, "JointVelocityMotion")
-      .def(py::init<const Vector7d &, std::optional<franka::Duration>, RelativeDynamicsFactor>(),
+      .def(py::init<const Vector7d &, franka::Duration, RelativeDynamicsFactor>(),
            "target"_a,
-           "max_total_duration"_a = std::nullopt,
+           "duration"_a = franka::Duration(1000),
            "relative_dynamics_factor"_a = 1.0);
 
   py::class_<StopMotion<franka::JointVelocities>,
