@@ -450,30 +450,11 @@ class Robot : public franka::Robot {
   MotionGeneratorVariant motion_generator_{std::nullopt};
   bool motion_generator_running_{false};
 
-  RobotState convertState(const franka::RobotState &franka_robot_state, Vector7d ddq_est) const {
-    auto ee_jacobian = model_->bodyJacobian(
-        franka::Frame::kEndEffector,
-        toEigenD(franka_robot_state.q),
-        stdToAffine(franka_robot_state.F_T_EE),
-        stdToAffine(franka_robot_state.EE_T_K));
-    return RobotState::from_franka(franka_robot_state, ee_jacobian, ddq_est);
-  }
+  RobotState convertState(const franka::RobotState &franka_robot_state, Vector7d ddq_est) const;
 
-  RobotState initState(const franka::RobotState &franka_robot_state) const {
-    // Use the desired joint accelerations as the initial joint accelerations
-    return convertState(franka_robot_state, toEigenD(franka_robot_state.ddq_d));
-  }
+  RobotState initState(const franka::RobotState &franka_robot_state) const;
 
-  RobotState updateState(const RobotState &robot_state, const franka::RobotState &franka_robot_state) const {
-    auto prev_ddq_est = robot_state.ddq_est.value();
-    auto prev_dq = robot_state.dq;
-    auto new_dq = toEigenD(franka_robot_state.dq);
-    auto dt = franka_robot_state.time - robot_state.time;
-    auto new_ddq_est = (new_dq - prev_dq) / dt.toSec();
-    auto smooth_ddq_est = params_.joint_acceleration_estimator_decay * prev_ddq_est +
-                          (1.0 - params_.joint_acceleration_estimator_decay) * new_ddq_est;
-    return convertState(franka_robot_state, smooth_ddq_est);
-  }
+  RobotState updateState(const RobotState &robot_state, const franka::RobotState &franka_robot_state) const;
 
   [[nodiscard]] bool is_in_control_unsafe() const;
 
