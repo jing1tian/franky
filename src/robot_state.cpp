@@ -47,7 +47,7 @@ RobotState RobotState::from_franka(
       .O_F_ext_hat_K = toEigen(franka_robot_state.O_F_ext_hat_K),
       .K_F_ext_hat_K = toEigen(franka_robot_state.K_F_ext_hat_K),
       .O_dP_EE_d = Twist::fromVectorRepr(toEigen(franka_robot_state.O_dP_EE_d)),
-#ifdef FRANKA_0_8
+#ifdef FRANKA_0_9
       .O_ddP_O = toEigen(franka_robot_state.O_ddP_O),
 #endif
       .O_T_EE_c = stdToAffine(franka_robot_state.O_T_EE_c),
