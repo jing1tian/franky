@@ -454,11 +454,11 @@ class Robot : public franka::Robot {
   MotionGeneratorVariant motion_generator_{std::nullopt};
   bool motion_generator_running_{false};
 
-  RobotState convertState(const franka::RobotState &franka_robot_state, const Vector7d& ddq_est) const;
+  [[nodiscard]] RobotState convertState(const franka::RobotState &franka_robot_state, const Vector7d& ddq_est) const;
 
-  RobotState initState(const franka::RobotState &franka_robot_state) const;
+  [[nodiscard]] RobotState initState(const franka::RobotState &franka_robot_state) const;
 
-  RobotState updateState(const RobotState &robot_state, const franka::RobotState &franka_robot_state) const;
+  [[nodiscard]] RobotState updateState(const RobotState &robot_state, const franka::RobotState &franka_robot_state) const;
 
   [[nodiscard]] bool is_in_control_unsafe() const;
 

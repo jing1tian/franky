@@ -14,7 +14,7 @@ using namespace franky;
 SequentialExecutor callback_executor;
 
 template<typename ControlSignalType>
-void mkMotionAndReactionClasses(py::module_ m, const std::string &control_signal_name) {
+void mkMotionAndReactionClasses(py::module_ &m, const std::string &control_signal_name) {
   py::class_<Motion<ControlSignalType>, std::shared_ptr<Motion<ControlSignalType>>> motion_class(
       m, ("Base" + control_signal_name + "Motion").c_str());
   py::class_<Reaction<ControlSignalType>, std::shared_ptr<Reaction<ControlSignalType>>> reaction_class(

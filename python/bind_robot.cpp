@@ -41,10 +41,7 @@ void bind_robot(py::module &m) {
       .def("get", &DynamicsLimit<Vector7d>::get)
       .def("__repr__", strFromStream<DynamicsLimit<Vector7d>>)
       .def_property_readonly(
-          "max",
-          [](const DynamicsLimit<Vector7d> &dynamics_limit) {
-            return Vector7d::Map(dynamics_limit.max.data());
-          })
+          "max", [](const DynamicsLimit<Vector7d> &dynamics_limit) { return Vector7d::Map(dynamics_limit.max.data()); })
       .def_readonly("desc", &DynamicsLimit<Vector7d>::desc);
 
   py::class_<DynamicsLimit<double>>(m, "DoubleDynamicsLimit")
@@ -83,7 +80,7 @@ void bind_robot(py::module &m) {
       .def("stop", &Gripper::stop, py::call_guard<py::gil_scoped_release>())
       .def("stop_async", &Gripper::stopAsync, py::call_guard<py::gil_scoped_release>())
       .def_property_readonly("state", &Gripper::state)
-      .def_property_readonly("server_version", (uint16_t(Gripper::*)()) & Gripper::serverVersion)
+      .def_property_readonly("server_version", reinterpret_cast<uint16_t (Gripper::*)()>(&Gripper::serverVersion))
       .def_property_readonly("width", &Gripper::width)
       .def_property_readonly("is_grasped", &Gripper::is_grasped)
       .def_property_readonly("max_width", &Gripper::max_width);

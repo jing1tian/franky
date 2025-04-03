@@ -22,7 +22,7 @@ Robot::Robot(const std::string &fci_hostname, const Params &params)
   setCollisionBehavior(params_.default_torque_threshold, params_.default_force_threshold);
 }
 
-RobotState Robot::convertState(const franka::RobotState &franka_robot_state, const Vector7d& ddq_est) const {
+RobotState Robot::convertState(const franka::RobotState &franka_robot_state, const Vector7d &ddq_est) const {
   auto ee_jacobian = model_->bodyJacobian(
       franka::Frame::kEndEffector,
       toEigenD(franka_robot_state.q),
@@ -47,9 +47,7 @@ RobotState Robot::updateState(const RobotState &robot_state, const franka::Robot
   return convertState(franka_robot_state, smooth_ddq_est);
 }
 
-bool Robot::hasErrors() {
-  return static_cast<bool>(state().current_errors);
-}
+bool Robot::hasErrors() { return static_cast<bool>(state().current_errors); }
 
 bool Robot::recoverFromErrors() {
   automaticErrorRecovery();
