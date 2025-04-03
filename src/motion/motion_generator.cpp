@@ -3,8 +3,10 @@
 #include <franka/duration.h>
 #include <franka/robot_state.h>
 
-#include "franky/robot.hpp"
+#include <franky/rt_mutex.hpp>
+
 #include "franky/motion/motion.hpp"
+#include "franky/robot.hpp"
 
 namespace franky {
 
@@ -17,7 +19,9 @@ template class MotionGenerator<franka::CartesianPose>;
 template<typename ControlSignalType>
 MotionGenerator<ControlSignalType>::MotionGenerator(
     Robot *robot, std::shared_ptr<Motion<ControlSignalType>> initial_motion)
-    : robot_(robot), initial_motion_(initial_motion) {}
+    : robot_(robot), initial_motion_(initial_motion) {
+  patchMutexRT(new_motion_mutex_);
+}
 
 template<typename ControlSignalType>
 ControlSignalType

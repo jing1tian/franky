@@ -1,5 +1,6 @@
 #include "franky/robot.hpp"
 
+#include <franky/rt_mutex.hpp>
 #include <ruckig/ruckig.hpp>
 
 #include "franky/types.hpp"
@@ -12,6 +13,8 @@ Robot::Robot(const std::string &fci_hostname) : Robot(fci_hostname, Params()) { 
 
 Robot::Robot(const std::string &fci_hostname, const Params &params)
     : fci_hostname_(fci_hostname), params_(params), franka::Robot(fci_hostname, params.realtime_config) {
+  patchMutexRT(state_mutex_);
+  patchMutexRT(*control_mutex_);
   model_ = std::make_shared<const Model>(loadModel());
 #ifdef FRANKA_0_15
   model_urdf_ = getRobotModel();

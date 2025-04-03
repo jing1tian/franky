@@ -59,7 +59,7 @@ class Reaction {
    * robot started moving, and is only reset if a motion expires without being replaced by a new motion.
    * @return True if the condition is met, false otherwise.
    */
-  [[nodiscard]] inline bool condition(const RobotState &robot_state,
+  [[nodiscard]] bool condition(const RobotState &robot_state,
                                       franka::Duration rel_time,
                                       franka::Duration abs_time) const {
     return condition_(robot_state, rel_time, abs_time);

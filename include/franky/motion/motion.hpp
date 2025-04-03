@@ -111,7 +111,7 @@ class Motion {
       franka::Duration abs_time,
       const std::optional<ControlSignalType> &previous_command) = 0;
 
-  [[nodiscard]] inline Robot *robot() const {
+  [[nodiscard]] Robot *robot() const {
     return robot_;
   }
 

@@ -1,11 +1,13 @@
 #include "franky/motion/reaction.hpp"
 
-#include <memory>
-#include <utility>
 #include <franka/robot_state.h>
 
-#include "franky/motion/motion.hpp"
+#include <franky/rt_mutex.hpp>
+#include <memory>
+#include <utility>
+
 #include "franky/motion/condition.hpp"
+#include "franky/motion/motion.hpp"
 
 namespace franky {
 
@@ -27,6 +29,7 @@ Reaction<ControlSignalType>::Reaction(
     const RobotState &, franka::Duration, franka::Duration) { return new_motion; }) {
   if (new_motion == nullptr)
     throw std::invalid_argument("The new motion must not be null.");
+  patchMutexRT(callback_mutex_);
 }
 
 template<typename ControlSignalType>

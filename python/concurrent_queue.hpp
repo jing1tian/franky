@@ -1,32 +1,36 @@
 #pragma once
 
-#include <queue>
-#include <mutex>
-#include <optional>
 #include <condition_variable>
+#include <optional>
+#include <queue>
 
-template<typename T>
+#include "franky.hpp"
+
+template <typename T>
 class ConcurrentQueue {
  public:
-  void push(const T &item) {
-    std::lock_guard<std::mutex> lock(mutex_);
+  ConcurrentQueue() {
+    franky::patchMutexRT(mutex_);
+  }
+
+  void push(const T& item) {
+    std::lock_guard lock(mutex_);
     queue_.push(item);
     condition_.notify_one();
   }
 
   T pop() {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock lock(mutex_);
     condition_.wait(lock, [this]() { return !queue_.empty(); });
     T item = queue_.front();
     queue_.pop();
     return item;
   }
 
-  template<class Rep, class Period>
+  template <class Rep, class Period>
   std::optional<T> pop(const std::chrono::duration<Rep, Period>& timeout) {
-    std::unique_lock<std::mutex> lock(mutex_);
-    bool not_empty = condition_.wait_for(lock, timeout, [this]() { return !queue_.empty(); });
-    if (not_empty) {
+    std::unique_lock lock(mutex_);
+    if (condition_.wait_for(lock, timeout, [this]() { return !queue_.empty(); })) {
       T item = queue_.front();
       queue_.pop();
       return item;
@@ -39,4 +43,3 @@ class ConcurrentQueue {
   std::mutex mutex_;
   std::condition_variable condition_;
 };
-

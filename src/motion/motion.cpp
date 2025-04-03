@@ -1,5 +1,6 @@
 #include "franky/motion/motion.hpp"
 
+#include <franky/rt_mutex.hpp>
 #include <mutex>
 
 #include "franky/motion/reaction.hpp"
@@ -19,7 +20,10 @@ template
 class Motion<franka::CartesianPose>;
 
 template<typename ControlSignalType>
-Motion<ControlSignalType>::Motion() : robot_(nullptr) {}
+Motion<ControlSignalType>::Motion() : robot_(nullptr) {
+  patchMutexRT(callback_mutex_);
+  patchMutexRT(reaction_mutex_);
+}
 
 template<typename ControlSignalType>
 void Motion<ControlSignalType>::registerCallback(CallbackType callback) {
