@@ -92,7 +92,8 @@ void bind_robot(py::module &m) {
                         double default_torque_threshold,
                         double default_force_threshold,
                         franka::ControllerMode controller_mode,
-                        franka::RealtimeConfig realtime_config) {
+                        franka::RealtimeConfig realtime_config,
+                        double joint_acceleration_estimator_decay) {
             return std::make_unique<Robot>(
                 fci_hostname,
                 Robot::Params{
@@ -100,7 +101,8 @@ void bind_robot(py::module &m) {
                     default_torque_threshold,
                     default_force_threshold,
                     controller_mode,
-                    realtime_config});
+                    realtime_config,
+                    joint_acceleration_estimator_decay});
           }),
           "fci_hostname"_a,
           "relative_dynamics_factor"_a = 1.0,
@@ -108,7 +110,8 @@ void bind_robot(py::module &m) {
           "default_force_threshold"_a = 30.0,
           py::arg_v(
               "controller_mode", franka::ControllerMode::kJointImpedance, "_franky.ControllerMode.JointImpedance"),
-          py::arg_v("realtime_config", franka::RealtimeConfig::kEnforce, "_franky.RealtimeConfig.Enforce"))
+          py::arg_v("realtime_config", franka::RealtimeConfig::kEnforce, "_franky.RealtimeConfig.Enforce"),
+          "joint_acceleration_estimator_decay"_a = 0.9)
       .def("recover_from_errors", &Robot::recoverFromErrors)
       .def(
           "move",
