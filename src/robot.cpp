@@ -19,7 +19,7 @@ Robot::Robot(const std::string &fci_hostname, const Params &params)
   setCollisionBehavior(params_.default_torque_threshold, params_.default_force_threshold);
 }
 
-RobotState Robot::convertState(const franka::RobotState &franka_robot_state, Vector7d ddq_est) const {
+RobotState Robot::convertState(const franka::RobotState &franka_robot_state, const Vector7d& ddq_est) const {
   auto ee_jacobian = model_->bodyJacobian(
       franka::Frame::kEndEffector,
       toEigenD(franka_robot_state.q),

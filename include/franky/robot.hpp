@@ -454,7 +454,7 @@ class Robot : public franka::Robot {
   MotionGeneratorVariant motion_generator_{std::nullopt};
   bool motion_generator_running_{false};
 
-  RobotState convertState(const franka::RobotState &franka_robot_state, Vector7d ddq_est) const;
+  RobotState convertState(const franka::RobotState &franka_robot_state, const Vector7d& ddq_est) const;
 
   RobotState initState(const franka::RobotState &franka_robot_state) const;
 
