@@ -469,7 +469,7 @@ class Robot : public franka::Robot {
    */
 #define MAX_JOINT_ACC toEigenD<7>({15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0})
   DynamicsLimit<Vector7d> joint_acceleration_limit{
-    "joint_acceleration", MAX_JOINT_ACC, MAX_JOINT_ACC * 0.3, control_mutex_,
+    "joint_acceleration", MAX_JOINT_ACC, MAX_JOINT_ACC, control_mutex_,
     [this] { return is_in_control_unsafe(); }
   };
 
@@ -478,7 +478,7 @@ class Robot : public franka::Robot {
    */
 #define MAX_JOINT_JERK toEigenD<7>({7500.0, 3750.0, 5000.0, 6250.0, 7500.0, 10000.0, 10000.0})
   DynamicsLimit<Vector7d> joint_jerk_limit{
-    "joint_jerk", MAX_JOINT_JERK, MAX_JOINT_JERK * 0.3, control_mutex_,
+    "joint_jerk", MAX_JOINT_JERK, MAX_JOINT_JERK, control_mutex_,
     [this] { return is_in_control_unsafe(); }
   };
 
