@@ -71,6 +71,16 @@ std::array<double, dims> expand(const ScalarOrArray<dims> &input) {
   return output;
 }
 
+template<size_t dims>
+Eigen::Vector<double, dims> expandEigen(const ScalarOrArray<dims> &input) {
+  if (std::holds_alternative<Array<dims>>(input)) {
+    return ensureEigen<dims>(std::get<Array<dims>>(input));
+  }
+  Eigen::Vector<double, dims> output;
+  output.fill(std::get<double>(input));
+  return output;
+}
+
 template<int dims>
 std::ostream &operator<<(std::ostream &os, const Eigen::Vector<double, dims> &vec) {
   os << "[";

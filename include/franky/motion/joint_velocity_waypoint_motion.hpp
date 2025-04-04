@@ -1,10 +1,10 @@
 #pragma once
 
+#include <franka/robot_state.h>
+
 #include <atomic>
 #include <optional>
 #include <ruckig/ruckig.hpp>
-
-#include <franka/robot_state.h>
 
 #include "franky/joint_state.hpp"
 #include "franky/motion/velocity_waypoint_motion.hpp"
@@ -32,26 +32,23 @@ class JointVelocityWaypointMotion : public VelocityWaypointMotion<franka::JointV
   void checkWaypoint(const VelocityWaypoint<Vector7d> &waypoint) const override;
 
   void initWaypointMotion(
-      const RobotState &robot_state,
-      const std::optional<franka::JointVelocities> &previous_command,
+      const RobotState &robot_state, const std::optional<franka::JointVelocities> &previous_command,
       ruckig::InputParameter<7> &input_parameter) override;
 
   void setNewWaypoint(
-      const RobotState &robot_state,
-      const std::optional<franka::JointVelocities> &previous_command,
-      const VelocityWaypoint<Vector7d> &new_waypoint,
-      ruckig::InputParameter<7> &input_parameter) override;
+      const RobotState &robot_state, const std::optional<franka::JointVelocities> &previous_command,
+      const VelocityWaypoint<Vector7d> &new_waypoint, ruckig::InputParameter<7> &input_parameter) override;
 
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override;
 
   [[nodiscard]] franka::JointVelocities getControlSignal(
-      const RobotState &robot_state,
-      const franka::Duration &time_step,
+      const RobotState &robot_state, const franka::Duration &time_step,
       const std::optional<franka::JointVelocities> &previous_command,
       const ruckig::InputParameter<7> &input_parameter) override;
 
-  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(
-      const RobotState &robot_state) const override;
+  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(const RobotState &robot_state) const override;
+
+  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getGoalTolerance() const override;
 };
 
 }  // namespace franky

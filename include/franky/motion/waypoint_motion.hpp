@@ -99,11 +99,28 @@ class WaypointMotion : public Motion<ControlSignalType> {
       extrapolateMotion(time_step - expected_time_step, input_parameter_, output_parameter_);
       output_parameter_.pass_to_input(input_parameter_);
     }
+
     auto max_time_reached = false;
     if (waypoint_iterator_ != waypoints_.end() && waypoint_iterator_->max_total_duration.has_value()) {
       max_time_reached = rel_time - waypoint_started_time_ >= waypoint_iterator_->max_total_duration.value();
     }
-    if (prev_result_ == ruckig::Result::Finished || max_time_reached) {
+
+    const auto curr_pos = toEigenD(input_parameter_.current_position);
+    const auto curr_vel = toEigenD(input_parameter_.current_velocity);
+    const auto curr_acc = toEigenD(input_parameter_.current_acceleration);
+
+    const auto tar_pos = toEigenD(input_parameter_.target_position);
+    const auto tar_vel = toEigenD(input_parameter_.target_velocity);
+    const auto tar_acc = toEigenD(input_parameter_.target_acceleration);
+
+    const auto [prec_pos, prec_vel, prec_acc] = getGoalTolerance();
+
+    const auto target_reached =
+        (((curr_pos - tar_pos).cwiseAbs() - prec_pos).maxCoeff() < 0 &&
+         ((curr_vel - tar_vel).cwiseAbs() - prec_vel).maxCoeff() < 0 &&
+         ((curr_acc - tar_acc).cwiseAbs() - prec_acc).maxCoeff() < 0);
+
+    if (prev_result_ == ruckig::Result::Finished || target_reached || max_time_reached) {
       if (!target_reached_time_.has_value()) {
         target_reached_time_ = rel_time;
       }
@@ -122,12 +139,11 @@ class WaypointMotion : public Motion<ControlSignalType> {
         auto command = getControlSignal(robot_state, time_step, previous_command, input_parameter_);
         if (!return_when_finished_) return command;
         return franka::MotionFinished(command);
-      } else {
-        checkWaypointPrivate(*waypoint_iterator_);
-        setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
-        setInputLimits(*waypoint_iterator_, input_parameter_);
-        waypoint_started_time_ = rel_time;
       }
+      checkWaypointPrivate(*waypoint_iterator_);
+      setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
+      setInputLimits(*waypoint_iterator_, input_parameter_);
+      waypoint_started_time_ = rel_time;
     }
     if (waypoint_iterator_ != waypoints_.end()) {
       auto blend = waypoint_iterator_->state_estimate_weight;
@@ -176,6 +192,8 @@ class WaypointMotion : public Motion<ControlSignalType> {
       const RobotState &robot_state) const = 0;
 
   [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const = 0;
+
+  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getGoalTolerance() const = 0;
 
   [[nodiscard]] virtual ControlSignalType getControlSignal(
       const RobotState &robot_state, const franka::Duration &time_step,

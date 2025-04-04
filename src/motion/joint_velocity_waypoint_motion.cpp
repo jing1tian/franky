@@ -52,4 +52,8 @@ std::tuple<Vector7d, Vector7d, Vector7d> JointVelocityWaypointMotion::getStateEs
     const RobotState &robot_state) const {
   return {robot_state.dq, robot_state.ddq_est.value(), Vector7d::Zero()};
 }
+
+std::tuple<Vector7d, Vector7d, Vector7d> JointVelocityWaypointMotion::getGoalTolerance() const {
+  return {expandEigen<7>(5e-3), expandEigen<7>(10.0), expandEigen<7>(std::numeric_limits<double>::infinity())};
+}
 }  // namespace franky

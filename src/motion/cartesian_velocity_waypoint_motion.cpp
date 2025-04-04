@@ -107,4 +107,9 @@ std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getSta
   return {current_velocity.vector_repr(), current_acceleration, Vector7d::Zero()};
 }
 
+std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getGoalTolerance() const {
+  // TODO: set these properly
+  return {expandEigen<7>(5e-3), expandEigen<7>(10.0), expandEigen<7>(std::numeric_limits<double>::infinity())};
+}
+
 }  // namespace franky
