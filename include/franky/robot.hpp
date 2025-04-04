@@ -22,8 +22,8 @@
 #include "franky/motion/motion_generator.hpp"
 #include "franky/relative_dynamics_factor.hpp"
 #include "franky/robot_pose.hpp"
+#include "franky/robot_state_estimator.hpp"
 #include "franky/robot_velocity.hpp"
-#include "franky/scope_guard.hpp"
 #include "franky/types.hpp"
 #include "franky/util.hpp"
 
@@ -82,13 +82,38 @@ class Robot : public franka::Robot {
     franka::RealtimeConfig realtime_config{franka::RealtimeConfig::kEnforce};
 
     /**
-     * @brief Joint acceleration estimator decay.
+     * @brief Window size of the median filter of the joint velocity estimator.
      *
-     * This parameter is used to smooth the joint acceleration estimates. The acceleration estimates are computed as
+     * This filter is applied before exponential smoothing.
+     */
+    size_t dq_estimator_window_size{9};
+
+    /**
+     * @brief Joint velocity estimator exponential decay.
+     *
+     * This parameter is used to smooth the joint velocity estimates. After the median filter, the velocity estimates
+     * are computed as
+     * \f$ \dot{q}_{t + \Delta t} = \alpha \dot{q}_{t}
+     * + ( 1 - \alpha)\left(\frac{\dot{q}_{t + \Delta t} - \dot{q}_{t}}{\Delta t}\right) \f$
+     */
+    double dq_estimator_alpha{0.9};
+
+    /**
+     * @brief Window size of the median filter of the joint acceleration estimator.
+     *
+     * This filter is applied before exponential smoothing.
+     */
+    size_t ddq_estimator_window_size{9};
+
+    /**
+     * @brief Joint acceleration estimator exponential decay.
+     *
+     * This parameter is used to smooth the joint acceleration estimates. After the median filter, the acceleration
+     * estimates are computed as
      * \f$ \ddot{q}_{t + \Delta t} = \alpha \ddot{q}_{t}
      * + ( 1 - \alpha)\left(\frac{\dot{q}_{t + \Delta t} - \dot{q}_{t}}{\Delta t}\right) \f$
      */
-     double joint_acceleration_estimator_decay{0.9};
+    double ddq_estimator_alpha{0.99};
   };
 
   /** Number of degrees of freedom of the robot */
@@ -370,6 +395,8 @@ class Robot : public franka::Robot {
   MotionGeneratorVariant motion_generator_{std::nullopt};
   bool motion_generator_running_{false};
 
+  [[nodiscard]] bool is_in_control_unsafe() const;
+
  public:
   // IMPORTANT: this has to come after control_mutex_ as otherwise control_mutex_ will be uninitialized when passed to
   // the constructor of the DynamicsLimit class
@@ -458,14 +485,6 @@ class Robot : public franka::Robot {
   // clang-format on
 
  private:
-  [[nodiscard]] RobotState convertState(const franka::RobotState &franka_robot_state, const Vector7d& ddq_est) const;
-
-  [[nodiscard]] RobotState initState(const franka::RobotState &franka_robot_state) const;
-
-  [[nodiscard]] RobotState updateState(const RobotState &robot_state, const franka::RobotState &franka_robot_state) const;
-
-  [[nodiscard]] bool is_in_control_unsafe() const;
-
   template <class Rep = long, class Period = std::ratio<1>>
   bool joinMotionUnsafe(
       std::unique_lock<std::mutex> &lock,
@@ -518,15 +537,15 @@ class Robot : public franka::Robot {
         control_thread_ = std::thread([this, control_func_executor, motion_generator]() {
           try {
             bool done = false;
-            std::optional<RobotState> robot_state;
+            RobotStateEstimator robot_state_estimator(
+                params_.dq_estimator_window_size,
+                params_.ddq_estimator_window_size,
+                params_.dq_estimator_alpha,
+                params_.ddq_estimator_alpha);
             while (!done) {
               control_func_executor(
-                  [this, motion_generator, &robot_state](const franka::RobotState &rs, franka::Duration d) {
-                    if (!robot_state.has_value())
-                      robot_state = initState(rs);
-                    else
-                      robot_state = updateState(robot_state.value(), rs);
-                    return (*motion_generator)(robot_state.value(), d);
+                  [this, motion_generator, &robot_state_estimator](const franka::RobotState &rs, franka::Duration d) {
+                    return (*motion_generator)(robot_state_estimator.update(rs, *model_), d);
                   });
               std::unique_lock lock(*control_mutex_);
 

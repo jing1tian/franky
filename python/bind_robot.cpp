@@ -93,7 +93,10 @@ void bind_robot(py::module &m) {
                         double default_force_threshold,
                         franka::ControllerMode controller_mode,
                         franka::RealtimeConfig realtime_config,
-                        double joint_acceleration_estimator_decay) {
+                        size_t dq_estimator_window_size,
+                        double dq_estimator_alpha,
+                        size_t ddq_estimator_window_size,
+                        double ddq_estimator_alpha) {
             return std::make_unique<Robot>(
                 fci_hostname,
                 Robot::Params{
@@ -102,7 +105,10 @@ void bind_robot(py::module &m) {
                     default_force_threshold,
                     controller_mode,
                     realtime_config,
-                    joint_acceleration_estimator_decay});
+                    dq_estimator_window_size,
+                    dq_estimator_alpha,
+                    ddq_estimator_window_size,
+                    ddq_estimator_alpha});
           }),
           "fci_hostname"_a,
           "relative_dynamics_factor"_a = 1.0,
@@ -111,7 +117,10 @@ void bind_robot(py::module &m) {
           py::arg_v(
               "controller_mode", franka::ControllerMode::kJointImpedance, "_franky.ControllerMode.JointImpedance"),
           py::arg_v("realtime_config", franka::RealtimeConfig::kEnforce, "_franky.RealtimeConfig.Enforce"),
-          "joint_acceleration_estimator_decay"_a = 0.9)
+          "dq_estimator_window_size"_a = 10,
+          "dq_estimator_alpha"_a = 0.9,
+          "ddq_estimator_window_size"_a = 10,
+          "ddq_estimator_alpha"_a = 0.9)
       .def("recover_from_errors", &Robot::recoverFromErrors)
       .def(
           "move",

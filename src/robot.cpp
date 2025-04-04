@@ -25,31 +25,6 @@ Robot::Robot(const std::string &fci_hostname, const Params &params)
   setCollisionBehavior(params_.default_torque_threshold, params_.default_force_threshold);
 }
 
-RobotState Robot::convertState(const franka::RobotState &franka_robot_state, const Vector7d &ddq_est) const {
-  auto ee_jacobian = model_->bodyJacobian(
-      franka::Frame::kEndEffector,
-      toEigenD(franka_robot_state.q),
-      stdToAffine(franka_robot_state.F_T_EE),
-      stdToAffine(franka_robot_state.EE_T_K));
-  return RobotState::from_franka(franka_robot_state, ee_jacobian, ddq_est);
-}
-
-RobotState Robot::initState(const franka::RobotState &franka_robot_state) const {
-  // Use the desired joint accelerations as the initial joint accelerations
-  return convertState(franka_robot_state, toEigenD(franka_robot_state.ddq_d));
-}
-
-RobotState Robot::updateState(const RobotState &robot_state, const franka::RobotState &franka_robot_state) const {
-  auto prev_ddq_est = robot_state.ddq_est.value();
-  auto prev_dq = robot_state.dq;
-  auto new_dq = toEigenD(franka_robot_state.dq);
-  auto dt = franka_robot_state.time - robot_state.time;
-  auto new_ddq_est = (new_dq - prev_dq) / dt.toSec();
-  auto smooth_ddq_est = params_.joint_acceleration_estimator_decay * prev_ddq_est +
-                        (1.0 - params_.joint_acceleration_estimator_decay) * new_ddq_est;
-  return convertState(franka_robot_state, smooth_ddq_est);
-}
-
 bool Robot::hasErrors() { return static_cast<bool>(state().current_errors); }
 
 bool Robot::recoverFromErrors() {

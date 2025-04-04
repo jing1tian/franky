@@ -50,7 +50,7 @@ std::tuple<Vector7d, Vector7d, Vector7d> JointVelocityWaypointMotion::getAbsolut
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointVelocityWaypointMotion::getStateEstimate(
     const RobotState &robot_state) const {
-  return {robot_state.dq, robot_state.ddq_est.value(), Vector7d::Zero()};
+  return {robot_state.dq_est.value(), robot_state.ddq_est.value(), Vector7d::Zero()};
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointVelocityWaypointMotion::getGoalTolerance() const {

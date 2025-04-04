@@ -46,7 +46,7 @@ std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getAbsoluteInputLi
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getStateEstimate(const RobotState &robot_state) const {
-  return {robot_state.q, robot_state.dq, robot_state.ddq_est.value()};
+  return {robot_state.q, robot_state.ddq_est.value(), robot_state.ddq_est.value()};
 }
 
 std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getGoalTolerance() const {
