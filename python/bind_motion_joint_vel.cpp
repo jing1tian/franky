@@ -57,8 +57,8 @@ void bind_motion_joint_vel(py::module &m) {
       .def(
           py::init<const Vector7d &, franka::Duration, double, RelativeDynamicsFactor>(),
           "target"_a,
-          "state_estimate_weight"_a = 0.0,
           "duration"_a = franka::Duration(1000),
+          "state_estimate_weight"_a = 0.0,
           "relative_dynamics_factor"_a = 1.0);
 
   py::class_<
