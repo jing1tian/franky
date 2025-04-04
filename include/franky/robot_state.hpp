@@ -19,13 +19,13 @@ namespace franky {
  */
 struct RobotState {
   static RobotState from_franka(
-      const franka::RobotState& robot_state, std::optional<Vector7d> dq_est = std::nullopt,
-      std::optional<Vector7d> ddq_est = std::nullopt, std::optional<Twist> O_dP_EE_est = std::nullopt,
-      std::optional<TwistAcceleration> O_ddP_EE_est = std::nullopt, std::optional<double> delbow_est = std::nullopt,
-      std::optional<double> ddelbow_est = std::nullopt);
+      const franka::RobotState& robot_state, std::optional<Vector7d> q_est = std::nullopt,
+      std::optional<Vector7d> dq_est = std::nullopt, std::optional<Vector7d> ddq_est = std::nullopt,
+      std::optional<Twist> O_dP_EE_est = std::nullopt, std::optional<TwistAcceleration> O_ddP_EE_est = std::nullopt,
+      std::optional<double> delbow_est = std::nullopt, std::optional<double> ddelbow_est = std::nullopt);
 
   static RobotState from_franka(
-      const franka::RobotState& robot_state, const Jacobian& ee_jacobian, const Vector7d& dq_est,
+      const franka::RobotState& robot_state, const Jacobian& ee_jacobian, const Vector7d& q_est, const Vector7d& dq_est,
       const Vector7d& ddq_est);
 
   /**
@@ -353,6 +353,12 @@ struct RobotState {
    * instead.
    */
   franka::Duration time{};
+
+  /**
+   * Estimated joint position computed by franky. This value does not come from the franka firmware.
+   * Unit: \f$[rad]\f$.
+   */
+  std::optional<Vector7d> q_est{};
 
   /**
    * Estimated joint velocity computed by franky. This value does not come from the franka firmware.

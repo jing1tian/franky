@@ -82,38 +82,44 @@ class Robot : public franka::Robot {
     franka::RealtimeConfig realtime_config{franka::RealtimeConfig::kEnforce};
 
     /**
-     * @brief Window size of the median filter of the joint velocity estimator.
-     *
-     * This filter is applied before exponential smoothing.
+     * @brief Kalman parameter: process noise variance of the position.
      */
-    size_t dq_estimator_window_size{9};
+    double kalman_q_process_var = 0.01;
 
     /**
-     * @brief Joint velocity estimator exponential decay.
-     *
-     * This parameter is used to smooth the joint velocity estimates. After the median filter, the velocity estimates
-     * are computed as
-     * \f$ \dot{q}_{t + \Delta t} = \alpha \dot{q}_{t}
-     * + ( 1 - \alpha)\left(\frac{\dot{q}_{t + \Delta t} - \dot{q}_{t}}{\Delta t}\right) \f$
+     * @brief Kalman parameter: process noise variance of the velocity.
      */
-    double dq_estimator_alpha{0.9};
+    double kalman_dq_process_var = 0.01;
 
     /**
-     * @brief Window size of the median filter of the joint acceleration estimator.
-     *
-     * This filter is applied before exponential smoothing.
+     * @brief Kalman parameter: process noise variance of the acceleration.
      */
-    size_t ddq_estimator_window_size{9};
+    double kalman_ddq_process_var = 1000;
 
     /**
-     * @brief Joint acceleration estimator exponential decay.
-     *
-     * This parameter is used to smooth the joint acceleration estimates. After the median filter, the acceleration
-     * estimates are computed as
-     * \f$ \ddot{q}_{t + \Delta t} = \alpha \ddot{q}_{t}
-     * + ( 1 - \alpha)\left(\frac{\dot{q}_{t + \Delta t} - \dot{q}_{t}}{\Delta t}\right) \f$
+     * @brief Kalman parameter: observation noise variance of measured joint positions.
      */
-    double ddq_estimator_alpha{0.99};
+    double kalman_q_obs_var = 0.1;
+
+    /**
+     * @brief Kalman parameter: observation noise variance of measured joint velocities.
+     */
+    double kalman_dq_obs_var = 0.1;
+
+    /**
+     * @brief Kalman parameter: observation noise variance of desired joint positions.
+     */
+    double kalman_q_d_obs_var = 0.1;
+
+    /**
+     * @brief Kalman parameter: observation noise variance of desired joint velocities.
+     */
+    double kalman_dq_d_obs_var = 0.1;
+
+    /**
+     * @brief Kalman parameter: observation noise variance of desired joint accelerations.
+     */
+    double kalman_ddq_d_obs_var = 0.1;
   };
 
   /** Number of degrees of freedom of the robot */
@@ -538,10 +544,14 @@ class Robot : public franka::Robot {
           try {
             bool done = false;
             RobotStateEstimator robot_state_estimator(
-                params_.dq_estimator_window_size,
-                params_.ddq_estimator_window_size,
-                params_.dq_estimator_alpha,
-                params_.ddq_estimator_alpha);
+                params_.kalman_q_process_var,
+                params_.kalman_dq_process_var,
+                params_.kalman_ddq_process_var,
+                params_.kalman_q_obs_var,
+                params_.kalman_dq_obs_var,
+                params_.kalman_q_d_obs_var,
+                params_.kalman_dq_d_obs_var,
+                params_.kalman_ddq_d_obs_var);
             while (!done) {
               control_func_executor(
                   [this, motion_generator, &robot_state_estimator](const franka::RobotState &rs, franka::Duration d) {

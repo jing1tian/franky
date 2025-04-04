@@ -76,6 +76,7 @@ using namespace franky;
     control_command_success_rate, \
     robot_mode, \
     time, \
+    q_est, \
     dq_est, \
     ddq_est, \
     O_dP_EE_est, \

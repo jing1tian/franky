@@ -5,7 +5,6 @@
 #include <pybind11/stl.h>
 
 #include "franky.hpp"
-
 #include "util.hpp"
 
 namespace py = pybind11;
@@ -93,10 +92,14 @@ void bind_robot(py::module &m) {
                         double default_force_threshold,
                         franka::ControllerMode controller_mode,
                         franka::RealtimeConfig realtime_config,
-                        size_t dq_estimator_window_size,
-                        double dq_estimator_alpha,
-                        size_t ddq_estimator_window_size,
-                        double ddq_estimator_alpha) {
+                        double kalman_q_process_var,
+                        double kalman_dq_process_var,
+                        double kalman_ddq_process_var,
+                        double kalman_q_obs_var,
+                        double kalman_dq_obs_var,
+                        double kalman_q_d_obs_var,
+                        double kalman_dq_d_obs_var,
+                        double kalman_ddq_d_obs_var) {
             return std::make_unique<Robot>(
                 fci_hostname,
                 Robot::Params{
@@ -105,10 +108,14 @@ void bind_robot(py::module &m) {
                     default_force_threshold,
                     controller_mode,
                     realtime_config,
-                    dq_estimator_window_size,
-                    dq_estimator_alpha,
-                    ddq_estimator_window_size,
-                    ddq_estimator_alpha});
+                    kalman_q_process_var,
+                    kalman_dq_process_var,
+                    kalman_ddq_process_var,
+                    kalman_q_obs_var,
+                    kalman_dq_obs_var,
+                    kalman_q_d_obs_var,
+                    kalman_dq_d_obs_var,
+                    kalman_ddq_d_obs_var});
           }),
           "fci_hostname"_a,
           "relative_dynamics_factor"_a = 1.0,
@@ -117,10 +124,14 @@ void bind_robot(py::module &m) {
           py::arg_v(
               "controller_mode", franka::ControllerMode::kJointImpedance, "_franky.ControllerMode.JointImpedance"),
           py::arg_v("realtime_config", franka::RealtimeConfig::kEnforce, "_franky.RealtimeConfig.Enforce"),
-          "dq_estimator_window_size"_a = 10,
-          "dq_estimator_alpha"_a = 0.9,
-          "ddq_estimator_window_size"_a = 10,
-          "ddq_estimator_alpha"_a = 0.9)
+          "kalman_q_process_var"_a = 0.1,
+          "kalman_dq_process_var"_a = 0.1,
+          "kalman_ddq_process_var"_a = 1000.0,
+          "kalman_q_obs_var"_a = 0.1,
+          "kalman_dq_obs_var"_a = 0.1,
+          "kalman_q_d_obs_var"_a = 0.1,
+          "kalman_dq_d_obs_var"_a = 0.1,
+          "kalman_ddq_d_obs_var"_a = 0.1)
       .def("recover_from_errors", &Robot::recoverFromErrors)
       .def(
           "move",

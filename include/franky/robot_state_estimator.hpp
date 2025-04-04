@@ -1,15 +1,15 @@
 #pragma once
 
-#include "franky/exponential_filter.hpp"
-#include "franky/median_filter.hpp"
-#include "franky/robot_state.hpp"
 #include "franky/model.hpp"
+#include "franky/robot_state.hpp"
 
 namespace franky {
 
 class RobotStateEstimator {
  public:
-  RobotStateEstimator(size_t dq_window_size, size_t ddq_window_size, double dq_alpha, double ddq_alpha);
+  RobotStateEstimator(
+      double q_process_var, double dq_process_var, double ddq_process_var, double q_obs_var, double dq_obs_var,
+      double q_d_obs_var, double dq_d_obs_var, double ddq_d_obs_var);
 
   RobotStateEstimator(const RobotStateEstimator&) = default;
 
@@ -20,12 +20,16 @@ class RobotStateEstimator {
   }
 
  private:
-  MedianFilter<7> dq_median_filter_;
-  ExponentialFilter<7> dq_exponential_filter_;
-  MedianFilter<7> ddq_median_filter_;
-  ExponentialFilter<7> ddq_exponential_filter_;
+  double q_process_var_;
+  double dq_process_var_;
+  double ddq_process_var_;
+
+  Eigen::Matrix<double, 5 * 7, 3 * 7> h_mat_;
+  Eigen::Matrix<double, 5 * 7, 5 * 7> r_mat_;
 
   std::optional<franka::Duration> prev_time_{};
+  Eigen::Vector<double, 3 * 7> joint_state_mean_;
+  Eigen::Matrix<double, 3 * 7, 3 * 7> joint_state_covar_;
 };
 
 }  // namespace franky
