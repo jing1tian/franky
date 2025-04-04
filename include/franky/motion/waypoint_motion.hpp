@@ -133,6 +133,12 @@ class WaypointMotion : public Motion<ControlSignalType> {
         target_reached_time_ = std::nullopt;
         if (waypoint_iterator_ != waypoints_.end()) {
           ++waypoint_iterator_;
+          if (waypoint_iterator_ != waypoints_.end()) {
+            checkWaypointPrivate(*waypoint_iterator_);
+            setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
+            setInputLimits(*waypoint_iterator_, input_parameter_);
+            waypoint_started_time_ = rel_time;
+          }
         }
       }
       if (waypoint_iterator_ == waypoints_.end()) {
@@ -140,10 +146,6 @@ class WaypointMotion : public Motion<ControlSignalType> {
         if (!return_when_finished_) return command;
         return franka::MotionFinished(command);
       }
-      checkWaypointPrivate(*waypoint_iterator_);
-      setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
-      setInputLimits(*waypoint_iterator_, input_parameter_);
-      waypoint_started_time_ = rel_time;
     }
     if (waypoint_iterator_ != waypoints_.end()) {
       auto blend = waypoint_iterator_->state_estimate_weight;
