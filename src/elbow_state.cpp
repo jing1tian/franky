@@ -6,8 +6,7 @@ namespace franky {
 
 std::ostream &operator<<(std::ostream &os, const ElbowState &elbow_state) {
   os << "ElbowState(joint_3_pos=" << elbow_state.joint_3_pos_;
-  if (elbow_state.joint_4_flip_.has_value())
-    os << ", joint_4_flip=" << elbow_state.joint_4_flip_.value();
+  if (elbow_state.joint_4_flip_.has_value()) os << ", joint_4_flip=" << elbow_state.joint_4_flip_.value();
   os << ")";
   return os;
 }
@@ -16,8 +15,10 @@ std::ostream &operator<<(std::ostream &os, const FlipDirection &flip_direction) 
   switch (flip_direction) {
     case FlipDirection::kNegative:
       os << "FlipDirection.Negative";
+      break;
     case FlipDirection::kNeutral:
       os << "FlipDirection.Neutral";
+      break;
     default:
       os << "FlipDirection.Positive";
   }
