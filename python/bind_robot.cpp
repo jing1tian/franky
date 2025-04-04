@@ -117,10 +117,10 @@ void bind_robot(py::module &m) {
           py::arg_v(
               "controller_mode", franka::ControllerMode::kJointImpedance, "_franky.ControllerMode.JointImpedance"),
           py::arg_v("realtime_config", franka::RealtimeConfig::kEnforce, "_franky.RealtimeConfig.Enforce"),
-          "dq_estimator_window_size"_a = 10,
+          "dq_estimator_window_size"_a = 9,
           "dq_estimator_alpha"_a = 0.9,
-          "ddq_estimator_window_size"_a = 10,
-          "ddq_estimator_alpha"_a = 0.9)
+          "ddq_estimator_window_size"_a = 9,
+          "ddq_estimator_alpha"_a = 0.99)
       .def("recover_from_errors", &Robot::recoverFromErrors)
       .def(
           "move",
