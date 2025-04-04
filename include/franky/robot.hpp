@@ -405,7 +405,7 @@ class Robot : public franka::Robot {
    * @brief Translational velocity limit [m/s].
    */
   DynamicsLimit<double> translation_velocity_limit{
-    "translational velocity", 1.7, 0.7, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "translational velocity", 1.7, 1.7, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
  * @brief Rotational velocity limit [rad/s].
@@ -423,37 +423,37 @@ class Robot : public franka::Robot {
    * @brief Translational acceleration limit [m/s²].
    */
   DynamicsLimit<double> translation_acceleration_limit{
-    "translational acceleration", 13.0, 2.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "translational acceleration", 13.0, 13.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Rotational acceleration limit [rad/s²].
    */
   DynamicsLimit<double> rotation_acceleration_limit{
-    "rotational acceleration", 25.0, 10.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "rotational acceleration", 25.0, 25.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow acceleration limit [rad/s²].
    */
   DynamicsLimit<double> elbow_acceleration_limit{
-    "elbow acceleration", 10.0, 4.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "elbow acceleration", 10.0, 10.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Translational jerk limit [m/s³].
    */
   DynamicsLimit<double> translation_jerk_limit{
-    "translational jerk", 6500.0, 500.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "translational jerk", 6500.0, 6500.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Rotational jerk limit [rad/s³].
    */
   DynamicsLimit<double> rotation_jerk_limit{
-    "rotational jerk", 12500.0, 2000.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "rotational jerk", 12500.0, 12500.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow jerk limit [rad/s³].
    */
   DynamicsLimit<double> elbow_jerk_limit{
-    "elbow jerk", 5000.0, 800.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "elbow jerk", 5000.0, 5000.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Joint velocity limit [rad/s].
