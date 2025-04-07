@@ -406,85 +406,83 @@ class Robot : public franka::Robot {
  public:
   // IMPORTANT: this has to come after control_mutex_ as otherwise control_mutex_ will be uninitialized when passed to
   // the constructor of the DynamicsLimit class
+  // Limits provided by Franka for the FR3: https://frankaemika.github.io/docs/control_parameters.html
   // clang-format off
   /**
    * @brief Translational velocity limit [m/s].
    */
   DynamicsLimit<double> translation_velocity_limit{
-    "translational velocity", 1.7, 0.7, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "translational velocity", 3.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
  * @brief Rotational velocity limit [rad/s].
  */
   DynamicsLimit<double> rotation_velocity_limit{
-    "rotational velocity", 2.5, 2.5, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "rotational velocity", 2.5, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow velocity limit [rad/s].
    */
   DynamicsLimit<double> elbow_velocity_limit{
-    "elbow velocity", 2.175, 2.175, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "elbow velocity", 2.62,  control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Translational acceleration limit [m/s²].
    */
   DynamicsLimit<double> translation_acceleration_limit{
-    "translational acceleration", 13.0, 2.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "translational acceleration", 9.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Rotational acceleration limit [rad/s²].
    */
   DynamicsLimit<double> rotation_acceleration_limit{
-    "rotational acceleration", 25.0, 10.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "rotational acceleration", 17.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow acceleration limit [rad/s²].
    */
   DynamicsLimit<double> elbow_acceleration_limit{
-    "elbow acceleration", 10.0, 4.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "elbow acceleration", 10.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Translational jerk limit [m/s³].
    */
   DynamicsLimit<double> translation_jerk_limit{
-    "translational jerk", 6500.0, 500.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "translational jerk", 4500.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Rotational jerk limit [rad/s³].
    */
   DynamicsLimit<double> rotation_jerk_limit{
-    "rotational jerk", 12500.0, 2000.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "rotational jerk", 8500.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Elbow jerk limit [rad/s³].
    */
   DynamicsLimit<double> elbow_jerk_limit{
-    "elbow jerk", 5000.0, 800.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
+    "elbow jerk", 5000.0, control_mutex_, [this] { return is_in_control_unsafe(); }};
 
   /**
    * @brief Joint velocity limit [rad/s].
    */
-#define MAX_JOINT_VEL toEigenD<7>({2.175, 2.175, 2.175, 2.175, 2.610, 2.610, 2.610})
   DynamicsLimit<Vector7d> joint_velocity_limit{
-    "joint_velocity", MAX_JOINT_VEL, MAX_JOINT_VEL, control_mutex_,
+    "joint_velocity", toEigenD<7>({2.62, 2.62, 2.62, 2.62, 5.26, 4.18, 5.26}), control_mutex_,
     [this] { return is_in_control_unsafe(); }
   };
 
   /**
    * @brief Joint acceleration limit [rad/s²].
    */
-#define MAX_JOINT_ACC toEigenD<7>({15.0, 7.5, 10.0, 12.5, 15.0, 20.0, 20.0})
   DynamicsLimit<Vector7d> joint_acceleration_limit{
-    "joint_acceleration", MAX_JOINT_ACC, MAX_JOINT_ACC, control_mutex_,
+    "joint_acceleration", toEigenD<7>({10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}), control_mutex_,
     [this] { return is_in_control_unsafe(); }
   };
 
   /**
    * @brief Joint jerk limit [rad/s³].
    */
-#define MAX_JOINT_JERK toEigenD<7>({7500.0, 3750.0, 5000.0, 6250.0, 7500.0, 10000.0, 10000.0})
   DynamicsLimit<Vector7d> joint_jerk_limit{
-    "joint_jerk", MAX_JOINT_JERK, MAX_JOINT_JERK, control_mutex_,
+    "joint_jerk", toEigenD<7>({5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0, 5000.0}), control_mutex_,
     [this] { return is_in_control_unsafe(); }
   };
 

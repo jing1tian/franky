@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace franky {
 
@@ -23,18 +24,35 @@ class DynamicsLimit {
   /**
    * @brief Constructor for DynamicsLimit.
    *
+   * Initializes a new instance of the DynamicsLimit class with the provided values. The maximum value is used as
+   * default value by this constructor.
+   *
+   * @param desc                A string description of the limit (e.g., "joint velocity").
+   * @param max_val             The maximum allowable value for this limit.
+   * @param write_mutex         A shared pointer to the mutex used for synchronizing writes to the limit.
+   * @param can_write_condition A function that returns true if the limit can be written to.
+   */
+  DynamicsLimit(
+      const std::string& desc, const LimitType& max_val, const std::shared_ptr<std::mutex>& write_mutex,
+      const std::function<bool()>& can_write_condition)
+      : DynamicsLimit(desc, max_val, write_mutex, can_write_condition, max_val) {}
+
+  /**
+   * @brief Constructor for DynamicsLimit.
+   *
    * Initializes a new instance of the DynamicsLimit class with the provided values.
    *
    * @param desc                A string description of the limit (e.g., "joint velocity").
    * @param max_val             The maximum allowable value for this limit.
-   * @param default_val         The default value for this limit.
    * @param write_mutex         A shared pointer to the mutex used for synchronizing writes to the limit.
    * @param can_write_condition A function that returns true if the limit can be written to.
+   * @param default_val         The default value for this limit.
    */
-  DynamicsLimit(const std::string& desc, const LimitType& max_val, const LimitType& default_val,
-                const std::shared_ptr<std::mutex>& write_mutex, const std::function<bool()>& can_write_condition)
+  DynamicsLimit(
+      std::string desc, const LimitType& max_val, const std::shared_ptr<std::mutex>& write_mutex,
+      const std::function<bool()>& can_write_condition, const LimitType& default_val)
       : max(max_val),
-        desc(desc),
+        desc(std::move(desc)),
         write_mutex_(write_mutex),
         value_(default_val),
         can_write_condition_(can_write_condition) {}
@@ -108,8 +126,8 @@ class DynamicsLimit {
    */
   void check(const LimitType& value) const;
 
-  std::shared_ptr<std::mutex> write_mutex_; /**< Mutex for synchronizing writes to the limit. */
-  LimitType value_; /**< Current value of the limit. */
+  std::shared_ptr<std::mutex> write_mutex_;   /**< Mutex for synchronizing writes to the limit. */
+  LimitType value_;                           /**< Current value of the limit. */
   std::function<bool()> can_write_condition_; /**< Function to check if writing is allowed. */
 };
 
