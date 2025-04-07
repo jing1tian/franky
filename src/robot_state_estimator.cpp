@@ -54,20 +54,20 @@ RobotState RobotStateEstimator::update(const franka::RobotState& franka_robot_st
              zero,  one,      one * dt,
              zero,  zero,     one;
 
-    Eigen::Matrix<double, 3 * 7, 1> g_mat_acc;
-    g_mat_acc << Vector7d::Ones() * 0.5 * std::pow(dt, 2),
-             Vector7d::Ones() * dt,
-             Vector7d::Ones();
+    Eigen::Matrix<double, 3 * 7, 7> g_mat_acc;
+    g_mat_acc << one * 0.5 * std::pow(dt, 2),
+                 one * dt,
+                 one;
 
-    Eigen::Matrix<double, 3 * 7, 1> g_mat_vel;
-    g_mat_vel << Vector7d::Ones() * dt,
-             Vector7d::Ones(),
-             Vector7d::Zero();
+    Eigen::Matrix<double, 3 * 7, 7> g_mat_vel;
+    g_mat_vel << one * dt,
+                 one,
+                 zero;
 
-    Eigen::Matrix<double, 3 * 7, 1> g_mat_pos;
-    g_mat_pos << Vector7d::Ones(),
-             Vector7d::Zero(),
-             Vector7d::Zero();
+    Eigen::Matrix<double, 3 * 7, 7> g_mat_pos;
+    g_mat_pos << one,
+                 zero,
+                 zero;
     // clang-format on
     const auto q_mat = q_process_var_ * (g_mat_pos * g_mat_pos.transpose()) +
                        dq_process_var_ * (g_mat_vel * g_mat_vel.transpose()) +
