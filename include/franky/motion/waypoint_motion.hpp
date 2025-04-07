@@ -96,7 +96,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
       // In this case, we missed a couple of steps for some reason. Hence, extrapolate the way the robot does if it
       // does not receive data (constant acceleration model).
       // See https://frankaemika.github.io/docs/libfranka.html#under-the-hood
-      extrapolateMotion(time_step - expected_time_step, input_parameter_, output_parameter_);
+      extrapolateMotion(robot_state, time_step - expected_time_step, input_parameter_, output_parameter_);
       output_parameter_.pass_to_input(input_parameter_);
     }
 
@@ -185,8 +185,8 @@ class WaypointMotion : public Motion<ControlSignalType> {
       const WaypointType &new_waypoint, ruckig::InputParameter<7> &input_parameter) = 0;
 
   virtual void extrapolateMotion(
-      const franka::Duration &time_step, const ruckig::InputParameter<7> &input_parameter,
-      ruckig::OutputParameter<7> &output_parameter) const = 0;
+      const RobotState &robot_state, const franka::Duration &time_step,
+      const ruckig::InputParameter<7> &input_parameter, ruckig::OutputParameter<7> &output_parameter) const = 0;
 
   virtual void checkWaypoint(const WaypointType &waypoint) const {}
 

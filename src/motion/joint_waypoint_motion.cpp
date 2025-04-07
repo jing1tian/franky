@@ -9,8 +9,7 @@ namespace franky {
 JointWaypointMotion::JointWaypointMotion(
     const std::vector<PositionWaypoint<JointState>> &waypoints, const RelativeDynamicsFactor &relative_dynamics_factor,
     bool return_when_finished)
-    : PositionWaypointMotion<franka::JointPositions, JointState>(
-          waypoints, relative_dynamics_factor, return_when_finished) {}
+    : PositionWaypointMotion(waypoints, relative_dynamics_factor, return_when_finished) {}
 
 void JointWaypointMotion::initWaypointMotion(
     const RobotState &robot_state, const std::optional<franka::JointPositions> &previous_command,
@@ -49,8 +48,13 @@ std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getStateEstimate(c
   return {robot_state.q_est.value(), robot_state.dq_est.value(), robot_state.ddq_est.value()};
 }
 
+std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getDesiredState(
+    const RobotState &robot_state) const {
+  return {robot_state.q_d, robot_state.dq_d, robot_state.ddq_d};
+}
+
 std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getGoalTolerance() const {
-  return {expandEigen<7>(1e-3), expandEigen<7>(5e-3), expandEigen<7>(10.0)};
+  return {expandEigen<7>(1e-3), expandEigen<7>(5e-3), expandEigen<7>(std::numeric_limits<double>::infinity())};
 }
 
 }  // namespace franky

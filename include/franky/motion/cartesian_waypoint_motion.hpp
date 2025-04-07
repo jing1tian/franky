@@ -56,6 +56,8 @@ class CartesianWaypointMotion : public PositionWaypointMotion<franka::CartesianP
 
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(const RobotState &robot_state) const override;
 
+  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getDesiredState(const RobotState &robot_state) const override;
+
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getGoalTolerance() const override;
 
  private:

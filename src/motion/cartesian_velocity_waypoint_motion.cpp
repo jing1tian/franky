@@ -107,9 +107,21 @@ std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getSta
   return {current_velocity.vector_repr(), current_acceleration, Vector7d::Zero()};
 }
 
+std::tuple<Vector7d, Vector7d> CartesianVelocityWaypointMotion::getDesiredState(
+    const RobotState &robot_state) const {
+  RobotVelocity current_velocity(robot_state.O_dP_EE_d, robot_state.delbow_c);
+  Vector7d current_acceleration =
+      (Vector7d() << robot_state.O_ddP_EE_c.vector_repr(), robot_state.ddelbow_c).finished();
+
+  return {current_velocity.vector_repr(), current_acceleration};
+}
+
 std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getGoalTolerance() const {
   // TODO: set these properly
-  return {expandEigen<7>(5e-3), expandEigen<7>(10.0), expandEigen<7>(std::numeric_limits<double>::infinity())};
+  return {
+      expandEigen<7>(5e-3),
+      expandEigen<7>(std::numeric_limits<double>::infinity()),
+      expandEigen<7>(std::numeric_limits<double>::infinity())};
 }
 
 }  // namespace franky

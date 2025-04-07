@@ -147,9 +147,23 @@ std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getStateEstima
   return {current_pose_ref_frame.vector_repr(), current_vel_ref_frame.vector_repr(), current_acc_ref_frame};
 }
 
+std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getDesiredState(
+    const RobotState &robot_state) const {
+  auto ref_frame_inv = ref_frame_.inverse();
+  auto current_pose_ref_frame = ref_frame_inv * RobotPose(robot_state.O_T_EE_d, robot_state.elbow_c);
+  auto current_vel_ref_frame =
+      ref_frame_inv * RobotVelocity(robot_state.O_dP_EE_d, robot_state.delbow_c);
+  auto current_ee_acc_ref_frame = ref_frame_inv * robot_state.O_ddP_EE_c;
+  auto current_elbow_acc = robot_state.ddelbow_c;
+
+  Vector7d current_acc_ref_frame = (Vector7d() << current_ee_acc_ref_frame.vector_repr(), current_elbow_acc).finished();
+
+  return {current_pose_ref_frame.vector_repr(), current_vel_ref_frame.vector_repr(), current_acc_ref_frame};
+}
+
 std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getGoalTolerance() const {
   // TODO: set these properly
-  return {expandEigen<7>(1e-3), expandEigen<7>(5e-3), expandEigen<7>(10.0)};
+  return {expandEigen<7>(1e-3), expandEigen<7>(5e-3), expandEigen<7>(std::numeric_limits<double>::infinity())};
 }
 
 }  // namespace franky
