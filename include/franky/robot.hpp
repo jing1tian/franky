@@ -84,22 +84,27 @@ class Robot : public franka::Robot {
     /**
      * @brief Kalman parameter: process noise variance of the position.
      */
-    double kalman_q_process_var = 0.01;
+    double kalman_q_process_var = 0.0001;
 
     /**
      * @brief Kalman parameter: process noise variance of the velocity.
      */
-    double kalman_dq_process_var = 0.01;
+    double kalman_dq_process_var = 0.001;
 
     /**
      * @brief Kalman parameter: process noise variance of the acceleration.
      */
-    double kalman_ddq_process_var = 1000;
+    double kalman_ddq_process_var = 0.1;
+
+    /**
+     * @brief Kalman parameter: process noise variance of the control signal.
+     */
+    double kalman_control_process_var = 1;
 
     /**
      * @brief Kalman parameter: observation noise variance of measured joint positions.
      */
-    double kalman_q_obs_var = 0.1;
+    double kalman_q_obs_var = 0.01;
 
     /**
      * @brief Kalman parameter: observation noise variance of measured joint velocities.
@@ -109,17 +114,22 @@ class Robot : public franka::Robot {
     /**
      * @brief Kalman parameter: observation noise variance of desired joint positions.
      */
-    double kalman_q_d_obs_var = 0.1;
+    double kalman_q_d_obs_var = 0.0001;
 
     /**
      * @brief Kalman parameter: observation noise variance of desired joint velocities.
      */
-    double kalman_dq_d_obs_var = 0.1;
+    double kalman_dq_d_obs_var = 0.0001;
 
     /**
      * @brief Kalman parameter: observation noise variance of desired joint accelerations.
      */
-    double kalman_ddq_d_obs_var = 0.1;
+    double kalman_ddq_d_obs_var = 0.0001;
+
+    /**
+     * @brief Kalman parameter: rate of adaptation of the robot state to the desired robot state.
+     */
+    double kalman_control_adaptation_rate = 0.1;
   };
 
   /** Number of degrees of freedom of the robot */
@@ -545,11 +555,13 @@ class Robot : public franka::Robot {
                 params_.kalman_q_process_var,
                 params_.kalman_dq_process_var,
                 params_.kalman_ddq_process_var,
+                params_.kalman_control_process_var,
                 params_.kalman_q_obs_var,
                 params_.kalman_dq_obs_var,
                 params_.kalman_q_d_obs_var,
                 params_.kalman_dq_d_obs_var,
-                params_.kalman_ddq_d_obs_var);
+                params_.kalman_ddq_d_obs_var,
+                params_.kalman_control_adaptation_rate);
             while (!done) {
               control_func_executor(
                   [this, motion_generator, &robot_state_estimator](const franka::RobotState &rs, franka::Duration d) {

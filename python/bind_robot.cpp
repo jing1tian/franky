@@ -95,11 +95,13 @@ void bind_robot(py::module &m) {
                         double kalman_q_process_var,
                         double kalman_dq_process_var,
                         double kalman_ddq_process_var,
+                        double kalman_control_process_var,
                         double kalman_q_obs_var,
                         double kalman_dq_obs_var,
                         double kalman_q_d_obs_var,
                         double kalman_dq_d_obs_var,
-                        double kalman_ddq_d_obs_var) {
+                        double kalman_ddq_d_obs_var,
+                        double kalman_control_adaptation_rate) {
             return std::make_unique<Robot>(
                 fci_hostname,
                 Robot::Params{
@@ -111,11 +113,13 @@ void bind_robot(py::module &m) {
                     kalman_q_process_var,
                     kalman_dq_process_var,
                     kalman_ddq_process_var,
+                    kalman_control_process_var,
                     kalman_q_obs_var,
                     kalman_dq_obs_var,
                     kalman_q_d_obs_var,
                     kalman_dq_d_obs_var,
-                    kalman_ddq_d_obs_var});
+                    kalman_ddq_d_obs_var,
+                    kalman_control_adaptation_rate});
           }),
           "fci_hostname"_a,
           "relative_dynamics_factor"_a = 1.0,
@@ -124,14 +128,16 @@ void bind_robot(py::module &m) {
           py::arg_v(
               "controller_mode", franka::ControllerMode::kJointImpedance, "_franky.ControllerMode.JointImpedance"),
           py::arg_v("realtime_config", franka::RealtimeConfig::kEnforce, "_franky.RealtimeConfig.Enforce"),
-          "kalman_q_process_var"_a = 0.1,
-          "kalman_dq_process_var"_a = 0.1,
-          "kalman_ddq_process_var"_a = 1000.0,
-          "kalman_q_obs_var"_a = 0.1,
+          "kalman_q_process_var"_a = 0.0001,
+          "kalman_dq_process_var"_a = 0.001,
+          "kalman_ddq_process_var"_a = 0.1,
+          "kalman_control_process_var"_a = 1.0,
+          "kalman_q_obs_var"_a = 0.01,
           "kalman_dq_obs_var"_a = 0.1,
-          "kalman_q_d_obs_var"_a = 0.1,
-          "kalman_dq_d_obs_var"_a = 0.1,
-          "kalman_ddq_d_obs_var"_a = 0.1)
+          "kalman_q_d_obs_var"_a = 0.0001,
+          "kalman_dq_d_obs_var"_a = 0.0001,
+          "kalman_ddq_d_obs_var"_a = 0.0001,
+          "kalman_control_adaptation_rate"_a = 0.1)
       .def("recover_from_errors", &Robot::recoverFromErrors)
       .def(
           "move",
