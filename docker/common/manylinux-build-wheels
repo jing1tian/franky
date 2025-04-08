@@ -58,7 +58,7 @@ echo "Finished building wheels."
 
 # Bundle external shared libraries into the wheels
 for whl in wheels/*.whl; do
-  if [[ "$whl" =~ wheels/franky_panda-.*\.whl ]]; then
+  if [[ "$whl" =~ wheels/franky_control-.*\.whl ]]; then
     auditwheel repair "$whl" -w dist_full/
   else
     cp "$whl" dist_full/
@@ -75,7 +75,7 @@ for PYBIN in /opt/python/*/bin/; do
   fi
 done
 
-cp dist_full/franky_panda-*.whl dist/
+cp dist_full/franky_control-*.whl dist/
 echo "Built the following wheels:"
 ls dist
 
