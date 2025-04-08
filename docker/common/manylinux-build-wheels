@@ -24,36 +24,12 @@ mkdir -p dist_full
 
 # Compile wheels
 echo "Building wheels..."
-CONCURRENT_JOBS=2
-job_list=()
 for PYBIN in /opt/python/*/bin; do
-  PYBIN_NAME="$(basename "$(dirname "$PYBIN")")"
-  if [[ "${PYBIN}" =~ ${PYBIN_SUPPORTED_VERSIONS} ]]; then
-    # Wait if we've reached the concurrency limit
-    if (( ${#job_list[@]} >= CONCURRENT_JOBS )); then
-      wait -n  # wait for any job to finish (requires bash 4.3+)
-      # Remove completed jobs from the list
-      new_job_list=()
-      for pid in "${job_list[@]}"; do
-        if kill -0 "$pid" 2>/dev/null; then
-          new_job_list+=("$pid")
-        fi
-      done
-      job_list=("${new_job_list[@]}")
-    fi
-
-    (
-      echo "Started building wheels for ${PYBIN}" &&
-      mkdir -p "$PYBIN_NAME" &&
-      cd "$PYBIN_NAME" &&
-      "${PYBIN}/pip" wheel "$CODE_DIR" -w "${WHEELS_DIR}" 1> /dev/null &&
-      echo "Successfully built wheel for ${PYBIN}"
-    ) &
-    job_list+=($!)
-  fi
+  echo "Started building wheels for ${PYBIN}"
+  "${PYBIN}/pip" wheel "$CODE_DIR" -w "${WHEELS_DIR}" 1> /dev/null
+  echo "Successfully built wheel for ${PYBIN}"
 done
 
-wait
 echo "Finished building wheels."
 
 # Bundle external shared libraries into the wheels
