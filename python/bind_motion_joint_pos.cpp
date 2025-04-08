@@ -68,9 +68,8 @@ void bind_motion_joint_pos(py::module &m) {
   py::class_<
       StopMotion<franka::JointPositions>,
       Motion<franka::JointPositions>,
-      std::shared_ptr<StopMotion<franka::JointPositions>>>(m, "JointPositionStopMotion")
-      .def(
-          py::init<RelativeDynamicsFactor, const Eigen::Vector3d &>(),
+      std::shared_ptr<StopMotion<franka::JointPositions>>>(m, "JointStopMotion")
+      .def(          py::init<RelativeDynamicsFactor, const Eigen::Vector3d &>(),
           "relative_dynamics_factor"_a = 1.0,
           "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0});
 }
