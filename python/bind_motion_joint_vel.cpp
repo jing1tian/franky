@@ -17,28 +17,20 @@ void bind_motion_joint_vel(py::module &m) {
                             minimum_time,
                         franka::Duration hold_target_duration,
                         std::optional<franka::Duration>
-                            max_total_duration,
-                        const Eigen::Vector3d &state_estimate_weight) {
+                            max_total_duration) {
             return VelocityWaypoint<Vector7d>{
-                target,
-                relative_dynamics_factor,
-                minimum_time,
-                hold_target_duration,
-                max_total_duration,
-                state_estimate_weight};
+                target, relative_dynamics_factor, minimum_time, hold_target_duration, max_total_duration};
           }),
           "target"_a,
           "relative_dynamics_factor"_a = 1.0,
           "minimum_time"_a = std::nullopt,
           "hold_target_duration"_a = franka::Duration(0),
-          "max_total_duration"_a = std::nullopt,
-          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0})
+          "max_total_duration"_a = std::nullopt)
       .def_readonly("target", &VelocityWaypoint<Vector7d>::target)
       .def_readonly("relative_dynamics_factor", &VelocityWaypoint<Vector7d>::relative_dynamics_factor)
       .def_readonly("minimum_time", &VelocityWaypoint<Vector7d>::minimum_time)
       .def_readonly("hold_target_duration", &VelocityWaypoint<Vector7d>::hold_target_duration)
-      .def_readonly("max_total_duration", &VelocityWaypoint<Vector7d>::max_total_duration)
-      .def_readonly("state_estimate_weight", &VelocityWaypoint<Vector7d>::state_estimate_weight);
+      .def_readonly("max_total_duration", &VelocityWaypoint<Vector7d>::max_total_duration);
 
   py::class_<
       JointVelocityWaypointMotion,
@@ -55,18 +47,14 @@ void bind_motion_joint_vel(py::module &m) {
   py::class_<JointVelocityMotion, JointVelocityWaypointMotion, std::shared_ptr<JointVelocityMotion>>(
       m, "JointVelocityMotion")
       .def(
-          py::init<const Vector7d &, franka::Duration, const Eigen::Vector3d &, RelativeDynamicsFactor>(),
+          py::init<const Vector7d &, franka::Duration, RelativeDynamicsFactor>(),
           "target"_a,
           "duration"_a = franka::Duration(1000),
-          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0},
           "relative_dynamics_factor"_a = 1.0);
 
   py::class_<
       StopMotion<franka::JointVelocities>,
       Motion<franka::JointVelocities>,
       std::shared_ptr<StopMotion<franka::JointVelocities>>>(m, "JointVelocityStopMotion")
-      .def(
-          py::init<RelativeDynamicsFactor, const Eigen::Vector3d &>(),
-          "relative_dynamics_factor"_a = 1.0,
-          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0});
+      .def(py::init<RelativeDynamicsFactor>(), "relative_dynamics_factor"_a = 1.0);
 }

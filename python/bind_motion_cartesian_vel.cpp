@@ -17,28 +17,20 @@ void bind_motion_cartesian_vel(py::module &m) {
                             minimum_time,
                         franka::Duration hold_target_duration,
                         std::optional<franka::Duration>
-                            max_total_duration,
-                        const Eigen::Vector3d &state_estimate_weight) {
+                            max_total_duration) {
             return VelocityWaypoint<RobotVelocity>{
-                target,
-                relative_dynamics_factor,
-                minimum_time,
-                hold_target_duration,
-                max_total_duration,
-                state_estimate_weight};
+                target, relative_dynamics_factor, minimum_time, hold_target_duration, max_total_duration};
           }),
           "target"_a,
           "relative_dynamics_factor"_a = 1.0,
           "minimum_time"_a = std::nullopt,
           "hold_target_duration"_a = franka::Duration(0),
-          "max_total_duration"_a = std::nullopt,
-          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0})
+          "max_total_duration"_a = std::nullopt)
       .def_readonly("target", &VelocityWaypoint<RobotVelocity>::target)
       .def_readonly("relative_dynamics_factor", &VelocityWaypoint<RobotVelocity>::relative_dynamics_factor)
       .def_readonly("minimum_time", &VelocityWaypoint<RobotVelocity>::minimum_time)
       .def_readonly("hold_target_duration", &VelocityWaypoint<RobotVelocity>::hold_target_duration)
-      .def_readonly("max_total_duration", &VelocityWaypoint<RobotVelocity>::max_total_duration)
-      .def_readonly("state_estimate_weight", &VelocityWaypoint<RobotVelocity>::state_estimate_weight);
+      .def_readonly("max_total_duration", &VelocityWaypoint<RobotVelocity>::max_total_duration);
 
   py::class_<
       CartesianVelocityWaypointMotion,
@@ -60,19 +52,13 @@ void bind_motion_cartesian_vel(py::module &m) {
       .def(
           py::init<>([](const RobotVelocity &target,
                         franka::Duration duration,
-                        const Eigen::Vector3d &state_estimate_weight,
                         RelativeDynamicsFactor relative_dynamics_factor,
                         const std::optional<Affine> &ee_frame) {
             return std::make_shared<CartesianVelocityMotion>(
-                target,
-                duration,
-                state_estimate_weight,
-                relative_dynamics_factor,
-                ee_frame.value_or(Affine::Identity()));
+                target, duration, relative_dynamics_factor, ee_frame.value_or(Affine::Identity()));
           }),
           "target"_a,
           "duration"_a = franka::Duration(1000),
-          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0},
           "relative_dynamics_factor"_a = 1.0,
           "ee_frame"_a = std::nullopt);
 
@@ -80,7 +66,5 @@ void bind_motion_cartesian_vel(py::module &m) {
       StopMotion<franka::CartesianVelocities>,
       Motion<franka::CartesianVelocities>,
       std::shared_ptr<StopMotion<franka::CartesianVelocities>>>(m, "CartesianVelocityStopMotion")
-      .def(          py::init<RelativeDynamicsFactor, const Eigen::Vector3d &>(),
-          "relative_dynamics_factor"_a = 1.0,
-          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0});
+      .def(py::init<RelativeDynamicsFactor>(), "relative_dynamics_factor"_a = 1.0);
 }

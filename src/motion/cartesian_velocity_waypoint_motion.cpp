@@ -98,28 +98,12 @@ std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getAbs
       vec_cart_rot_elbow(r->translation_jerk_limit.get(), r->rotation_jerk_limit.get(), r->elbow_jerk_limit.get())};
 }
 
-std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getStateEstimate(
-    const RobotState &robot_state) const {
-  RobotVelocity current_velocity(robot_state.O_dP_EE_est.value(), robot_state.delbow_est.value());
-  Vector7d current_acceleration =
-      (Vector7d() << robot_state.O_ddP_EE_est.value().vector_repr(), robot_state.ddelbow_est.value()).finished();
-  return {current_velocity.vector_repr(), current_acceleration, Vector7d::Zero()};
-}
-
 std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getDesiredState(
     const RobotState &robot_state) const {
   RobotVelocity current_velocity(robot_state.O_dP_EE_d, robot_state.delbow_c);
   Vector7d current_acceleration =
       (Vector7d() << robot_state.O_ddP_EE_c.vector_repr(), robot_state.ddelbow_c).finished();
   return {current_velocity.vector_repr(), current_acceleration, Vector7d::Zero()};
-}
-
-std::tuple<Vector7d, Vector7d, Vector7d> CartesianVelocityWaypointMotion::getGoalCloseTolerance() const {
-  // TODO: set these properly
-  return {
-    expandEigen<7>(5e-3),
-    expandEigen<7>(std::numeric_limits<double>::infinity()),
-    expandEigen<7>(std::numeric_limits<double>::infinity())};
 }
 
 }  // namespace franky

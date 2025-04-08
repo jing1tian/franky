@@ -46,12 +46,7 @@ class JointWaypointMotion : public PositionWaypointMotion<franka::JointPositions
       const std::optional<franka::JointPositions> &previous_command,
       const ruckig::InputParameter<7> &input_parameter) override;
 
-  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(const RobotState &robot_state) const override;
-
-  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getDesiredState(
-      const RobotState &robot_state) const override;
-
-  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getGoalCloseTolerance() const override;
+  [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getDesiredState(const RobotState &robot_state) const override;
 };
 
 }  // namespace franky

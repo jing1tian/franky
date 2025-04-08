@@ -20,13 +20,9 @@ class StopMotion<franka::JointPositions> : public JointMotion {
   /**
    *
    * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
-   * @param state_estimate_weight    Weighting of the robot state estimate vs the target. See JointMotion for details.
    */
-  explicit StopMotion(
-      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
-      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0})
-      : JointMotion(
-            JointState(Vector7d::Zero()), state_estimate_weight, ReferenceType::kRelative, relative_dynamics_factor) {}
+  explicit StopMotion(const RelativeDynamicsFactor &relative_dynamics_factor = 1.0)
+      : JointMotion(JointState(Vector7d::Zero()), ReferenceType::kRelative, relative_dynamics_factor) {}
 };
 
 /**
@@ -38,13 +34,9 @@ class StopMotion<franka::JointVelocities> : public JointVelocityMotion {
   /**
    *
    * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
-   * @param state_estimate_weight    Weighting of the robot state estimate vs the target. See JointVelocityMotion for
-   *                                 details.
    */
-  explicit StopMotion(
-      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
-      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0})
-      : JointVelocityMotion(Vector7d::Zero(), franka::Duration(0), state_estimate_weight, relative_dynamics_factor) {}
+  explicit StopMotion(const RelativeDynamicsFactor &relative_dynamics_factor = 1.0)
+      : JointVelocityMotion(Vector7d::Zero(), franka::Duration(0), relative_dynamics_factor) {}
 };
 
 /**
@@ -56,17 +48,15 @@ class StopMotion<franka::CartesianPose> : public CartesianWaypointMotion {
   /**
    *
    * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
-   * @param state_estimate_weight    Weighting of the robot state estimate vs the target. See CartesianMotion for
-   *                                 details.
    */
   explicit StopMotion(
-      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
-      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0})
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0)
       : CartesianWaypointMotion(
             {PositionWaypoint<CartesianState>{
-                {.target = RobotPose(),
-                 .hold_target_duration = franka::Duration(50),
-                 .state_estimate_weight = state_estimate_weight},
+                {
+                    .target = RobotPose(),
+                    .hold_target_duration = franka::Duration(50),
+                },
                 ReferenceType::kRelative}},
             relative_dynamics_factor) {}
 };
@@ -80,13 +70,10 @@ class StopMotion<franka::CartesianVelocities> : public CartesianVelocityMotion {
   /**
    *
    * @param relative_dynamics_factor Relative dynamics factor for this stop motion.
-   * @param state_estimate_weight    Weighting of the robot state estimate vs the target. See CartesianVelocityMotion
-   *                                 for details.
    */
   explicit StopMotion(
-      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
-      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0})
-      : CartesianVelocityMotion(RobotVelocity(), franka::Duration(0), state_estimate_weight, relative_dynamics_factor) {
+      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0)
+      : CartesianVelocityMotion(RobotVelocity(), franka::Duration(0), relative_dynamics_factor) {
   }
 };
 

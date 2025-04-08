@@ -14,11 +14,6 @@ class CartesianMotion : public CartesianWaypointMotion {
    * @brief Construct a Cartesian motion.
    *
    * @param target                   The target Cartesian state.
-   * @param state_estimate_weight    Weighting of the robot state estimate vs the target when computing the current
-   *                                 state to continue planning from. A value of 0 means that the planner always assumes
-   *                                 it reached its last target perfectly (open loop control), while a value of 1 means
-   *                                 that the planner always uses the robot state estimate (closed loop control). A
-   *                                 value between 0 and 1 means that the planner uses a weighted average of the two.
    * @param reference_type           The reference type (absolute or relative). An absolute target is defined in the
    *                                 robot's base frame, a relative target is defined in the current end-effector frame.
    * @param relative_dynamics_factor The relative dynamics factor for this motion. The factor will get multiplied with
@@ -32,7 +27,6 @@ class CartesianMotion : public CartesianWaypointMotion {
    */
   explicit CartesianMotion(
       const CartesianState &target,
-      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0},
       ReferenceType reference_type = ReferenceType::kAbsolute,
       const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true,
