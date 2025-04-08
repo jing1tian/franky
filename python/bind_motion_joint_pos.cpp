@@ -19,7 +19,7 @@ void bind_motion_joint_pos(py::module &m) {
                         franka::Duration hold_target_duration,
                         std::optional<franka::Duration>
                             max_total_duration,
-                        double state_estimate_weight) {
+                        const Eigen::Vector3d &state_estimate_weight) {
             return PositionWaypoint<JointState>{
                 {target,
                  relative_dynamics_factor,
@@ -35,7 +35,7 @@ void bind_motion_joint_pos(py::module &m) {
           "minimum_time"_a = std::nullopt,
           "hold_target_duration"_a = franka::Duration(0),
           "max_total_duration"_a = std::nullopt,
-          "state_estimate_weight"_a = 0.0)
+          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0})
       .def_readonly("target", &PositionWaypoint<JointState>::target)
       .def_readonly("reference_type", &PositionWaypoint<JointState>::reference_type)
       .def_readonly("relative_dynamics_factor", &PositionWaypoint<JointState>::relative_dynamics_factor)
@@ -58,9 +58,9 @@ void bind_motion_joint_pos(py::module &m) {
 
   py::class_<JointMotion, JointWaypointMotion, std::shared_ptr<JointMotion>>(m, "JointMotion")
       .def(
-          py::init<const JointState &, double, ReferenceType, RelativeDynamicsFactor, bool>(),
+          py::init<const JointState &, const Eigen::Vector3d &, ReferenceType, RelativeDynamicsFactor, bool>(),
           "target"_a,
-          "state_estimate_weight"_a = 0.0,
+          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0},
           py::arg_v("reference_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
           "relative_dynamics_factor"_a = 1.0,
           "return_when_finished"_a = true);
@@ -70,7 +70,7 @@ void bind_motion_joint_pos(py::module &m) {
       Motion<franka::JointPositions>,
       std::shared_ptr<StopMotion<franka::JointPositions>>>(m, "JointPositionStopMotion")
       .def(
-          py::init<RelativeDynamicsFactor, double>(),
+          py::init<RelativeDynamicsFactor, const Eigen::Vector3d &>(),
           "relative_dynamics_factor"_a = 1.0,
-          "state_estimate_weight"_a = 0.0);
+          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0});
 }

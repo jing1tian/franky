@@ -32,7 +32,7 @@ class CartesianMotion : public CartesianWaypointMotion {
    */
   explicit CartesianMotion(
       const CartesianState &target,
-      double state_estimate_weight = 0.0,
+      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0},
       ReferenceType reference_type = ReferenceType::kAbsolute,
       const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       bool return_when_finished = true,

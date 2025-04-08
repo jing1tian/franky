@@ -76,18 +76,16 @@ class PositionWaypointMotion : public WaypointMotion<ControlSignalType, Position
     auto vel = toEigenD<7>(input_parameter.current_velocity);
     auto pos = toEigenD<7>(input_parameter.current_position);
 
-    // Retain difference between desired state and motion planner state
-    auto vel_diff = vel - vel_d;
-    auto pos_diff = pos - pos_d;
-
-    auto new_vel_d = (vel_d + acc_d * time_step.toSec()).cwiseMin(vel_lim).cwiseMax(-vel_lim);
-    auto new_pos_d = pos_d + (vel_d + new_vel_d) * time_step.toSec() / 2.0;
+    auto vel_delta = acc_d * time_step.toSec();
+    auto new_vel_d = (vel_d + vel_delta).cwiseMin(vel_lim).cwiseMax(-vel_lim);
+    auto new_pos = pos + (vel_d + new_vel_d) * time_step.toSec() / 2.0;
+    auto new_vel = (vel + vel_delta).cwiseMin(vel_lim).cwiseMax(-vel_lim);
 
     // Franka assumes a constant acceleration model if no new input is received.
     // See https://frankaemika.github.io/docs/libfranka.html#under-the-hood
     output_parameter.new_acceleration = input_parameter.current_acceleration;
-    output_parameter.new_velocity = toStdD<7>(new_vel_d + vel_diff);
-    output_parameter.new_position = toStdD<7>(new_pos_d + pos_diff);
+    output_parameter.new_velocity = toStdD<7>(new_vel);
+    output_parameter.new_position = toStdD<7>(new_pos);
   }
 
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override = 0;

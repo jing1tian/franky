@@ -161,7 +161,7 @@ std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getDesiredStat
   return {current_pose_ref_frame.vector_repr(), current_vel_ref_frame.vector_repr(), current_acc_ref_frame};
 }
 
-std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getGoalTolerance() const {
+std::tuple<Vector7d, Vector7d, Vector7d> CartesianWaypointMotion::getGoalCloseTolerance() const {
   // TODO: set these properly
   return {expandEigen<7>(1e-3), expandEigen<7>(5e-3), expandEigen<7>(std::numeric_limits<double>::infinity())};
 }

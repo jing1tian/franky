@@ -46,7 +46,7 @@ struct Waypoint {
 
   std::optional<franka::Duration> max_total_duration{std::nullopt};
 
-  double state_estimate_weight{0.0};
+  Eigen::Vector3d state_estimate_weight{0.0, 0.0, 0.0};
 };
 
 /**
@@ -78,19 +78,28 @@ class WaypointMotion : public Motion<ControlSignalType> {
     initWaypointMotion(robot_state, previous_command, input_parameter_);
 
     waypoint_iterator_ = waypoints_.begin();
-    if (waypoint_iterator_ != waypoints_.end()) {
-      checkWaypointPrivate(*waypoint_iterator_);
-      setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
-      setInputLimits(*waypoint_iterator_, input_parameter_);
-      prev_result_ = ruckig::Result::Working;
-    } else {
-      prev_result_ = ruckig::Result::Finished;
-    }
+    prev_close_to_target_ = false;
+    first_update_ = true;
   }
 
   ControlSignalType nextCommandImpl(
       const RobotState &robot_state, franka::Duration time_step, franka::Duration rel_time, franka::Duration abs_time,
       const std::optional<ControlSignalType> &previous_command) override {
+    if (first_update_) {
+      // We do this twice on purpose, as the first time is just to ensure that input_parameter_ is initialized for the
+      // state estimator warm-up
+      initWaypointMotion(robot_state, previous_command, input_parameter_);
+      if (waypoint_iterator_ != waypoints_.end()) {
+        checkWaypointPrivate(*waypoint_iterator_);
+        setNewWaypoint(robot_state, previous_command, *waypoint_iterator_, input_parameter_);
+        setInputLimits(*waypoint_iterator_, input_parameter_);
+        prev_result_ = ruckig::Result::Working;
+      } else {
+        prev_result_ = ruckig::Result::Finished;
+      }
+      first_update_ = false;
+    }
+
     const auto expected_time_step = franka::Duration(1);
     if (time_step > expected_time_step) {
       // In this case, we missed a couple of steps for some reason. Hence, extrapolate the way the robot does if it
@@ -105,33 +114,18 @@ class WaypointMotion : public Motion<ControlSignalType> {
       max_time_reached = rel_time - waypoint_started_time_ >= waypoint_iterator_->max_total_duration.value();
     }
 
-    const auto curr_pos = toEigenD(input_parameter_.current_position);
-    const auto curr_vel = toEigenD(input_parameter_.current_velocity);
-    const auto curr_acc = toEigenD(input_parameter_.current_acceleration);
-
-    const auto tar_pos = toEigenD(input_parameter_.target_position);
-    const auto tar_vel = toEigenD(input_parameter_.target_velocity);
-    const auto tar_acc = toEigenD(input_parameter_.target_acceleration);
-
-    const auto [prec_pos, prec_vel, prec_acc] = getGoalTolerance();
-
-    const auto target_reached =
-        (((curr_pos - tar_pos).cwiseAbs() - prec_pos).maxCoeff() < 0 &&
-         ((curr_vel - tar_vel).cwiseAbs() - prec_vel).maxCoeff() < 0 &&
-         ((curr_acc - tar_acc).cwiseAbs() - prec_acc).maxCoeff() < 0);
-
-    if (prev_result_ == ruckig::Result::Finished || target_reached || max_time_reached) {
+    if (prev_result_ == ruckig::Finished || max_time_reached) {
       if (!target_reached_time_.has_value()) {
         target_reached_time_ = rel_time;
       }
-      auto hold_target_duration = waypoint_iterator_->hold_target_duration;
-      if (waypoint_iterator_ + 1 == waypoints_.end()) {
-        // Allow cooldown of motion, so that the low-pass filter has time to adjust to target values
-        hold_target_duration = std::max(hold_target_duration, franka::Duration(5));
-      }
-      if (rel_time - target_reached_time_.value() >= hold_target_duration || max_time_reached) {
-        target_reached_time_ = std::nullopt;
-        if (waypoint_iterator_ != waypoints_.end()) {
+      if (waypoint_iterator_ != waypoints_.end()) {
+        auto hold_target_duration = waypoint_iterator_->hold_target_duration;
+        if (waypoint_iterator_ + 1 == waypoints_.end()) {
+          // Allow cooldown of motion, so that the low-pass filter has time to adjust to target values
+          hold_target_duration = std::max(hold_target_duration, franka::Duration(10));
+        }
+        if (rel_time - target_reached_time_.value() >= hold_target_duration || max_time_reached) {
+          target_reached_time_ = std::nullopt;
           ++waypoint_iterator_;
           if (waypoint_iterator_ != waypoints_.end()) {
             checkWaypointPrivate(*waypoint_iterator_);
@@ -147,31 +141,78 @@ class WaypointMotion : public Motion<ControlSignalType> {
         return franka::MotionFinished(command);
       }
     }
-    if (waypoint_iterator_ != waypoints_.end()) {
-      auto blend = waypoint_iterator_->state_estimate_weight;
 
-      if (blend != 0) {
-        auto [pos_s, vel_s, acc_s] = getStateEstimate(robot_state);
-        auto pos_t = toEigen(input_parameter_.current_position);
-        auto vel_t = toEigen(input_parameter_.current_velocity);
-        auto acc_t = toEigen(input_parameter_.current_acceleration);
+    assert(waypoint_iterator_ != waypoints_.end());
 
-        auto pos_b = (1 - blend) * pos_t + blend * pos_s;
-        auto vel_b = (1 - blend) * vel_t + blend * vel_s;
-        auto acc_b = (1 - blend) * acc_t + blend * acc_s;
+    auto [curr_pos, curr_vel, curr_acc] = getStateEstimate(robot_state);
 
-        input_parameter_.current_position = toStdD<7>(pos_b);
-        input_parameter_.current_velocity = toStdD<7>(vel_b);
-        input_parameter_.current_acceleration = toStdD<7>(acc_b);
+    const auto tar_pos = toEigenD(input_parameter_.target_position);
+    const auto tar_vel = toEigenD(input_parameter_.target_velocity);
+    const auto tar_acc = toEigenD(input_parameter_.target_acceleration);
+
+    const auto pos_error = (curr_pos - tar_pos).cwiseAbs();
+    const auto vel_error = (curr_vel - tar_vel).cwiseAbs();
+    const auto acc_error = (curr_acc - tar_acc).cwiseAbs();
+
+    const auto [prec_pos, prec_vel, prec_acc] = getGoalCloseTolerance();
+
+    const auto close_to_target = (pos_error - prec_pos).maxCoeff() < 0 && (vel_error - prec_vel).maxCoeff() < 0 &&
+                                 (acc_error - prec_acc).maxCoeff() < 0;
+
+    auto pos_t = toEigen(input_parameter_.current_position);
+    auto vel_t = toEigen(input_parameter_.current_velocity);
+    auto acc_t = toEigen(input_parameter_.current_acceleration);
+
+    auto [curr_pos_d, curr_vel_d, curr_acc_d] = getDesiredState(robot_state);
+    Eigen::Vector3d blend = waypoint_iterator_->state_estimate_weight;
+    if (close_to_target && blend.maxCoeff() > 0) {
+      // Switch to open-loop control close to the target to avoid precision problems
+      if (!prev_close_to_target_) {
+        pos_t = curr_pos_d;
+        vel_t = curr_vel_d;
+        acc_t = curr_acc_d;
       }
-
-      prev_result_ = trajectory_generator_.update(input_parameter_, output_parameter_);
-      if (prev_result_ == ruckig::Result::Working || prev_result_ == ruckig::Result::Finished) {
-        output_parameter_.pass_to_input(input_parameter_);
-      } else {
-        throw MotionPlannerException("Motion planner failed with error code " + std::to_string(prev_result_));
-      }
+      blend = Eigen::Vector3d::Zero();
     }
+    prev_close_to_target_ = close_to_target;
+
+    auto pos_b = (1 - blend[0]) * pos_t + blend[0] * curr_pos;
+    auto vel_b = (1 - blend[1]) * vel_t + blend[1] * curr_vel;
+    auto acc_b = (1 - blend[2]) * acc_t + blend[2] * curr_acc;
+
+    input_parameter_.current_position = toStdD<7>(pos_b);
+    input_parameter_.current_velocity = toStdD<7>(vel_b);
+    input_parameter_.current_acceleration = toStdD<7>(acc_b);
+
+    prev_result_ = trajectory_generator_.update(input_parameter_, output_parameter_);
+    if (prev_result_ == ruckig::Result::Working || prev_result_ == ruckig::Result::Finished) {
+      // This is a workaround to prevent NaNs from popping up. Must be some bug in ruckig.
+      for (int i = 0; i < 7; i++) {
+        if (!input_parameter_.enabled[i]) {
+          output_parameter_.new_position[i] = 0.0;
+          output_parameter_.new_velocity[i] = 0.0;
+          output_parameter_.new_acceleration[i] = 0.0;
+        }
+      }
+      output_parameter_.pass_to_input(input_parameter_);
+    } else {
+      throw MotionPlannerException("Motion planner failed with error code " + std::to_string(prev_result_));
+    }
+
+    // ruckig::InputParameter<7> new_input_parameter_;
+    // double dt_lookahead = 0.000;
+    //
+    // auto acc = toEigenD(input_parameter_.current_acceleration);
+    // auto vel = toEigenD(input_parameter_.current_velocity);
+    // auto pos = toEigenD(input_parameter_.current_position);
+    //
+    // auto new_vel = vel + acc * dt_lookahead;
+    // auto new_pos = pos + (new_vel + vel) / 2 * dt_lookahead;
+    //
+    // new_input_parameter_.current_position = toStdD<7>(new_pos);
+    // new_input_parameter_.current_velocity = toStdD<7>(new_vel);
+    // new_input_parameter_.current_acceleration = toStdD<7>(acc);
+    // new_input_parameter_.enabled = input_parameter_.enabled;
 
     return getControlSignal(robot_state, time_step, previous_command, input_parameter_);
   };
@@ -193,9 +234,12 @@ class WaypointMotion : public Motion<ControlSignalType> {
   [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getStateEstimate(
       const RobotState &robot_state) const = 0;
 
+  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getDesiredState(
+      const RobotState &robot_state) const = 0;
+
   [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const = 0;
 
-  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getGoalTolerance() const = 0;
+  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getGoalCloseTolerance() const = 0;
 
   [[nodiscard]] virtual ControlSignalType getControlSignal(
       const RobotState &robot_state, const franka::Duration &time_step,
@@ -206,6 +250,8 @@ class WaypointMotion : public Motion<ControlSignalType> {
  private:
   std::vector<WaypointType> waypoints_;
   bool return_when_finished_{true};
+  bool prev_close_to_target_{false};
+  bool first_update_{true};
 
   ruckig::Ruckig<7> trajectory_generator_{Robot::control_rate};
   ruckig::Result prev_result_;
@@ -218,9 +264,12 @@ class WaypointMotion : public Motion<ControlSignalType> {
   franka::Duration waypoint_started_time_;
 
   void checkWaypointPrivate(const WaypointType &waypoint) const {
-    if (waypoint.state_estimate_weight < 0 || waypoint.state_estimate_weight > 1)
-      throw std::runtime_error(
-          "state_estimate_weight must be between 0 and 1. Got " + std::to_string(waypoint.state_estimate_weight));
+    if ((waypoint.state_estimate_weight.array() < 0).any() || (waypoint.state_estimate_weight.array() > 1).any()) {
+      std::stringstream ss;
+      ss << "state_estimate_weight must be between 0 and 1. Got ";
+      ss << waypoint.state_estimate_weight;
+      throw std::runtime_error(ss.str());
+    }
     checkWaypoint(waypoint);
   }
 };

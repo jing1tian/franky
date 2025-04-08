@@ -2,10 +2,10 @@
 
 #include <ruckig/ruckig.hpp>
 
-#include "franky/util.hpp"
-#include "franky/relative_dynamics_factor.hpp"
 #include "franky/motion/reference_type.hpp"
 #include "franky/motion/waypoint_motion.hpp"
+#include "franky/relative_dynamics_factor.hpp"
+#include "franky/util.hpp"
 
 namespace franky {
 
@@ -14,7 +14,7 @@ namespace franky {
  *
  * @tparam TargetType The type of the target.
  */
-template<typename TargetType>
+template <typename TargetType>
 using VelocityWaypoint = Waypoint<TargetType>;
 
 /**
@@ -24,7 +24,7 @@ using VelocityWaypoint = Waypoint<TargetType>;
  * franka::CartesianVelocities, franka::JointPositions or franka::CartesianPose.
  * @tparam TargetType The type of the target of the waypoints.
  */
-template<typename ControlSignalType, typename TargetType>
+template <typename ControlSignalType, typename TargetType>
 class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, VelocityWaypoint<TargetType>, TargetType> {
  public:
   /**
@@ -34,9 +34,7 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
    *                                 motion.
    */
   explicit VelocityWaypointMotion(
-      std::vector<VelocityWaypoint<TargetType>> waypoints,
-      const RelativeDynamicsFactor &relative_dynamics_factor = 1.0
-  )
+      std::vector<VelocityWaypoint<TargetType>> waypoints, const RelativeDynamicsFactor &relative_dynamics_factor = 1.0)
       : WaypointMotion<ControlSignalType, VelocityWaypoint<TargetType>, TargetType>(waypoints, true),
         relative_dynamics_factor_(relative_dynamics_factor) {}
 
@@ -66,7 +64,7 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
     auto [vel_lim, acc_lim, jerk_lim] = getAbsoluteInputLimits();
 
     // We use the desired state here as this is likely what the robot uses internally as well
-    auto [vel_d, acc_d] = getDesiredState(robot_state);
+    auto [vel_d, acc_d, _] = getDesiredState(robot_state);
 
     auto vel = toEigenD<7>(input_parameter.current_velocity);
 
@@ -84,7 +82,7 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
 
   [[nodiscard]] std::tuple<Vector7d, Vector7d, Vector7d> getAbsoluteInputLimits() const override = 0;
 
-  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d> getDesiredState(const RobotState &robot_state) const = 0;
+  [[nodiscard]] virtual std::tuple<Vector7d, Vector7d, Vector7d> getDesiredState(const RobotState &robot_state) const = 0;
 
  private:
   RelativeDynamicsFactor relative_dynamics_factor_;

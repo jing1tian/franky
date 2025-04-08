@@ -53,8 +53,8 @@ std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getDesiredState(
   return {robot_state.q_d, robot_state.dq_d, robot_state.ddq_d};
 }
 
-std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getGoalTolerance() const {
-  return {expandEigen<7>(1e-3), expandEigen<7>(5e-3), expandEigen<7>(std::numeric_limits<double>::infinity())};
+std::tuple<Vector7d, Vector7d, Vector7d> JointWaypointMotion::getGoalCloseTolerance() const {
+  return {expandEigen<7>(5e-3), expandEigen<7>(1e-2), expandEigen<7>(std::numeric_limits<double>::infinity())};
 }
 
 }  // namespace franky

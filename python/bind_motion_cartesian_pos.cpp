@@ -19,7 +19,7 @@ void bind_motion_cartesian_pos(py::module &m) {
                         franka::Duration hold_target_duration,
                         std::optional<franka::Duration>
                             max_total_duration,
-                        double state_estimate_weight) {
+                        const Eigen::Vector3d &state_estimate_weight) {
             return PositionWaypoint<CartesianState>{
                 {target,
                  relative_dynamics_factor,
@@ -35,7 +35,7 @@ void bind_motion_cartesian_pos(py::module &m) {
           "minimum_time"_a = std::nullopt,
           "hold_target_duration"_a = franka::Duration(0),
           "max_total_duration"_a = std::nullopt,
-          "state_estimate_weight"_a = 0.0)
+          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0})
       .def_readonly("target", &PositionWaypoint<CartesianState>::target)
       .def_readonly("reference_type", &PositionWaypoint<CartesianState>::reference_type)
       .def_readonly("relative_dynamics_factor", &PositionWaypoint<CartesianState>::relative_dynamics_factor)
@@ -62,8 +62,8 @@ void bind_motion_cartesian_pos(py::module &m) {
   py::class_<CartesianMotion, CartesianWaypointMotion, std::shared_ptr<CartesianMotion>>(m, "CartesianMotion")
       .def(
           py::init<>([](const CartesianState &target,
+                        const Eigen::Vector3d &state_estimate_weight,
                         ReferenceType reference_type,
-                        double state_estimate_weight,
                         RelativeDynamicsFactor relative_dynamics_factor,
                         bool return_when_finished,
                         const std::optional<Affine> &ee_frame) {
@@ -76,7 +76,7 @@ void bind_motion_cartesian_pos(py::module &m) {
                 ee_frame.value_or(Affine::Identity()));
           }),
           "target"_a,
-          "state_estimate_weight"_a = 0.0,
+          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0},
           py::arg_v("reference_type", ReferenceType::kAbsolute, "_franky.ReferenceType.Absolute"),
           "relative_dynamics_factor"_a = 1.0,
           "return_when_finished"_a = true,
@@ -87,7 +87,7 @@ void bind_motion_cartesian_pos(py::module &m) {
       Motion<franka::CartesianPose>,
       std::shared_ptr<StopMotion<franka::CartesianPose>>>(m, "CartesianPoseStopMotion")
       .def(
-          py::init<RelativeDynamicsFactor, double>(),
+          py::init<RelativeDynamicsFactor, const Eigen::Vector3d &>(),
           "relative_dynamics_factor"_a = 1.0,
-          "state_estimate_weight"_a = 0.0);
+          "state_estimate_weight"_a = Eigen::Vector3d{0.0, 0.0, 0.0});
 }

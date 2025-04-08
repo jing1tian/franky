@@ -7,7 +7,7 @@ namespace franky {
 JointVelocityMotion::JointVelocityMotion(
     const Vector7d &target,
     const franka::Duration &duration,
-    double state_estimate_weight,
+    const Eigen::Vector3d &state_estimate_weight,
     const RelativeDynamicsFactor &relative_dynamics_factor)
     : JointVelocityWaypointMotion(
     {

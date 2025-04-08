@@ -29,7 +29,7 @@ class CartesianVelocityMotion : public CartesianVelocityWaypointMotion {
   explicit CartesianVelocityMotion(
       const RobotVelocity &target,
       const franka::Duration &duration = franka::Duration(1000),
-      double state_estimate_weight = 0.0,
+      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0},
       const RelativeDynamicsFactor &relative_dynamics_factor = 1.0,
       const Affine &frame = Affine::Identity());
 };

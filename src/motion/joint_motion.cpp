@@ -6,7 +6,7 @@ namespace franky {
 
 JointMotion::JointMotion(
     const JointState &target,
-    double state_estimate_weight,
+    const Eigen::Vector3d &state_estimate_weight,
     ReferenceType reference_type,
     const RelativeDynamicsFactor &relative_dynamics_factor,
     bool return_when_finished)

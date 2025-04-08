@@ -25,7 +25,7 @@ class JointVelocityMotion : public JointVelocityWaypointMotion {
   explicit JointVelocityMotion(
       const Vector7d &target,
       const franka::Duration &duration = franka::Duration(1000),
-      double state_estimate_weight = 0.0,
+      const Eigen::Vector3d &state_estimate_weight = {0.0, 0.0, 0.0},
       const RelativeDynamicsFactor &relative_dynamics_factor = 1.0);
 };
 
