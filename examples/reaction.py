@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from franky import Affine, JointMotion, Measure, Reaction, Robot, CartesianPoseStopMotion, CartesianMotion, RobotPose, \
+from franky import Affine, JointMotion, Measure, Reaction, Robot, CartesianStopMotion, CartesianMotion, RobotPose, \
     RobotState, ReferenceType
 
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     robot.move(JointMotion([0.0, 0.0, 0.0, -2.2, 0.0, 2.2, 0.7]))
 
     # Define and move forwards
-    reaction = Reaction(Measure.FORCE_Z < -5.0, CartesianPoseStopMotion())
+    reaction = Reaction(Measure.FORCE_Z < -5.0, CartesianStopMotion())
     reaction.register_callback(reaction_callback)
     motion_down = CartesianMotion(RobotPose(Affine([0.0, 0.0, 0.5])), ReferenceType.Relative)
     motion_down.add_reaction(reaction)

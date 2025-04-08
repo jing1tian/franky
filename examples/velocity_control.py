@@ -15,7 +15,7 @@ if __name__ == "__main__":
     robot.recover_from_errors()
 
     # Reduce the acceleration and velocity dynamic
-    robot.relative_dynamics_factor = RelativeDynamicsFactor(0.2, 0.05, 0.05)
+    robot.relative_dynamics_factor = RelativeDynamicsFactor(0.1, 0.05, 0.05)
 
     # Go to initial position
     robot.move(JointMotion([0.0, 0.0, 0.0, -2.2, 0.0, 2.2, 0.7]))
