@@ -28,16 +28,16 @@
 
 Franky is a high-level control library for Franka robots offering Python and C++ support.
 By providing a high-level control interface, Franky eliminates the need for strict real-time programming at 1 kHz,
-making control from non-real time environments, such as Python programs, feasible.
+making control from non-real-time environments, such as Python programs, feasible.
 Instead of relying on low-level control commands, Franky expects high-level position or velocity targets and
-uses [Ruckig](https://github.com/pantor/ruckig) to plan time-optimal trajectories in real time.
+uses [Ruckig](https://github.com/pantor/ruckig) to plan time-optimal trajectories in real-time.
 
 Although Python does not provide real-time guarantees, Franky strives to maintain as much real-time control as possible.
 Motions can be preempted at any moment, prompting Franky to re-plan trajectories on the fly.
-To handle unforeseen situations—such as unexpected contact with the environment—Franky includes a reaction system that
-allows to dynamically update motion commands.
-Furthermore, most non-real time functionality of [libfranka](https://frankaemika.github.io/docs/libfranka.html), such as
-Gripper control, is made directly available in Python.
+To handle unforeseen situations—such as unexpected contact with the environment — Franky includes a reaction system that
+allows to update motion commands dynamically.
+Furthermore, most non-real-time functionality of [libfranka](https://frankaemika.github.io/docs/libfranka.html), such as
+Gripper control is made directly available in Python.
 
 Check out the [tutorial](#-tutorial) and the [examples](https://github.com/TimSchneider42/franky/tree/master/examples)
 for an introduction.
@@ -49,41 +49,67 @@ at [https://timschneider42.github.io/franky/](https://timschneider42.github.io/f
 - **Control your Franka robot directly from Python in just a few lines!**  
   No more endless hours setting up ROS, juggling packages, or untangling dependencies. Just `pip install` — no ROS at all.
 
-- **[Four control modes](#-motion-types)**:
-  - [Cartesian position](#cartesian-position-control)
-  - [Cartesian velocity](#cartesian-velocity-control)
-  - [Joint position](#joint-position-control)
-  - [Joint velocity](#joint-velocity-control)  
-  
+- **[Four control modes](#motion-types)**: [Cartesian position](#cartesian-position-control), [Cartesian velocity](#cartesian-velocity-control), [Joint position](#joint-position-control), [Joint velocity](#joint-velocity-control)  
   Franky uses [Ruckig](https://github.com/pantor/ruckig) to generate smooth, time-optimal trajectories while respecting velocity, acceleration, and jerk limits.
 
-- **[Real-time control from Python and C++](#-real-time-motions)**:  
-  Need to change the target while the robot’s moving? No problem. Franky re-plans trajectories on the fly, so you can preempt motions anytime.
+- **[Real-time control from Python and C++](#real-time-motions)**
+  Need to change the target while the robot’s moving? No problem. Franky re-plans trajectories on the fly so that you can preempt motions anytime.
 
-- **[Reactive behavior](#-real-time-reactions)**:  
-  Robots don’t always go according to plan. Franky lets you define reactions to unexpected events—like contact with the environment — so you can change course in real time.
+- **[Reactive behavior](#-real-time-reactions)**  
+  Robots don’t always go according to plan. Franky lets you define reactions to unexpected events—like contact with the environment — so you can change course in real-time.
 
-- **[Motion and reaction callbacks](#motion-callbacks)**:  
+- **[Motion and reaction callbacks](#motion-callbacks)**  
   Want to monitor what’s happening under the hood? Add callbacks to your motions and reactions. They won’t block the control thread and are super handy for debugging or logging.
 
-- **Things are moving too fast? [Tune the robot's dynamics to your needs](#-robot)**:  
+- **Things are moving too fast? [Tune the robot's dynamics to your needs](#-robot)**  
   Adjust max velocity, acceleration, and jerk to match your setup or task. Fine control for smooth, safe operation.
 
-- **Full Python access to the libfranka API**:  
-  Want to tweak impedance, read the robot state, set force thresholds, or mess with the Jacobian? Go for it. If libfranka supports it, chances are Franky does too.
+- **Full Python access to the libfranka API**  
+  Want to tweak impedance, read the robot state, set force thresholds, or mess with the Jacobian? Go for it. If libfranka supports it, chances are Franky does, too.
 
+## 📖 Python Quickstart Guide
 
-## ⚙️ Setup
+Real-time kernel already installed and real-time permissions granted? Just install Franky via
 
-To install franky, you have to follow three steps:
+```bash
+pip install franky-control
+```
+
+otherwise, follow the [setup instructions](#setup) first.
+
+Now we are already ready to go!
+Unlock the brakes in the web interface, activate FCI, and start coding:
+```python
+from franky import *
+
+robot = Robot("172.16.0.2")  # Replace this with your robot's IP
+
+# Let's start slow (this lets the robot use a maximum of 5% of its velocity, acceleration, and jerk limits)
+robot.relative_dynamics_factor = 0.05
+
+# Move the robot 20cm along the relative X-axis of its end-effector
+motion = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
+robot.move(motion)
+```
+
+If you are seeing server version mismatch errors, such as
+```
+franky.IncompatibleVersionException: libfranka: Incompatible library version (server version: 5, library version: 9)
+```
+then your Franka robot is either not on the most recent firmware version or you are using the older Franka Panda model.
+In any case, it's no big deal; just check [here](https://frankaemika.github.io/docs/compatibility.html) which libfranka version you need and follow our [instructions](installing-frankly) to install the appropriate Franky wheels.
+
+## <a id="setup" /> ⚙️ Setup
+
+To install Franky, you have to follow three steps:
 
 1. Ensure that you are using a realtime kernel
 2. Ensure that the executing user has permission to run real-time applications
-3. Install franky via pip or build it from source
+3. Install Franky via pip or build it from source
 
 ### Installing a real-time kernel
 
-In order for franky to function properly, it requires the underlying OS to use a realtime kernel.
+In order for Franky to function properly, it requires the underlying OS to use a realtime kernel.
 Otherwise, you might see `communication_constrains_violation` errors.
 
 To check whether your system is currently using a real-time kernel, type `uname -a`.
@@ -103,7 +129,7 @@ or, if you are using Ubuntu, it can be [enabled through Ubuntu Pro](https://ubun
 
 ### Allowing the executing user to run real-time applications
 
-First, create a group `realtime` and add your user (or whoever is running franky) to this group:
+First, create a group `realtime` and add your user (or whoever is running Franky) to this group:
 
 ```bash
 sudo addgroup realtime
@@ -132,9 +158,9 @@ $ groups
 
 If realtime is not listed in your groups, try rebooting.
 
-### Installing franky
+### Installing Franky
 
-To start using franky with Python and libfranka *0.15.0*, just install it via
+To start using Franky with Python and libfranka *0.15.0*, just install it via
 
 ```bash
 pip install franky-control
@@ -155,10 +181,10 @@ pip install --no-index --find-links=./dist franky-control
 Franky is based on [libfranka](https://github.com/frankaemika/libfranka), [Eigen](https://eigen.tuxfamily.org) for
 transformation calculations and [pybind11](https://github.com/pybind/pybind11) for the Python bindings.
 As the Franka is sensitive to acceleration discontinuities, it requires jerk-constrained motion generation, for which
-franky uses the [Ruckig](https://ruckig.com) community version for Online Trajectory Generation (OTG).
+Franky uses the [Ruckig](https://ruckig.com) community version for Online Trajectory Generation (OTG).
 
 After installing the dependencies (the exact versions can be found [here](#-development)), you can build and install
-franky via
+Franky via
 
 ```bash
 git clone --recurse-submodules git@github.com:timschneider42/franky.git
@@ -170,10 +196,10 @@ make
 make install
 ```
 
-To use franky, you can also include it as a subproject in your parent CMake via `add_subdirectory(franky)` and then
+To use Franky, you can also include it as a subproject in your parent CMake via `add_subdirectory(franky)` and then
 `target_link_libraries(<target> franky)`.
 
-If you need only the Python module, you can install franky via
+If you need only the Python module, you can install Franky via
 
 ```bash
 pip install .
@@ -184,7 +210,7 @@ Make sure that the built library `_franky.cpython-3**-****-linux-gnu.so` is in t
 
 #### Using Docker
 
-To use franky within Docker we provide a [Dockerfile](docker/run/Dockerfile) and
+To use Franky within Docker we provide a [Dockerfile](docker/run/Dockerfile) and
 accompanying [docker-compose](docker-compose.yml) file.
 
 ```bash
@@ -208,9 +234,9 @@ docker compose run franky-run bash
 The container requires access to the host machines network *and* elevated user rights to allow the docker user to set RT
 capabilities of the processes run from within it.
 
-#### Building franky with Docker
+#### Building Franky with Docker
 
-For building franky and its wheels, we provide another Docker container that can also be launched using docker-compose:
+For building Franky and its wheels, we provide another Docker container that can also be launched using docker-compose:
 
 ```bash
 docker compose build franky-build
@@ -319,7 +345,7 @@ print(robot.joint_jerk_limit.max)
 
 #### Robot State
 
-The robot state can be retrieved by calling the following methods:
+The robot state can be retrieved by accessing the following properties:
 
 * `state`: Object of type `franky.RobotState`, which extends the
   libfranka [franka::RobotState](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html) structure by
@@ -372,7 +398,7 @@ For a full list of state-related features, check
 the [Robot](https://timschneider42.github.io/franky/classfranky_1_1_robot.html)
 and [Model](https://timschneider42.github.io/franky/classfranky_1_1_model.html) sections of the documentation.
 
-### 🏃‍♂️ Motion Types
+### <a id="motion-types" /> 🏃‍♂️ Motion Types
 
 Franky currently supports four different impedance control modes: **joint position control**, **joint velocity control
 **, **cartesian position control**, and **cartesian velocity control**.
@@ -670,7 +696,7 @@ motion
 robot.move(motion)
 ```
 
-### ⏱️ Real-Time Motions
+###  <a id="real-time-motions" /> ⏱️ Real-Time Motions
 
 By setting the `asynchronous` parameter of `Robot.move` to `True`, the function does not block until the motion
 finishes.
@@ -795,7 +821,7 @@ Franky is currently tested against following versions
 ## 📜 License
 
 For non-commercial applications, this software is licensed under the LGPL v3.0.
-If you want to use franky within commercial applications or under a different license, please contact us for individual
+If you want to use Franky within commercial applications or under a different license, please contact us for individual
 agreements.
 
 ## 🔍 Differences to frankx
