@@ -85,7 +85,7 @@ void bind_robot(py::module &m) {
       .def_property_readonly("is_grasped", &Gripper::is_grasped)
       .def_property_readonly("max_width", &Gripper::max_width);
 
-  py::class_<Robot>(m, "RobotInternal")
+  py::class_<Robot>(m, "_RobotInternal")
       .def(
           py::init<>([](const std::string &fci_hostname,
                         RelativeDynamicsFactor relative_dynamics_factor,
