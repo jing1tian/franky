@@ -23,7 +23,7 @@ void bind_model(py::module &m) {
       .value("EndEffector", franka::Frame::kEndEffector)
       .value("Stiffness", franka::Frame::kStiffness);
 
-  py::class_<Model>(m, "Model")
+  py::class_<Model, std::shared_ptr<Model>>(m, "Model")
       .def("pose", py::overload_cast<franka::Frame, const RobotState &>(&Model::pose, py::const_),
            "frame"_a, "state"_a)
       .def("pose", py::overload_cast<franka::Frame, const Vector7d &, const Affine &, const Affine &>(
