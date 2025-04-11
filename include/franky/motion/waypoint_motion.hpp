@@ -68,6 +68,7 @@ class WaypointMotion : public Motion<ControlSignalType> {
     target_reached_time_ = std::nullopt;
     waypoint_started_time_ = franka::Duration(0);
 
+    waypoint_iterator_ = waypoints_.begin();
     initWaypointMotion(robot_state, previous_command, input_parameter_);
     if (waypoint_iterator_ != waypoints_.end()) {
       checkWaypoint(*waypoint_iterator_);
@@ -77,8 +78,6 @@ class WaypointMotion : public Motion<ControlSignalType> {
     } else {
       prev_result_ = ruckig::Result::Finished;
     }
-
-    waypoint_iterator_ = waypoints_.begin();
   }
 
   ControlSignalType nextCommandImpl(
