@@ -214,7 +214,7 @@ To use Franky within Docker we provide a [Dockerfile](docker/run/Dockerfile) and
 accompanying [docker-compose](docker-compose.yml) file.
 
 ```bash
-git clone https://github.com/timschneider42/franky.git
+git clone --recurse-submodules https://github.com/timschneider42/franky.git
 cd franky/
 docker compose build franky-run
 ```
