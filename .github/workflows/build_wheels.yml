@@ -25,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          yum -y install poco-devel* zip boost1.78-devel urdfdom-devel fmt-devel gcc-g++
+          yum -y install zip boost-devel urdfdom-devel fmt-devel gcc-c++ openssl-devel mysql-devel postgresql-devel
           LIBFRANKA_VERSION=${{ inputs.libfranka-version }} ./docker/common/install-dependencies
 
       - name: Setting up pip

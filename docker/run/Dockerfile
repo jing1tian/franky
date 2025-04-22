@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 LABEL maintainer="Tim Schneider <tim@robot-learning.de>"
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get -y install build-essential cmake git libpoco-dev catch2 python3-dev libboost-all-dev liburdfdom-dev libfmt-dev
+RUN apt-get update && apt-get -y install build-essential cmake git catch2 python3-dev libboost-all-dev liburdfdom-dev libfmt-dev libssl-dev libmysqlclient-dev libpq-dev
 
 ADD docker/common/ /tmp/common/
 ARG LIBFRANKA_VERSION

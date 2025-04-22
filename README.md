@@ -814,6 +814,7 @@ Franky is currently tested against following versions
 - libfranka 0.7.1, 0.8.0, 0.9.2, 0.10.0, 0.11.0, 0.12.1, 0.13.3, 0.14.2, 0.15.0
 - Eigen 3.4.0
 - Pybind11 2.13.6
+- POCO 1.14.1
 - Pinocchio 3.4.0
 - Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
 - Catch2 2.13.8 (for testing only)

@@ -20,7 +20,7 @@ jobs:
       - name: Install apt dependencies
         run: |
           sudo apt-get update
-          sudo apt-get -y install build-essential cmake git libpoco-dev python3-dev libboost-all-dev liburdfdom-dev libfmt-dev
+          sudo apt-get -y install build-essential cmake git python3-dev libboost-all-dev liburdfdom-dev libfmt-dev libssl-dev libmysqlclient-dev libpq-dev
 
       - name: Install other dependencies
         run: |

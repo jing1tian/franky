@@ -16,6 +16,7 @@ version_ge() {
     fi
 }
 
+"${SCRIPT_DIR}/install-poco"
 if version_ge "$LIBFRANKA_VERSION" "0.14.0"; then
   "${SCRIPT_DIR}/install-pinocchio"
 fi
@@ -41,7 +42,8 @@ git submodule update
 
 mkdir build
 cd build
-cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.10 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF -DCMAKE_POLICY_DEFAULT_CMP0167=NEW ..
+# CMP0167 has to be set to OLD to be compatible with outdated boost versions
+cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.10 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DBUILD_EXAMPLES=OFF -DCMAKE_POLICY_DEFAULT_CMP0167=OLD ..
 make -j "$(nproc)"
 sudo make install || make install
 

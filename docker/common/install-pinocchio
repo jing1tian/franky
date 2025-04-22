@@ -8,7 +8,8 @@ cd "${TMP_DIR}"
 git checkout "${PINOCCHIO_VERSION}"
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -D BUILD_WITH_URDF_SUPPORT=on -DBUILD_PYTHON_INTERFACE=off -DBUILD_TESTING=off
+# CMP0167 has to be set to OLD to be compatible with outdated boost versions
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_DEFAULT_CMP0167=OLD -DBUILD_WITH_URDF_SUPPORT=on -DBUILD_PYTHON_INTERFACE=off -DBUILD_TESTING=off
 make -j "$(nproc)"
 sudo make install || make install
 cd /
