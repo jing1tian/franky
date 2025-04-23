@@ -4,8 +4,6 @@ LABEL maintainer="Tim Schneider <tim@robot-learning.de>"
 
 RUN yum -y install zip boost-devel urdfdom-devel fmt-devel gcc-c++ openssl-devel mysql-devel postgresql-devel
 
-ENV LD_LIBRARY_PATH="/usr/local/lib64"
-
 ADD docker/common/ /tmp/common/
 ARG LIBFRANKA_VERSION
 RUN /tmp/common/install-dependencies
