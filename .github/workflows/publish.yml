@@ -34,16 +34,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts/
-          merge-multiple: true
 
       - name: Merge wheels
         run: |
-          set -euo pipefail
-
-          # find unique versions in names like wheels___1.2.3___manylinux2014_x86_64.zip
-          versions=$(ls wheels___*___*.zip 2>/dev/null \
-            | sed -E 's/wheels___([^_]+)___.*\.zip/\1/' \
-            | sort -u)
+          # find unique versions
+          versions=$(
+            cd artifacts && 
+            ls -1d wheels___*___* 2>/dev/null \
+              | sed -E 's/wheels___([^_]+)___.*/\1/' \
+              | sort -u
+          )
 
           if [[ -z "$versions" ]]; then
             echo "No wheel archives found, skipping."
@@ -51,20 +51,25 @@ jobs:
           fi
           
           for version in $versions; do
-            out="output/libfranka_${version}_wheels.zip"
-            echo "Creating $out from all wheels___${version}___*.zip…"
+            out="libfranka_${version//\./-}_wheels.zip"
+            out_full=$(realpath "output/$out")
+            echo "Creating $out from all wheels___${version}___*.zip"
           
             tmp=$(mktemp -d)
+            mkdir "$tmp/dist"
             # unpack each matching zip into the temp dir
-            for z in wheels___${version}___*.zip; do
-              echo "  ↳ Unpacking $z"
-              unzip -q "$z" -d "$tmp"
+            for z in artifacts/wheels___${version}___*/*.zip; do
+              echo "Unpacking $z"
+              tmp2=$(mktemp -d)
+              unzip -q "$z" -d "$tmp2"
+              mv $tmp2/dist/* "$tmp/dist/"
+              rm -rf "$tmp2"
             done
             
             # re-combine into a single zip
             (
               cd "$tmp"
-              zip -qr "../$out" .
+              zip -qr "$out_full" .
             )
             
             # clean up
