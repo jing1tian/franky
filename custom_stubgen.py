@@ -30,6 +30,11 @@ class CustomWriter(Writer):
             for prop in cls.properties:
                 if prop.setter is not None:
                     self._patch_function(prop.setter)
+            for field in cls.fields:
+                if field.attribute.annotation is not None and field.attribute.annotation.name in self.alternative_types:
+                    converted_types = [ResolvedType(e) for e in self.alternative_types[field.attribute.annotation.name]]
+                    field.attribute.annotation = ResolvedType(
+                        QualifiedName.from_str("typing.Union"), [field.attribute.annotation] + converted_types)
         super().write_module(module, printer, to, sub_dir=sub_dir)
 
 
