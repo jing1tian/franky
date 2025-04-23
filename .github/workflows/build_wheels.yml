@@ -6,6 +6,9 @@ on:
       libfranka-version:
         required: true
         type: string
+      manylinux-version:
+        required: true
+        type: string
 
 env:
   PYBIN_SUPPORTED_VERSIONS: "cp3(7m|8|9|10|11|12|13)"
@@ -15,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: quay.io/pypa/manylinux_2_34_x86_64
+      image: quay.io/pypa/${{ inputs.manylinux-version }}
 
     steps:
       - name: Checkout repository and submodules
@@ -39,5 +42,5 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: libfranka_${{ inputs.libfranka-version }}_wheels
+          name: wheels___${{ inputs.libfranka-version }}___${{ inputs.manylinux-version }}
           path: output/libfranka_*_wheels.zip

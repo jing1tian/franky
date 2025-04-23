@@ -10,9 +10,11 @@ jobs:
     strategy:
       matrix:
         libfranka-version: [0.7.1, 0.8.0, 0.9.2, 0.10.0, 0.11.0, 0.12.1, 0.13.3, 0.14.2, 0.15.0]
+        manylinux-version: [manylinux_2_28_x86_64, manylinux_2_34_x86_64]
     uses: ./.github/workflows/build_wheels.yml
     with:
       libfranka-version: ${{ matrix.libfranka-version }}
+      manylinux-version: ${{ matrix.manylinux-version }}
 
   publish:
     needs: build
@@ -26,12 +28,49 @@ jobs:
       - name: Prepare
         run: |
           mkdir -p artifacts
+          mkdir -p output
 
       - name: Get wheels
         uses: actions/download-artifact@v4
         with:
           path: artifacts/
           merge-multiple: true
+
+      - name: Merge wheels
+        run: |
+          set -euo pipefail
+
+          # find unique versions in names like wheels___1.2.3___manylinux2014_x86_64.zip
+          versions=$(ls wheels___*___*.zip 2>/dev/null \
+            | sed -E 's/wheels___([^_]+)___.*\.zip/\1/' \
+            | sort -u)
+
+          if [[ -z "$versions" ]]; then
+            echo "No wheel archives found, skipping."
+            exit 0
+          fi
+          
+          for version in $versions; do
+            out="output/libfranka_${version}_wheels.zip"
+            echo "Creating $out from all wheels___${version}___*.zip…"
+          
+            tmp=$(mktemp -d)
+            # unpack each matching zip into the temp dir
+            for z in wheels___${version}___*.zip; do
+              echo "  ↳ Unpacking $z"
+              unzip -q "$z" -d "$tmp"
+            done
+            
+            # re-combine into a single zip
+            (
+              cd "$tmp"
+              zip -qr "../$out" .
+            )
+            
+            # clean up
+            rm -rf "$tmp"
+            echo "$out done."
+          done
 
       - name: Create release
         uses: marvinpinto/action-automatic-releases@latest
@@ -40,11 +79,11 @@ jobs:
           prerelease: false
           draft: false
           files: |
-            artifacts/libfranka_*_wheels.zip
+            output/libfranka_*_wheels.zip
 
       - name: Unpack wheels
         run: |
-          unzip artifacts/libfranka_0-15-0_wheels.zip
+          unzip output/libfranka_0-15-0_wheels.zip
 
       - name: Publish python package
         uses: pypa/gh-action-pypi-publish@release/v1
