@@ -92,7 +92,7 @@ class RobotWebSession:
         self.__client.close()
 
     def __enter__(self):
-        self.open()
+        return self.open()
 
     def __exit__(self, type, value, traceback):
         self.close()
