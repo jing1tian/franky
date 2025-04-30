@@ -21,8 +21,8 @@ class FrankaAPIError(Exception):
 
 
 class RobotWebSession:
-    def __init__(self, fci_hostname: str, username: str, password: str):
-        self.__fci_hostname = fci_hostname
+    def __init__(self, hostname: str, username: str, password: str):
+        self.__hostname = hostname
         self.__username = username
         self.__password = password
 
@@ -74,7 +74,7 @@ class RobotWebSession:
     def open(self):
         if self.is_open:
             raise RuntimeError("Session is already open.")
-        self.__client = HTTPSConnection(self.__fci_hostname, timeout=12, context=ssl._create_unverified_context())
+        self.__client = HTTPSConnection(self.__hostname, timeout=12, context=ssl._create_unverified_context())
         self.__client.connect()
         payload = json.dumps(
             {"login": self.__username, "password": self.__encode_password(self.__username, self.__password)})
