@@ -354,7 +354,7 @@ The robot state can be retrieved by accessing the following properties:
   obtained
   from [franka::RobotState::O_T_EE](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html#a193781d47722b32925e0ea7ac415f442)
   and [franka::RobotState::O_dP_EE_c](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html#a4be112bd1a9a7d777a67aea4a18a8dcc).
-* `current_joint_position`: Object of type `franky.JointState`, which contains the joint positions and velocities
+* `current_joint_state`: Object of type `franky.JointState`, which contains the joint positions and velocities
   obtained
   from [franka::RobotState::q](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html#ade3335d1ac2f6c44741a916d565f7091)
   and [franka::RobotState::dq](https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html#a706045af1b176049e9e56df755325bd2).
@@ -400,8 +400,7 @@ and [Model](https://timschneider42.github.io/franky/classfranky_1_1_model.html) 
 
 ### <a id="motion-types" /> 🏃‍♂️ Motion Types
 
-Franky currently supports four different impedance control modes: **joint position control**, **joint velocity control
-**, **cartesian position control**, and **cartesian velocity control**.
+Franky currently supports four different impedance control modes: **joint position control**, **joint velocity control**, **cartesian position control**, and **cartesian velocity control**.
 Each of these control modes is invoked by passing the robot an appropriate _Motion_ object.
 
 In the following, we provide a brief example for each motion type implemented by Franky in Python.
