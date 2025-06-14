@@ -281,6 +281,8 @@ motion = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
 robot.move(motion)
 ```
 
+Before executing any code, make sure that you have enabled the Franka Control Interface (FCI) in the Franka UI web interface.
+
 Furthermore, we will introduce methods for geometric calculations, for moving the robot according to different motion
 types, how to implement real-time reactions and changing waypoints in real time as well as controlling the gripper.
 
@@ -731,7 +733,7 @@ The next time `Robot.join_motion` or `Robot.move` are called, they will throw th
 Hence, after an asynchronous motion has finished, make sure to call `Robot.join_motion` to ensure being notified of any
 exceptions that occurred during the motion.
 
-### Gripper
+### <a id="gripper" /> 👌  Gripper
 
 In the `franky::Gripper` class, the default gripper force and gripper speed can be set.
 Then, additionally to the libfranka commands, the following helper methods can be used:
@@ -805,6 +807,70 @@ else:
     success_future.wait()
     print("Gripper motion timed out.")
 ```
+
+### Accessing the Web Interface API
+
+For Franka robots, control happens via the Franka Control Interface (FCI), which has to be enabled through the Franka UI in the robot's web interface.
+The Franka UI also provides methods for locking and unlocking the brakes, setting the execution mode, and executing the safety self-test.
+However, sometimes you may want to access these methods programmatically, e.g. for automatically unlocking the brakes before starting a motion, or automatically executing the self-test after 24h of continuous execution.
+
+For that reason, Franky provides a `RobotWebSession` class that allows you to access the web interface API of the robot.
+Note that directly accessing the web interface API is not officially supported and documented by Franka.
+Hence, use this feature at your own risk.
+
+A typical automated workflow could look like this:
+
+```python
+import franky
+
+with franky.RobotWebSession("172.16.0.2", "username", "password") as robot_web_session:
+    # First take control, in case some other web session is currently running
+    assert robot_web_session.take_control(), "Control not granted"
+    
+    # Unlock the brakes
+    robot_web_session.unlock_brakes()
+    
+    # Enable the FCI
+    robot_web_session.enable_fci()
+    
+    # Create a franky.Robot instance and do whatever you want
+    ...
+    
+    # Disable the FCI
+    robot_web_session.disable_fci()
+    
+    # Lock brakes
+    robot_web_session.lock_brakes()
+```
+
+In case you are running the robot for longer than 24h you will have noticed that you have to do a safety self-test every 24h.
+`RobotWebSession` allows to automate this task as well:
+
+```python
+import time
+import franky
+
+with franky.RobotWebSession("172.16.0.2", "username", "password") as robot_web_session:
+    # Execute self-test if the time until self-test is less than 5 minutes.
+    if robot_web_session.get_system_status()["safety"]["timeToTd2"] < 300:
+        robot_web_session.disable_fci()
+        robot_web_session.lock_brakes()
+        time.sleep(1.0)
+        
+        robot_web_session.execute_self_test()
+        
+        robot_web_session.unlock_brakes()
+        robot_web_session.enable_fci()
+        time.sleep(1.0)
+        
+        # Recreate your franky.Robot instance as the FCI has been disabled and re-enabled
+        ...
+```
+
+`robot_web_session.get_system_status()` contains more information than just the time until self-test, such as the current execution mode, whether the brakes are locked, whether the FCI is enabled, and more.
+
+If you want to call other API functions, you can use the `RobotWebSession.send_api_request` and `RobotWebSession.send_control_api_request` methods.
+See [robot_web_session.py](franky/robot_web_session.py) for an example of how to use these methods.
 
 ## 🛠️ Development
 
