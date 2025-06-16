@@ -1,7 +1,7 @@
 #!/bin/bash
 # Author: Tim Schneider <tim@robot-learning.de>
 
-# Installs CUDA drivers on a fresh Ubuntu with realtime kernel. If other CUDA drivers are already installed, please remove them prior 
+# Installs CUDA drivers on a fresh Ubuntu with realtime kernel. If other CUDA drivers are already installed, please remove them prior
 # to running this script, e.g. with
 # sudo apt purge 'nvidia-*'
 # sudo apt autoremove
