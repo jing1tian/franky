@@ -14,7 +14,7 @@ namespace franky {
 #endif
 
 #define LIMIT_INIT(name, value_panda, value_fer) \
-  name, SEL_VAL(value_panda, value_fer), control_mutex_, [this] { return is_in_control_unsafe(); }
+  name, SEL_VAL(value_panda, value_fer), control_mutex_, [this] { return !is_in_control_unsafe(); }
 
 //! Connects to a robot at the given FCI IP address.
 Robot::Robot(const std::string &fci_hostname) : Robot(fci_hostname, Params()) {}
