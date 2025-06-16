@@ -108,11 +108,17 @@ class RobotWebSession:
         if self.__control_token is None:
             raise RuntimeError("Client does not have control. Call take_control() first.")
 
-    def take_control(self, wait_timeout: float = 30.0):
+    def take_control(self, wait_timeout: float = 30.0, force: bool = False):
         if not self.has_control():
             res = self.send_api_request(
-                "/admin/api/control-token/request", headers={"content-type": "application/json"},
+                f"/admin/api/control-token/request{'?force' if force else ''}",
+                headers={"content-type": "application/json"},
                 body=json.dumps({"requestedBy": self.__username}))
+            if force:
+                print(
+                    "Forcibly taking control: "
+                    f"Please physically take control by pressing the top button on the FR3 within {wait_timeout}s!"
+                )
             response_dict = json.loads(res)
             self.__control_token = response_dict["token"]
             self.__control_token_id = response_dict["id"]
