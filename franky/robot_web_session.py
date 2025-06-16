@@ -7,10 +7,13 @@ import time
 import urllib.parse
 from http.client import HTTPSConnection, HTTPResponse
 from typing import Dict, Optional, Any, Literal
-from urllib.error import HTTPError
 
 
-class FrankaAPIError(Exception):
+class RobotWebSessionError(Exception):
+    pass
+
+
+class FrankaAPIError(RobotWebSessionError):
     def __init__(self, target: str, http_code: int, http_reason: str, headers: Dict[str, str], message: str):
         super().__init__(
             f"Franka API returned error {http_code} ({http_reason}) when accessing end-point {target}: {message}")
@@ -18,6 +21,10 @@ class FrankaAPIError(Exception):
         self.http_code = http_code
         self.headers = headers
         self.message = message
+
+
+class TakeControlTimeoutError(RobotWebSessionError):
+    pass
 
 
 class RobotWebSession:
@@ -71,10 +78,10 @@ class RobotWebSession:
         _headers.update(headers)
         return self.send_api_request(target, headers=_headers, method=method, body=body)
 
-    def open(self):
+    def open(self, timeout: float = 30.0):
         if self.is_open:
             raise RuntimeError("Session is already open.")
-        self.__client = HTTPSConnection(self.__hostname, timeout=12, context=ssl._create_unverified_context())
+        self.__client = HTTPSConnection(self.__hostname, timeout=timeout, context=ssl._create_unverified_context())
         self.__client.connect()
         payload = json.dumps(
             {"login": self.__username, "password": self.__encode_password(self.__username, self.__password)})
@@ -101,19 +108,28 @@ class RobotWebSession:
         if self.__control_token is None:
             raise RuntimeError("Client does not have control. Call take_control() first.")
 
-    def take_control(self, wait_timeout: float = 10.0):
-        if self.__control_token is None:
+    def take_control(self, wait_timeout: float = 30.0, force: bool = False):
+        if not self.has_control():
             res = self.send_api_request(
-                "/admin/api/control-token/request", headers={"content-type": "application/json"},
+                f"/admin/api/control-token/request{'?force' if force else ''}",
+                headers={"content-type": "application/json"},
                 body=json.dumps({"requestedBy": self.__username}))
+            if force:
+                print(
+                    "Forcibly taking control: "
+                    f"Please physically take control by pressing the top button on the FR3 within {wait_timeout}s!"
+                )
             response_dict = json.loads(res)
             self.__control_token = response_dict["token"]
             self.__control_token_id = response_dict["id"]
             # One should probably use websockets here but that would introduce another dependency
             start = time.time()
-            while time.time() - start < wait_timeout and not self.has_control():
-                time.sleep(1.0)
-        return self.has_control()
+            has_control = self.has_control()
+            while time.time() - start < wait_timeout and not has_control:
+                time.sleep(max(0.0, min(1.0, wait_timeout - (time.time() - start))))
+                has_control = self.has_control()
+            if not has_control:
+                raise TakeControlTimeoutError(f"Timed out waiting for control to be granted after {wait_timeout}s.")
 
     def release_control(self):
         if self.__control_token is not None:
