@@ -71,10 +71,10 @@ class RobotWebSession:
         _headers.update(headers)
         return self.send_api_request(target, headers=_headers, method=method, body=body)
 
-    def open(self):
+    def open(self, timeout: float = 30.0):
         if self.is_open:
             raise RuntimeError("Session is already open.")
-        self.__client = HTTPSConnection(self.__hostname, timeout=12, context=ssl._create_unverified_context())
+        self.__client = HTTPSConnection(self.__hostname, timeout=timeout, context=ssl._create_unverified_context())
         self.__client.connect()
         payload = json.dumps(
             {"login": self.__username, "password": self.__encode_password(self.__username, self.__password)})
