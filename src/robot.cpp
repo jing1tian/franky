@@ -63,6 +63,7 @@ RobotState Robot::state() {
   {
     std::lock_guard control_lock(*control_mutex_);
     if (!is_in_control_unsafe()) {
+      readOnce();  // For some reason, calling this for the first time returns old data. So call it twice.
       current_state_ = RobotState::from_franka(readOnce());
     }
   }
