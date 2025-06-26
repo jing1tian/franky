@@ -178,6 +178,60 @@ pip install numpy
 pip install --no-index --find-links=./dist franky-control
 ```
 
+### Using Docker
+
+To use Franky within Docker we provide a [Dockerfile](docker/run/Dockerfile) and
+accompanying [docker-compose](docker-compose.yml) file.
+
+```bash
+git clone --recurse-submodules https://github.com/timschneider42/franky.git
+cd franky/
+docker compose build franky-run
+```
+
+To use another version of libfranka than the default (0.15.0) add a build argument:
+
+```bash
+docker compose build franky-run --build-arg LIBFRANKA_VERSION=0.9.2
+```
+
+To run the container:
+
+```bash
+docker compose run franky-run bash
+```
+
+The container requires access to the host machines network *and* elevated user rights to allow the docker user to set RT
+capabilities of the processes run from within it.
+
+### Can I use CUDA jointly with Franky?
+
+Yes. However, you need to set `IGNORE_PREEMPT_RT_PRESENCE=1` during the installation and all subsequent updates of the CUDA drivers on the real-time kernel.
+
+First, make sure that you have rebooted your system after installing the real-time kernel.
+Then, add `IGNORE_PREEMPT_RT_PRESENCE=1` to `/etc/environment`, call `export IGNORE_PREEMPT_RT_PRESENCE=1` to also set it in the current session and follow the instructions of Nvidia to install CUDA on your system.
+
+If you are on Ubuntu, you can also use [this](tools/install_cuda_realtime.bash) script to install CUDA on your real-time system:
+```bash
+# Download the script
+wget https://raw.githubusercontent.com/timschneider42/franky/master/tools/install_cuda_realtime.bash
+
+# Inspect the script to ensure it does what you expect
+
+# Make it executable
+chmod +x install_cuda_realtime.bash
+
+# Execute the script
+./install_cuda_realtime.bash
+```
+
+Alternatively, if you are a cowboy and do not care about security, you can also use this one-liner to directly call the script without checking it:
+```bash
+bash <(wget -qO- https://raw.githubusercontent.com/timschneider42/franky/master/tools/install_cuda_realtime.bash)
+```
+
+### Building Franky
+
 Franky is based on [libfranka](https://github.com/frankaemika/libfranka), [Eigen](https://eigen.tuxfamily.org) for
 transformation calculations and [pybind11](https://github.com/pybind/pybind11) for the Python bindings.
 As the Franka is sensitive to acceleration discontinuities, it requires jerk-constrained motion generation, for which
@@ -208,32 +262,6 @@ pip install .
 Make sure that the built library `_franky.cpython-3**-****-linux-gnu.so` is in the Python path, e.g. by adjusting
 `PYTHONPATH` accordingly.
 
-#### Using Docker
-
-To use Franky within Docker we provide a [Dockerfile](docker/run/Dockerfile) and
-accompanying [docker-compose](docker-compose.yml) file.
-
-```bash
-git clone --recurse-submodules https://github.com/timschneider42/franky.git
-cd franky/
-docker compose build franky-run
-```
-
-To use another version of libfranka than the default (0.15.0) add a build argument:
-
-```bash
-docker compose build franky-run --build-arg LIBFRANKA_VERSION=0.9.2
-```
-
-To run the container:
-
-```bash
-docker compose run franky-run bash
-```
-
-The container requires access to the host machines network *and* elevated user rights to allow the docker user to set RT
-capabilities of the processes run from within it.
-
 #### Building Franky with Docker
 
 For building Franky and its wheels, we provide another Docker container that can also be launched using docker-compose:
@@ -242,32 +270,6 @@ For building Franky and its wheels, we provide another Docker container that can
 docker compose build franky-build
 docker compose run --rm franky-build run-tests  # To run the tests
 docker compose run --rm franky-build build-wheels  # To build wheels for all supported python versions
-```
-
-### Can I use CUDA jointly with Franky?
-
-Yes. However, you need to set `IGNORE_PREEMPT_RT_PRESENCE=1` during the installation and all subsequent updates of the CUDA drivers on the real-time kernel.
-
-First, make sure that you have rebooted your system after installing the real-time kernel.
-Then, add `IGNORE_PREEMPT_RT_PRESENCE=1` to `/etc/environment`, call `export IGNORE_PREEMPT_RT_PRESENCE=1` to also set it in the current session and follow the instructions of Nvidia to install CUDA on your system.
-
-If you are on Ubuntu, you can also use [this](tools/install_cuda_realtime.bash) script to install CUDA on your real-time system:
-```bash
-# Download the script
-wget https://raw.githubusercontent.com/timschneider42/franky/master/tools/install_cuda_realtime.bash
-
-# Inspect the script to ensure it does what you expect
-
-# Make it executable
-chmod +x install_cuda_realtime.bash
-
-# Execute the script
-./install_cuda_realtime.bash
-```
-
-Alternatively, if you are a cowboy and do not care about security, you can also use this one-liner to directly call the script without checking it:
-```bash
-bash <(wget -qO- https://raw.githubusercontent.com/timschneider42/franky/master/tools/install_cuda_realtime.bash)
 ```
 
 ## 📚 Tutorial
