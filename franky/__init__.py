@@ -1,5 +1,10 @@
 from .robot import Robot
-from .robot_web_session import RobotWebSession
+from .robot_web_session import (
+    RobotWebSession,
+    RobotWebSessionError,
+    FrankaAPIError,
+    TakeControlTimeoutError,
+)
 from .reaction import (
     Reaction,
     TorqueReaction,
