@@ -850,8 +850,18 @@ A typical automated workflow could look like this:
 import franky
 
 with franky.RobotWebSession("172.16.0.2", "username", "password") as robot_web_session:
-    # First take control, in case some other web session is currently running
-    assert robot_web_session.take_control(), "Control not granted"
+    # First take control
+    try:
+        # Try taking control. The session currently holding control has to release it in order for this session to gain
+        # control. In the web interface, a notification will show prompting the user to release control. If the other
+        # session is another franky.RobotWebSession, then the `release_control` method can be called on the other
+        # session to release control.
+        robot_web_session.take_control(wait_timeout=10.0)
+    except franky.TakeControlTimeoutError:
+        # If nothing happens for 10s, we try to take control forcefully. This is particularly useful if the session
+        # holding control is dead. Taking control by force requires the user to manually push the blue button close to
+        # the robot's wrist.
+        robot_web_session.take_control(wait_timeout=30.0, force=True)
 
     # Unlock the brakes
     robot_web_session.unlock_brakes()
