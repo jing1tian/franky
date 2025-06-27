@@ -602,12 +602,7 @@ All motions support callbacks, which will be invoked in every control step at 1k
 Callbacks can be attached as follows:
 
 ```python
-def cb(
-        robot_state: RobotState,
-        time_step: Duration,
-        rel_time: Duration,
-        abs_time: Duration,
-        control_signal: JointPositions):
+def cb(robot_state: RobotState, time_step: Duration, rel_time: Duration, abs_time: Duration, control_signal: JointPositions):
     print(f"At time {abs_time}, the target joint positions were {control_signal.q}")
 
 
