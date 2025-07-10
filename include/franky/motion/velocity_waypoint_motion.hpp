@@ -68,7 +68,7 @@ class VelocityWaypointMotion : public WaypointMotion<ControlSignalType, Velocity
     // internally as well
     auto [vel_d, acc_d, _] = getDesiredState(robot_state);
 
-    auto vel = toEigenD<7>(input_parameter.current_velocity);
+    auto vel = toEigenD<7>(input_parameter.current_position);
 
     // Retain difference between desired state and motion planner state
     auto vel_diff = vel - vel_d;
