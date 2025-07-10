@@ -3,7 +3,6 @@
 #include <franka/control_types.h>
 #include <franka/duration.h>
 #include <franka/exception.h>
-#include <franka/model.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
 
