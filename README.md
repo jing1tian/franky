@@ -79,6 +79,7 @@ otherwise, follow the [setup instructions](#setup) first.
 
 Now we are already ready to go!
 Unlock the brakes in the web interface, activate FCI, and start coding:
+
 ```python
 from franky import *
 
@@ -352,7 +353,9 @@ robot.recover_from_errors()
 robot.relative_dynamics_factor = 0.05
 
 # Alternatively, you can define each constraint individually
-robot.relative_dynamics_factor = RelativeDynamicsFactor(velocity=0.1, acceleration=0.05, jerk=0.1)
+robot.relative_dynamics_factor = RelativeDynamicsFactor(
+    velocity=0.1, acceleration=0.05, jerk=0.1
+)
 
 # Or, for more finegrained access, set individual limits
 robot.translation_velocity_limit.set(3.0)
@@ -420,7 +423,8 @@ ee_pose_kin = robot.model.pose(Frame.EndEffector, q, f_t_ee, ee_t_k)
 # Get the jacobian of the current robot state
 jacobian = robot.model.body_jacobian(Frame.EndEffector, state)
 
-# Alternatively, just get the URDF as string and do the kinematics computation yourself (only for libfranka >= 0.15.0)
+# Alternatively, just get the URDF as string and do the kinematics computation yourself (only
+# for libfranka >= 0.15.0)
 urdf_model = robot.model_urdf
 ```
 
@@ -448,28 +452,37 @@ from franky import *
 # A point-to-point motion in the joint space
 m_jp1 = JointMotion([-0.3, 0.1, 0.3, -1.4, 0.1, 1.8, 0.7])
 
-# A motion in joint space with multiple waypoints
-m_jp2 = JointWaypointMotion([
-    JointWaypoint([-0.3, 0.1, 0.3, -1.4, 0.1, 1.8, 0.7]),
-    JointWaypoint([0.0, 0.3, 0.3, -1.5, -0.2, 1.5, 0.8]),
-    JointWaypoint([0.1, 0.4, 0.3, -1.4, -0.3, 1.7, 0.9])
-])
+# A motion in joint space with multiple waypoints. The robot will stop at each of these
+# waypoints. If you want the robot to move continuously, you have to specify a target velocity
+# at every waypoint as shown in the example following this one.
+m_jp2 = JointWaypointMotion(
+    [
+        JointWaypoint([-0.3, 0.1, 0.3, -1.4, 0.1, 1.8, 0.7]),
+        JointWaypoint([0.0, 0.3, 0.3, -1.5, -0.2, 1.5, 0.8]),
+        JointWaypoint([0.1, 0.4, 0.3, -1.4, -0.3, 1.7, 0.9]),
+    ]
+)
 
-# Intermediate waypoints also permit to specify target velocities. The default target velocity is 0, meaning that the
-# robot will stop at every waypoint.
-m_jp3 = JointWaypointMotion([
-    JointWaypoint([-0.3, 0.1, 0.3, -1.4, 0.1, 1.8, 0.7]),
-    JointWaypoint(
-        JointState(
-            position=[0.0, 0.3, 0.3, -1.5, -0.2, 1.5, 0.8],
-            velocity=[0.1, 0.0, 0.0, 0.0, -0.0, 0.0, 0.0])),
-    JointWaypoint([0.1, 0.4, 0.3, -1.4, -0.3, 1.7, 0.9])
-])
+# Intermediate waypoints also permit to specify target velocities. The default target velocity
+# is 0, meaning that the robot will stop at every waypoint.
+m_jp3 = JointWaypointMotion(
+    [
+        JointWaypoint([-0.3, 0.1, 0.3, -1.4, 0.1, 1.8, 0.7]),
+        JointWaypoint(
+            JointState(
+                position=[0.0, 0.3, 0.3, -1.5, -0.2, 1.5, 0.8],
+                velocity=[0.1, 0.0, 0.0, 0.0, -0.0, 0.0, 0.0],
+            )
+        ),
+        JointWaypoint([0.1, 0.4, 0.3, -1.4, -0.3, 1.7, 0.9]),
+    ]
+)
 
-# Stop the robot in joint position control mode. The difference of JointStopMotion to other stop motions such as
-# CartesianStopMotion is that # JointStopMotion # stops the robot in joint position control mode while
-# CartesianStopMotion stops it in cartesian pose control mode. The difference becomes relevant when asynchronous move
-# commands are being sent or reactions are being used(see below).
+# Stop the robot in joint position control mode. The difference of JointStopMotion to other
+# stop-motions such as CartesianStopMotion is that JointStopMotion stops the robot in joint
+# position control mode while CartesianStopMotion stops it in cartesian pose control mode. The
+# difference becomes relevant when asynchronous move commands are being sent or reactions are
+# being used(see below).
 m_jp4 = JointStopMotion()
 ```
 
@@ -479,18 +492,30 @@ m_jp4 = JointStopMotion()
 from franky import *
 
 # Accelerate to the given joint velocity and hold it. After 1000ms stop the robot again.
-m_jv1 = JointVelocityMotion([0.1, 0.3, -0.1, 0.0, 0.1, -0.2, 0.4], duration=Duration(1000))
+m_jv1 = JointVelocityMotion(
+    [0.1, 0.3, -0.1, 0.0, 0.1, -0.2, 0.4], duration=Duration(1000)
+)
 
-# Joint velocity motions also support waypoints. Unlike in joint position control, a joint velocity waypoint is a
-# target velocity to be reached. This particular example first accelerates the joints, holds the velocity for 1s, then
-# reverses direction for 2s, reverses direction again for 1s, and finally stops. It is important not to forget to stop
-# the robot at the end of such a sequence, as it will otherwise throw an error.
-m_jv2 = JointVelocityWaypointMotion([
-    JointVelocityWaypoint([0.1, 0.3, -0.1, 0.0, 0.1, -0.2, 0.4], hold_target_duration=Duration(1000)),
-    JointVelocityWaypoint([-0.1, -0.3, 0.1, -0.0, -0.1, 0.2, -0.4], hold_target_duration=Duration(2000)),
-    JointVelocityWaypoint([0.1, 0.3, -0.1, 0.0, 0.1, -0.2, 0.4], hold_target_duration=Duration(1000)),
-    JointVelocityWaypoint([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
-])
+# Joint velocity motions also support waypoints. Unlike in joint position control, a joint
+# velocity waypoint is a target velocity to be reached. This particular example first
+# accelerates the joints, holds the velocity for 1s, then reverses direction for 2s, reverses
+# direction again for 1s, and finally stops. It is important not to forget to stop the robot
+# at the end of such a sequence, as it will otherwise throw an error.
+m_jv2 = JointVelocityWaypointMotion(
+    [
+        JointVelocityWaypoint(
+            [0.1, 0.3, -0.1, 0.0, 0.1, -0.2, 0.4], hold_target_duration=Duration(1000)
+        ),
+        JointVelocityWaypoint(
+            [-0.1, -0.3, 0.1, -0.0, -0.1, 0.2, -0.4],
+            hold_target_duration=Duration(2000),
+        ),
+        JointVelocityWaypoint(
+            [0.1, 0.3, -0.1, 0.0, 0.1, -0.2, 0.4], hold_target_duration=Duration(1000)
+        ),
+        JointVelocityWaypoint([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
+    ]
+)
 
 # Stop the robot in joint velocity control mode.
 m_jv3 = JointVelocityStopMotion()
@@ -508,29 +533,44 @@ quat = Rotation.from_euler("xyz", [0, 0, math.pi / 2]).as_quat()
 m_cp1 = CartesianMotion(Affine([0.4, -0.2, 0.3], quat))
 
 # With target elbow angle (otherwise, the Franka firmware will choose by itself)
-m_cp2 = CartesianMotion(RobotPose(Affine([0.4, -0.2, 0.3], quat), elbow_state=ElbowState(0.3)))
+m_cp2 = CartesianMotion(
+    RobotPose(Affine([0.4, -0.2, 0.3], quat), elbow_state=ElbowState(0.3))
+)
 
 # A linear motion in cartesian space relative to the initial position
-# (Note that this motion is relative both in position and orientation. Hence, when the robot's end-effector is oriented
-# differently, it will move in a different direction)
+# (Note that this motion is relative both in position and orientation. Hence, when the robot's
+# end-effector is oriented differently, it will move in a different direction)
 m_cp3 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
 
-# Generalization of CartesianMotion that allows for multiple waypoints
-m_cp4 = CartesianWaypointMotion([
-    CartesianWaypoint(RobotPose(Affine([0.4, -0.2, 0.3], quat), elbow_state=ElbowState(0.3))),
-    # The following waypoint is relative to the prior one and 50% slower
-    CartesianWaypoint(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative, RelativeDynamicsFactor(0.5, 1.0, 1.0))
-])
+# Generalization of CartesianMotion that allows for multiple waypoints. The robot will stop at
+# each of these waypoints. If you want the robot to move continuously, you have to specify a
+# target velocity at every waypoint as shown in the example following this one.
+m_cp4 = CartesianWaypointMotion(
+    [
+        CartesianWaypoint(
+            RobotPose(Affine([0.4, -0.2, 0.3], quat), elbow_state=ElbowState(0.3))
+        ),
+        # The following waypoint is relative to the prior one and 50% slower
+        CartesianWaypoint(
+            Affine([0.2, 0.0, 0.0]),
+            ReferenceType.Relative,
+            RelativeDynamicsFactor(0.5, 1.0, 1.0),
+        ),
+    ]
+)
 
-# Cartesian waypoints also permit to specify target velocities
-m_cp5 = CartesianWaypointMotion([
-    CartesianWaypoint(Affine([0.5, -0.2, 0.3], quat)),
-    CartesianWaypoint(
-        CartesianState(
-            pose=Affine([0.4, -0.1, 0.3], quat),
-            velocity=Twist([-0.01, 0.01, 0.0]))),
-    CartesianWaypoint(Affine([0.3, 0.0, 0.3], quat))
-])
+# Cartesian waypoints permit to specify target velocities
+m_cp5 = CartesianWaypointMotion(
+    [
+        CartesianWaypoint(Affine([0.5, -0.2, 0.3], quat)),
+        CartesianWaypoint(
+            CartesianState(
+                pose=Affine([0.4, -0.1, 0.3], quat), velocity=Twist([-0.01, 0.01, 0.0])
+            )
+        ),
+        CartesianWaypoint(Affine([0.3, 0.0, 0.3], quat)),
+    ]
+)
 
 # Stop the robot in cartesian position control mode.
 m_cp6 = CartesianStopMotion()
@@ -541,22 +581,37 @@ m_cp6 = CartesianStopMotion()
 ```python
 from franky import *
 
-# A cartesian velocity motion with linear (first argument) and angular (second argument) components
+# A cartesian velocity motion with linear (first argument) and angular (second argument)
+# components
 m_cv1 = CartesianVelocityMotion(Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]))
 
 # With target elbow velocity
-m_cv2 = CartesianVelocityMotion(RobotVelocity(Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]), elbow_velocity=-0.2))
+m_cv2 = CartesianVelocityMotion(
+    RobotVelocity(Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]), elbow_velocity=-0.2)
+)
 
-# Cartesian velocity motions also support multiple waypoints. Unlike in cartesian position control, a cartesian velocity
-# waypoint is a target velocity to be reached. This particular example first accelerates the end-effector, holds the
-# velocity for 1s, then # reverses direction for 2s, reverses direction again for 1s, and finally stops. It is important
-# not to forget to stop # the robot at the end of such a sequence, as it will otherwise throw an error.
-m_cv4 = CartesianVelocityWaypointMotion([
-    CartesianVelocityWaypoint(Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]), hold_target_duration=Duration(1000)),
-    CartesianVelocityWaypoint(Twist([-0.2, 0.1, -0.1], [-0.1, 0.1, -0.2]), hold_target_duration=Duration(2000)),
-    CartesianVelocityWaypoint(Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]), hold_target_duration=Duration(1000)),
-    CartesianVelocityWaypoint(Twist()),
-])
+# Cartesian velocity motions also support multiple waypoints. Unlike in cartesian position
+# control, a cartesian velocity waypoint is a target velocity to be reached. This particular
+# example first accelerates the end-effector, holds the velocity for 1s, then reverses
+# direction for 2s, reverses direction again for 1s, and finally stops. It is important not to
+# forget to stop the robot at the end of such a sequence, as it will otherwise throw an error.
+m_cv4 = CartesianVelocityWaypointMotion(
+    [
+        CartesianVelocityWaypoint(
+            Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]),
+            hold_target_duration=Duration(1000),
+        ),
+        CartesianVelocityWaypoint(
+            Twist([-0.2, 0.1, -0.1], [-0.1, 0.1, -0.2]),
+            hold_target_duration=Duration(2000),
+        ),
+        CartesianVelocityWaypoint(
+            Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]),
+            hold_target_duration=Duration(1000),
+        ),
+        CartesianVelocityWaypoint(Twist()),
+    ]
+)
 
 # Stop the robot in cartesian velocity control mode.
 m_cv6 = CartesianVelocityStopMotion()
@@ -585,14 +640,15 @@ The real robot can be moved by applying a motion to the robot using `move`:
 ```python
 # Before moving the robot, set an appropriate dynamics factor. We start small:
 robot.relative_dynamics_factor = 0.05
-# or alternatively, to control the scaling of velocity, acceleration, and jerk limits separately:
+# or alternatively, to control the scaling of velocity, acceleration, and jerk limits
+# separately:
 robot.relative_dynamics_factor = RelativeDynamicsFactor(0.05, 0.1, 0.15)
 # If these values are set too high, you will see discontinuity errors
 
 robot.move(m_jp1)
 
-# We can also set a relative dynamics factor in the move command. It will be multiplied with the other relative
-# dynamics factors (robot and motion if present).
+# We can also set a relative dynamics factor in the move command. It will be multiplied with
+# the other relative dynamics factors (robot and motion if present).
 robot.move(m_jp2, relative_dynamics_factor=0.8)
 ```
 
@@ -602,7 +658,13 @@ All motions support callbacks, which will be invoked in every control step at 1k
 Callbacks can be attached as follows:
 
 ```python
-def cb(robot_state: RobotState, time_step: Duration, rel_time: Duration, abs_time: Duration, control_signal: JointPositions):
+def cb(
+        robot_state: RobotState,
+        time_step: Duration,
+        rel_time: Duration,
+        abs_time: Duration,
+        control_signal: JointPositions,
+):
     print(f"At time {abs_time}, the target joint positions were {control_signal.q}")
 
 
@@ -627,9 +689,10 @@ from franky import CartesianMotion, Affine, ReferenceType, Measure, Reaction
 
 motion = CartesianMotion(Affine([0.0, 0.0, 0.1]), ReferenceType.Relative)  # Move down 10cm
 
-# It is important that the reaction motion uses the same control mode as the original motion. Hence, we cannot register
-# a JointMotion as a reaction motion to a CartesianMotion.
-reaction_motion = CartesianMotion(Affine([0.0, 0.0, 0.01]), ReferenceType.Relative)  # Move up for 1cm
+# It is important that the reaction motion uses the same control mode as the original motion.
+# Hence, we cannot register a JointMotion as a reaction motion to a CartesianMotion.
+# Move up for 1cm
+reaction_motion = CartesianMotion(Affine([0.0, 0.0, 0.01]), ReferenceType.Relative)
 
 # Trigger reaction if the Z force is greater than 30N
 reaction = Reaction(Measure.FORCE_Z > 30.0, reaction_motion)
@@ -692,7 +755,8 @@ them.
 In C++ you can additionally use lambdas to define more complex behaviours:
 
 ```c++
-auto motion = CartesianMotion(RobotPose(Affine({0.0, 0.0, 0.2}), 0.0), ReferenceType::Relative);
+auto motion = CartesianMotion(
+  RobotPose(Affine({0.0, 0.0, 0.2}), 0.0), ReferenceType::Relative);
 
 // Stop motion if force is over 10N
 auto stop_motion = StopMotion<franka::CartesianPose>()
@@ -737,8 +801,8 @@ motion1 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
 robot.move(motion1, asynchronous=True)
 
 time.sleep(0.5)
-# Note that similar to reactions, when preempting active motions with new motions, the control mode cannot change.
-# Hence, we cannot use, e.g., a JointMotion here.
+# Note that similar to reactions, when preempting active motions with new motions, the
+# control mode cannot change. Hence, we cannot use, e.g., a JointMotion here.
 motion2 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
 robot.move(motion2, asynchronous=True)
 ```
@@ -849,15 +913,16 @@ import franky
 with franky.RobotWebSession("172.16.0.2", "username", "password") as robot_web_session:
     # First take control
     try:
-        # Try taking control. The session currently holding control has to release it in order for this session to gain
-        # control. In the web interface, a notification will show prompting the user to release control. If the other
-        # session is another franky.RobotWebSession, then the `release_control` method can be called on the other
+        # Try taking control. The session currently holding control has to release it in order
+        # for this session to gain control. In the web interface, a notification will show
+        # prompting the user to release control. If the other session is another
+        # franky.RobotWebSession, then the `release_control` method can be called on the other
         # session to release control.
         robot_web_session.take_control(wait_timeout=10.0)
     except franky.TakeControlTimeoutError:
-        # If nothing happens for 10s, we try to take control forcefully. This is particularly useful if the session
-        # holding control is dead. Taking control by force requires the user to manually push the blue button close to
-        # the robot's wrist.
+        # If nothing happens for 10s, we try to take control forcefully. This is particularly
+        # useful if the session holding control is dead. Taking control by force requires the
+        # user to manually push the blue button close to the robot's wrist.
         robot_web_session.take_control(wait_timeout=30.0, force=True)
 
     # Unlock the brakes
