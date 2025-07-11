@@ -452,7 +452,9 @@ from franky import *
 # A point-to-point motion in the joint space
 m_jp1 = JointMotion([-0.3, 0.1, 0.3, -1.4, 0.1, 1.8, 0.7])
 
-# A motion in joint space with multiple waypoints
+# A motion in joint space with multiple waypoints. The robot will stop at each of these
+# waypoints. If you want the robot to move continuously, you have to specify a target velocity
+# at every waypoint as shown in the example following this one.
 m_jp2 = JointWaypointMotion(
     [
         JointWaypoint([-0.3, 0.1, 0.3, -1.4, 0.1, 1.8, 0.7]),
@@ -540,7 +542,9 @@ m_cp2 = CartesianMotion(
 # end-effector is oriented differently, it will move in a different direction)
 m_cp3 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
 
-# Generalization of CartesianMotion that allows for multiple waypoints
+# Generalization of CartesianMotion that allows for multiple waypoints. The robot will stop at
+# each of these waypoints. If you want the robot to move continuously, you have to specify a
+# target velocity at every waypoint as shown in the example following this one.
 m_cp4 = CartesianWaypointMotion(
     [
         CartesianWaypoint(
@@ -555,7 +559,7 @@ m_cp4 = CartesianWaypointMotion(
     ]
 )
 
-# Cartesian waypoints also permit to specify target velocities
+# Cartesian waypoints permit to specify target velocities
 m_cp5 = CartesianWaypointMotion(
     [
         CartesianWaypoint(Affine([0.5, -0.2, 0.3], quat)),
