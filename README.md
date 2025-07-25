@@ -1020,4 +1020,4 @@ Please run the [pre-commit](https://pre-commit.com/) hooks before submitting you
 To install the pre-commit hooks, run:
 
 1. [Install pre-commit](https://pre-commit.com/#install)
-2. Install the Git hooks by running `pre-commit install` or, alternatively, run `pre-commit run --all-files manually.
+2. Install the Git hooks by running `pre-commit install` or, alternatively, run `pre-commit run --all-files` manually.
