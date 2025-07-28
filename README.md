@@ -692,7 +692,7 @@ motion = CartesianMotion(Affine([0.0, 0.0, 0.1]), ReferenceType.Relative)  # Mov
 # It is important that the reaction motion uses the same control mode as the original motion.
 # Hence, we cannot register a JointMotion as a reaction motion to a CartesianMotion.
 # Move up for 1cm
-reaction_motion = CartesianMotion(Affine([0.0, 0.0, 0.01]), ReferenceType.Relative)
+reaction_motion = CartesianMotion(Affine([0.0, 0.0, -0.01]), ReferenceType.Relative)
 
 # Trigger reaction if the Z force is greater than 30N
 reaction = Reaction(Measure.FORCE_Z > 30.0, reaction_motion)
