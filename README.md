@@ -83,7 +83,7 @@ Unlock the brakes in the web interface, activate FCI, and start coding:
 ```python
 from franky import *
 
-robot = Robot("172.16.0.2")  # Replace this with your robot's IP
+robot = Robot("10.90.90.1")  # Replace this with your robot's IP
 
 # Let's start slow (this lets the robot use a maximum of 5% of its velocity, acceleration, and jerk limits)
 robot.relative_dynamics_factor = 0.05
@@ -286,7 +286,7 @@ As a first example, only four lines of code are needed for simple robotic motion
 using namespace franky;
 
 // Connect to the robot with the FCI IP address
-Robot robot("172.16.0.2");
+Robot robot("10.90.90.1");
 
 // Reduce velocity and acceleration of the robot
 robot.setRelativeDynamicsFactor(0.05);
@@ -303,7 +303,7 @@ The corresponding program in Python is
 ```python
 from franky import Affine, CartesianMotion, Robot, ReferenceType
 
-robot = Robot("172.16.0.2")
+robot = Robot("10.90.90.1")
 robot.relative_dynamics_factor = 0.05
 
 motion = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
@@ -344,7 +344,7 @@ Moreover, we added methods to adapt the dynamics limits of the robot for all mot
 ```python
 from franky import *
 
-robot = Robot("172.16.0.2")
+robot = Robot("10.90.90.1")
 
 # Recover from errors
 robot.recover_from_errors()
@@ -395,7 +395,7 @@ The robot state can be retrieved by accessing the following properties:
 ```python
 from franky import *
 
-robot = Robot("172.16.0.2")
+robot = Robot("10.90.90.1")
 
 # Get the current state as `franky.RobotState`. See the documentation for a list of fields.
 state = robot.state
@@ -794,7 +794,7 @@ Instead, it returns immediately and, thus, allows the main thread to set new mot
 import time
 from franky import Affine, CartesianMotion, Robot, ReferenceType
 
-robot = Robot("172.16.0.2")
+robot = Robot("10.90.90.1")
 robot.relative_dynamics_factor = 0.05
 
 motion1 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
@@ -830,7 +830,7 @@ Then, additionally to the libfranka commands, the following helper methods can b
 #include <chrono>
 #include <future>
 
-auto gripper = franky::Gripper("172.16.0.2");
+auto gripper = franky::Gripper("10.90.90.1");
 
 double speed = 0.02; // [m/s]
 double force = 20.0; // [N]
@@ -866,7 +866,7 @@ The Python API follows the c++ API closely:
 ```python
 import franky
 
-gripper = franky.Gripper("172.16.0.2")
+gripper = franky.Gripper("10.90.90.1")
 
 speed = 0.02  # [m/s]
 force = 20.0  # [N]
@@ -910,7 +910,7 @@ A typical automated workflow could look like this:
 ```python
 import franky
 
-with franky.RobotWebSession("172.16.0.2", "username", "password") as robot_web_session:
+with franky.RobotWebSession("10.90.90.1", "username", "password") as robot_web_session:
     # First take control
     try:
         # Try taking control. The session currently holding control has to release it in order
@@ -948,7 +948,7 @@ In case you are running the robot for longer than 24h you will have noticed that
 import time
 import franky
 
-with franky.RobotWebSession("172.16.0.2", "username", "password") as robot_web_session:
+with franky.RobotWebSession("10.90.90.1", "username", "password") as robot_web_session:
     # Execute self-test if the time until self-test is less than 5 minutes.
     if robot_web_session.get_system_status()["safety"]["timeToTd2"] < 300:
         robot_web_session.disable_fci()
