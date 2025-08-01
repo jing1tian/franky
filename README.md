@@ -695,7 +695,7 @@ motion = CartesianMotion(Affine([0.0, 0.0, 0.1]), ReferenceType.Relative)  # Mov
 reaction_motion = CartesianMotion(Affine([0.0, 0.0, -0.01]), ReferenceType.Relative)
 
 # Trigger reaction if the Z force is greater than 30N
-reaction = Reaction(Measure.FORCE_Z > 30.0, reaction_motion)
+reaction = Reaction(Measure.FORCE_Z > 5.0, reaction_motion)
 motion.add_reaction(reaction)
 
 robot.move(motion)
