@@ -26,7 +26,7 @@
   </a>
 </p>
 
-franky is a high-level control library for Franka robots offering Python and C++ support.
+franky is a high-level control library for Franka robots, offering Python and C++ support.
 By providing a high-level control interface, franky eliminates the need for strict real-time programming at 1 kHz,
 making control from non-real-time environments, such as Python programs, feasible.
 Instead of relying on low-level control commands, franky expects high-level position or velocity targets and
@@ -35,7 +35,7 @@ uses [Ruckig](https://github.com/pantor/ruckig) to plan time-optimal trajectorie
 Although Python does not provide real-time guarantees, franky strives to maintain as much real-time control as possible.
 Motions can be preempted at any moment, prompting franky to re-plan trajectories on the fly.
 To handle unforeseen situations—such as unexpected contact with the environment — franky includes a reaction system that
-allows to update motion commands dynamically.
+allows for updating motion commands dynamically.
 Furthermore, most non-real-time functionality of [libfranka](https://frankaemika.github.io/docs/libfranka.html), such as
 Gripper control is made directly available in Python.
 
@@ -53,7 +53,7 @@ at [https://timschneider42.github.io/franky/](https://timschneider42.github.io/f
   franky uses [Ruckig](https://github.com/pantor/ruckig) to generate smooth, time-optimal trajectories while respecting velocity, acceleration, and jerk limits.
 
 - **[Real-time control from Python and C++](#real-time-motions)**
-  Need to change the target while the robot’s moving? No problem. franky re-plans trajectories on the fly so that you can preempt motions anytime.
+  Need to change the target while the robot’s moving? No problem. franky replans trajectories on the fly so that you can preempt motions anytime.
 
 - **[Reactive behavior](#-real-time-reactions)**
   Robots don’t always go according to plan. franky lets you define reactions to unexpected events—like contact with the environment — so you can change course in real-time.
@@ -75,7 +75,7 @@ Real-time kernel already installed and real-time permissions granted? Just insta
 pip install franky-control
 ```
 
-otherwise, follow the [setup instructions](#setup) first.
+Otherwise, follow the [setup instructions](#setup) first.
 
 Now we are already ready to go!
 Unlock the brakes in the web interface, activate FCI, and start coding:
@@ -97,20 +97,20 @@ If you are seeing server version mismatch errors, such as
 ```
 franky.IncompatibleVersionException: libfranka: Incompatible library version (server version: 5, library version: 9)
 ```
-then your Franka robot is either not on the most recent firmware version or you are using the older Franka Panda model.
+then your Franka robot is either not on the most recent firmware version, or you are using the older Franka Panda model.
 In any case, it's no big deal; just check [here](https://frankaemika.github.io/docs/compatibility.html) which libfranka version you need and follow our [instructions](installing-frankly) to install the appropriate franky wheels.
 
 ## <a id="setup" /> ⚙️ Setup
 
 To install franky, you have to follow three steps:
 
-1. Ensure that you are using a realtime kernel
+1. Ensure that you are using a real-time kernel
 2. Ensure that the executing user has permission to run real-time applications
 3. Install franky via pip or build it from source
 
 ### Installing a real-time kernel
 
-In order for franky to function properly, it requires the underlying OS to use a realtime kernel.
+In order for Franky to function properly, it requires the underlying OS to use a real-time kernel.
 Otherwise, you might see `communication_constrains_violation` errors.
 
 To check whether your system is currently using a real-time kernel, type `uname -a`.
@@ -157,7 +157,7 @@ $ groups
 ... realtime
 ```
 
-If realtime is not listed in your groups, try rebooting.
+If real-time is not listed in your groups, try rebooting.
 
 ### Installing franky
 
@@ -190,7 +190,7 @@ cd franky/
 docker compose build franky-run
 ```
 
-To use another version of libfranka than the default (0.15.0) add a build argument:
+To use another version of libfranka than the default (0.15.0), add a build argument:
 
 ```bash
 docker compose build franky-run --build-arg LIBFRANKA_VERSION=0.9.2
@@ -202,7 +202,7 @@ To run the container:
 docker compose run franky-run bash
 ```
 
-The container requires access to the host machines network *and* elevated user rights to allow the docker user to set RT
+The container requires access to the host machine's network *and* elevated user rights to allow the Docker user to set RT
 capabilities of the processes run from within it.
 
 ### Can I use CUDA jointly with franky?
@@ -210,7 +210,7 @@ capabilities of the processes run from within it.
 Yes. However, you need to set `IGNORE_PREEMPT_RT_PRESENCE=1` during the installation and all subsequent updates of the CUDA drivers on the real-time kernel.
 
 First, make sure that you have rebooted your system after installing the real-time kernel.
-Then, add `IGNORE_PREEMPT_RT_PRESENCE=1` to `/etc/environment`, call `export IGNORE_PREEMPT_RT_PRESENCE=1` to also set it in the current session and follow the instructions of Nvidia to install CUDA on your system.
+Then, add `IGNORE_PREEMPT_RT_PRESENCE=1` to `/etc/environment`, call `export IGNORE_PREEMPT_RT_PRESENCE=1` to also set it in the current session, and follow the instructions of Nvidia to install CUDA on your system.
 
 If you are on Ubuntu, you can also use [this](tools/install_cuda_realtime.bash) script to install CUDA on your real-time system:
 ```bash
@@ -313,7 +313,7 @@ robot.move(motion)
 Before executing any code, make sure that you have enabled the Franka Control Interface (FCI) in the Franka UI web interface.
 
 Furthermore, we will introduce methods for geometric calculations, for moving the robot according to different motion
-types, how to implement real-time reactions and changing waypoints in real time as well as controlling the gripper.
+types, how to implement real-time reactions and changing waypoints in real time, as well as controlling the gripper.
 
 ### 🧮 Geometry
 
@@ -339,7 +339,7 @@ In all cases, distances are in [m] and rotations in [rad].
 ### 🤖 Robot
 
 franky exposes most of the libfanka API for Python.
-Moreover, we added methods to adapt the dynamics limits of the robot for all motions.
+Moreover, we added methods to adapt the dynamic limits of the robot for all motions.
 
 ```python
 from franky import *
@@ -349,7 +349,7 @@ robot = Robot("10.90.90.1")
 # Recover from errors
 robot.recover_from_errors()
 
-# Set velocity, acceleration and jerk to 5% of the maximum
+# Set velocity, acceleration, and jerk to 5% of the maximum
 robot.relative_dynamics_factor = 0.05
 
 # Alternatively, you can define each constraint individually
@@ -357,7 +357,7 @@ robot.relative_dynamics_factor = RelativeDynamicsFactor(
     velocity=0.1, acceleration=0.05, jerk=0.1
 )
 
-# Or, for more finegrained access, set individual limits
+# Or, for more fine-grained access, set individual limits
 robot.translation_velocity_limit.set(3.0)
 robot.rotation_velocity_limit.set(2.5)
 robot.elbow_velocity_limit.set(2.62)
@@ -420,10 +420,10 @@ f_t_ee = Affine()
 ee_t_k = Affine()
 ee_pose_kin = robot.model.pose(Frame.EndEffector, q, f_t_ee, ee_t_k)
 
-# Get the jacobian of the current robot state
+# Get the Jacobian of the current robot state
 jacobian = robot.model.body_jacobian(Frame.EndEffector, state)
 
-# Alternatively, just get the URDF as string and do the kinematics computation yourself (only
+# Alternatively, just get the URDF as a string and do the kinematics computation yourself (only
 # for libfranka >= 0.15.0)
 urdf_model = robot.model_urdf
 ```
@@ -463,7 +463,7 @@ m_jp2 = JointWaypointMotion(
     ]
 )
 
-# Intermediate waypoints also permit to specify target velocities. The default target velocity
+# Intermediate waypoints also permit specifying target velocities. The default target velocity
 # is 0, meaning that the robot will stop at every waypoint.
 m_jp3 = JointWaypointMotion(
     [
@@ -478,8 +478,8 @@ m_jp3 = JointWaypointMotion(
     ]
 )
 
-# Stop the robot in joint position control mode. The difference of JointStopMotion to other
-# stop-motions such as CartesianStopMotion is that JointStopMotion stops the robot in joint
+# Stop the robot in joint position control mode. The difference between JointStopMotion to other
+# stop-motions, such as CartesianStopMotion, is that JointStopMotion stops the robot in joint
 # position control mode while CartesianStopMotion stops it in cartesian pose control mode. The
 # difference becomes relevant when asynchronous move commands are being sent or reactions are
 # being used(see below).
@@ -491,7 +491,7 @@ m_jp4 = JointStopMotion()
 ```python
 from franky import *
 
-# Accelerate to the given joint velocity and hold it. After 1000ms stop the robot again.
+# Accelerate to the given joint velocity and hold it. After 1000ms, stop the robot again.
 m_jv1 = JointVelocityMotion(
     [0.1, 0.3, -0.1, 0.0, 0.1, -0.2, 0.4], duration=Duration(1000)
 )
@@ -537,7 +537,7 @@ m_cp2 = CartesianMotion(
     RobotPose(Affine([0.4, -0.2, 0.3], quat), elbow_state=ElbowState(0.3))
 )
 
-# A linear motion in cartesian space relative to the initial position
+# A linear motion in Cartesian space relative to the initial position
 # (Note that this motion is relative both in position and orientation. Hence, when the robot's
 # end-effector is oriented differently, it will move in a different direction)
 m_cp3 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
@@ -559,7 +559,7 @@ m_cp4 = CartesianWaypointMotion(
     ]
 )
 
-# Cartesian waypoints permit to specify target velocities
+# Cartesian waypoints permit specifying target velocities
 m_cp5 = CartesianWaypointMotion(
     [
         CartesianWaypoint(Affine([0.5, -0.2, 0.3], quat)),
@@ -572,7 +572,7 @@ m_cp5 = CartesianWaypointMotion(
     ]
 )
 
-# Stop the robot in cartesian position control mode.
+# Stop the robot in Cartesian position control mode.
 m_cp6 = CartesianStopMotion()
 ```
 
@@ -581,7 +581,7 @@ m_cp6 = CartesianStopMotion()
 ```python
 from franky import *
 
-# A cartesian velocity motion with linear (first argument) and angular (second argument)
+# A Cartesian velocity motion with linear (first argument) and angular (second argument)
 # components
 m_cv1 = CartesianVelocityMotion(Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]))
 
@@ -590,8 +590,8 @@ m_cv2 = CartesianVelocityMotion(
     RobotVelocity(Twist([0.2, -0.1, 0.1], [0.1, -0.1, 0.2]), elbow_velocity=-0.2)
 )
 
-# Cartesian velocity motions also support multiple waypoints. Unlike in cartesian position
-# control, a cartesian velocity waypoint is a target velocity to be reached. This particular
+# Cartesian velocity motions also support multiple waypoints. Unlike in Cartesian position
+# control, a Cartesian velocity waypoint is a target velocity to be reached. This particular
 # example first accelerates the end-effector, holds the velocity for 1s, then reverses
 # direction for 2s, reverses direction again for 1s, and finally stops. It is important not to
 # forget to stop the robot at the end of such a sequence, as it will otherwise throw an error.
@@ -613,25 +613,25 @@ m_cv4 = CartesianVelocityWaypointMotion(
     ]
 )
 
-# Stop the robot in cartesian velocity control mode.
+# Stop the robot in Cartesian velocity control mode.
 m_cv6 = CartesianVelocityStopMotion()
 ```
 
 #### Relative Dynamics Factors
 
-Every motion and waypoint type allows to adapt the dynamics (velocity, acceleration and jerk) by setting the respective
+Every motion and waypoint type allows for adapting the dynamics (velocity, acceleration, and jerk) by setting the respective
 `relative_dynamics_factor` parameter.
-This parameter can also be set for the robot globally as shown below or in the `robot.move` command.
+This parameter can also be set for the robot globally, as shown below, or in the `robot.move` command.
 Crucially, relative dynamics factors on different layers (robot, move command, and motion) do not override each other
 but rather get multiplied.
 Hence, a relative dynamics factor on a motion can only reduce the dynamics of the robot and never increase them.
 
-There is one exception to this rule and that is if any layer sets the relative dynamics factor to
+There is one exception to this rule, and that is if any layer sets the relative dynamics factor to
 `RelativeDynamicsFactor.MAX_DYNAMICS`.
 This will cause the motion to be executed with maximum velocity, acceleration, and jerk limits, independently of the
 relative dynamics factors of the other layers.
-This feature should only be used to abruptly stop the robot in case of an unexpected environment contact as executing
-other motions with it is likely to lead to a discontinuity error and might be dangerous.
+This feature should only be used to abruptly stop the robot in case of an unexpected environment contact, as executing
+Other motions with it are likely to lead to a discontinuity error and might be dangerous.
 
 #### Executing Motions
 
@@ -647,7 +647,7 @@ robot.relative_dynamics_factor = RelativeDynamicsFactor(0.05, 0.1, 0.15)
 
 robot.move(m_jp1)
 
-# We can also set a relative dynamics factor in the move command. It will be multiplied with
+# We can also set a relative dynamics factor in the move command. It will be multiplied by
 # the other relative dynamics factors (robot and motion if present).
 robot.move(m_jp2, relative_dynamics_factor=0.8)
 ```
@@ -674,7 +674,7 @@ robot.move(m_jp1)
 
 Note that in Python, these callbacks are not executed in the control thread since they would otherwise block it.
 Instead, they are put in a queue and executed by another thread.
-While this scheme ensures that the control thread can always run, it cannot prevent that the queue grows indefinitely
+While this scheme ensures that the control thread can always run, it cannot prevent the queue from growing indefinitely
 when the callbacks take more time to execute than it takes for new callbacks to be queued.
 Hence, callbacks might be executed significantly after they were queued if they take a long time to execute.
 
@@ -691,7 +691,7 @@ motion = CartesianMotion(Affine([0.0, 0.0, 0.1]), ReferenceType.Relative)  # Mov
 
 # It is important that the reaction motion uses the same control mode as the original motion.
 # Hence, we cannot register a JointMotion as a reaction motion to a CartesianMotion.
-# Move up for 1cm
+# Move up by 1cm
 reaction_motion = CartesianMotion(Affine([0.0, 0.0, -0.01]), ReferenceType.Relative)
 
 # Trigger reaction if the Z force is greater than 30N
@@ -752,7 +752,7 @@ with lower priority to ensure that the control thread does not get blocked.
 Thus, the callbacks might fire substantially after the reaction has fired, depending on the time it takes to execute
 them.
 
-In C++ you can additionally use lambdas to define more complex behaviours:
+In C++, you can additionally use lambdas to define more complex behaviours:
 
 ```c++
 auto motion = CartesianMotion(
@@ -801,13 +801,13 @@ motion1 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
 robot.move(motion1, asynchronous=True)
 
 time.sleep(0.5)
-# Note that similar to reactions, when preempting active motions with new motions, the
+# Note that, similar to reactions, when preempting active motions with new motions, the
 # control mode cannot change. Hence, we cannot use, e.g., a JointMotion here.
 motion2 = CartesianMotion(Affine([0.2, 0.0, 0.0]), ReferenceType.Relative)
 robot.move(motion2, asynchronous=True)
 ```
 
-By calling `Robot.join_motion` the main thread can be synchronized with the motion thread, as it will block until the
+By calling `Robot.join_motion`, the main thread can be synchronized with the motion thread, as it will block until the
 robot finishes its motion.
 
 ```python
@@ -816,14 +816,14 @@ robot.join_motion()
 
 Note that when exceptions occur during the asynchronous execution of a motion, they will not be thrown immediately.
 Instead, the control thread stores the exception and terminates.
-The next time `Robot.join_motion` or `Robot.move` are called, they will throw the stored exception in the main thread.
+The next time `Robot.join_motion` or `Robot.move` is called, they will throw the stored exception in the main thread.
 Hence, after an asynchronous motion has finished, make sure to call `Robot.join_motion` to ensure being notified of any
 exceptions that occurred during the motion.
 
 ### <a id="gripper" /> 👌  Gripper
 
 In the `franky::Gripper` class, the default gripper force and gripper speed can be set.
-Then, additionally to the libfranka commands, the following helper methods can be used:
+Then, in addition to the libfranka commands, the following helper methods can be used:
 
 ```c++
 #include <franky.hpp>
@@ -861,7 +861,7 @@ if (!success_future.wait_for(std::chrono::seconds(1)) == std::future_status::rea
 }
 ```
 
-The Python API follows the c++ API closely:
+The Python API follows the C++ API closely:
 
 ```python
 import franky
@@ -899,7 +899,7 @@ else:
 
 For Franka robots, control happens via the Franka Control Interface (FCI), which has to be enabled through the Franka UI in the robot's web interface.
 The Franka UI also provides methods for locking and unlocking the brakes, setting the execution mode, and executing the safety self-test.
-However, sometimes you may want to access these methods programmatically, e.g. for automatically unlocking the brakes before starting a motion, or automatically executing the self-test after 24h of continuous execution.
+However, sometimes you may want to access these methods programmatically, e.g., for automatically unlocking the brakes before starting a motion, or automatically executing the self-test after 24h of continuous execution.
 
 For that reason, franky provides a `RobotWebSession` class that allows you to access the web interface API of the robot.
 Note that directly accessing the web interface API is not officially supported and documented by Franka.
@@ -972,7 +972,7 @@ See [robot_web_session.py](franky/robot_web_session.py) for an example of how to
 
 ## 🛠️ Development
 
-franky is currently tested against following versions
+franky is currently tested against the following versions
 
 - libfranka 0.7.1, 0.8.0, 0.9.2, 0.10.0, 0.11.0, 0.12.1, 0.13.3, 0.14.2, 0.15.0
 - Eigen 3.4.0
@@ -992,13 +992,13 @@ agreements.
 
 franky started originally as a fork of [frankx](https://github.com/pantor/frankx), though both codebase and
 functionality differ substantially from frankx by now.
-Aside of bug fixes and general performance improvements, franky provides the following new features/improvements:
+Aside from bug fixes and general performance improvements, franky provides the following new features/improvements:
 
 * [Motions can be updated asynchronously.](#-real-time-motions)
 * [Reactions allow for the registration of callbacks instead of just printing to stdout when fired.](#-real-time-reactions)
 * [Motions allow for the registration of callbacks for profiling.](#motion-callbacks)
 * [The robot state is also available during control.](#robot-state)
-* A larger part of the libfranka API is exposed to python (e.g.,`setCollisionBehavior`, `setJoinImpedance`, and
+* A larger part of the libfranka API is exposed to python (e.g., `setCollisionBehavior`, `setJoinImpedance`, and
   `setCartesianImpedance`).
 * Cartesian motion generation handles boundaries in Euler angles properly.
 * [There is a new joint motion type that supports waypoints.](#-motion-types)
